@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <!-- Open Graph / Discord Embed -->
-    <meta property="og:title" content="Social Network Creator" id="MetaTAGName">
-    <meta property="og:description" content="Check out this website hosted By us. This is one of the sites we host on are network">
+    <meta property="og:title" id="MetaTAGName" content="Social Network Creator">
+    <meta property="og:description" content="Check out this website hosted By Social Network Creator. This is one of many of sites we host on are network. Create your today!">
     <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
     <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
     <meta property="og:type" content="website">
@@ -918,7 +918,7 @@
                 if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
                 document.getElementById('siteTitle').textContent = s.name || 'ChatSpace';
-                document.getElementById('MetaTAGName').textContent = s.name || 'ChatSpace'; 
+                document.getElementById('MetaTAGName').content = s.name || 'ChatSpace'; 
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
                 siteOwnerUsernameLower = owner ? String(owner).toLowerCase() : null;
