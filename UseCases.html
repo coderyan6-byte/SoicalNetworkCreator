@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>ChatSpace — Use Cases</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --card: #141a2e;
+            --primary: #4f7cff;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #111936, var(--bg));
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            nav h1 {
+                font-size: 1.4rem;
+                color: var(--primary);
+            }
+
+            nav .nav-links a {
+                margin-left: 25px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+
+        .hero {
+            padding: 90px 60px 50px;
+            text-align: center;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+            .hero h2 {
+                font-size: 2.8rem;
+                margin-bottom: 15px;
+            }
+
+            .hero p {
+                color: var(--muted);
+                max-width: 720px;
+                margin: auto;
+                font-size: 1.05rem;
+            }
+
+        section {
+            padding: 60px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .usecase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+
+        .usecase-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+        }
+
+            .usecase-card h3 {
+                margin-bottom: 10px;
+                font-size: 1.25rem;
+            }
+
+            .usecase-card p {
+                color: var(--muted);
+                font-size: 0.95rem;
+            }
+
+        footer {
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        @media(max-width: 900px) {
+            nav, .hero, section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>ChatSpace</h1>
+        <div class="nav-links">
+            <a href="Features.html">Features</a>
+            <a href="UseCases.html">Use Cases</a>
+            <a href="Pricing.html">Pricing</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h2>Common Use Cases</h2>
+        <p>
+            Examples of how ChatSpace can be embedded into different
+            products and websites to support conversation and community.
+        </p>
+    </div>
+
+    <section>
+        <div class="usecase-grid">
+
+            <div class="usecase-card">
+                <h3> Company Communities</h3>
+                <p>
+                    Create discussion spaces for customers or internal teams
+                    to share feedback, updates, and ideas in a centralized place.
+                </p>
+            </div>
+
+            <div class="usecase-card">
+                <h3> Customer Support</h3>
+                <p>
+                    Provide structured chatrooms for announcements, FAQs,
+                    and guided support conversations.
+                </p>
+            </div>
+
+            <div class="usecase-card">
+                <h3> Events & Launches</h3>
+                <p>
+                    Host temporary chat spaces alongside live streams,
+                    product launches, or online events.
+                </p>
+            </div>
+
+            <div class="usecase-card">
+                <h3> Creator Communities</h3>
+                <p>
+                    Embed community discussion directly into creator platforms,
+                    content hubs, or membership areas.
+                </p>
+            </div>
+
+            <div class="usecase-card">
+                <h3> Education & Learning</h3>
+                <p>
+                    Enable discussion spaces for courses, classrooms,
+                    and knowledge-sharing environments.
+                </p>
+            </div>
+
+            <div class="usecase-card">
+                <h3> Product Feedback</h3>
+                <p>
+                    Gather structured user feedback and discussion
+                    directly inside early-stage or beta products.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        © 2026 ChatSpace
+    </footer>
+
+</body>
+</html>

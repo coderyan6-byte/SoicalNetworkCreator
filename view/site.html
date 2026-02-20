@@ -1,0 +1,1941 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator" id="MetaTAGName">
+    <meta property="og:description" content="Check out this website hosted By us. This is one of the sites we host on are network">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Chatspace</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111;
+            --accent: #fbc02d;
+            --muted: #666;
+            --font-size: 16px;
+            --card-radius: 10px;
+            --gap: 12px;
+            --input-padding: 8px;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-size: var(--font-size);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.22s ease;
+        }
+
+        .app {
+            max-width: 1100px;
+            margin: 16px auto;
+            display: grid;
+            grid-template-columns: 320px 1fr 340px;
+            gap: var(--gap);
+        }
+
+        header {
+            grid-column: 1/-1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.15rem
+        }
+
+        .left-col, .mid-col, .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap)
+        }
+
+        .card {
+            background: rgba(255,255,255,0.9);
+            border-radius: var(--card-radius);
+            padding: 12px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+            transition: 0.2s;
+        }
+
+        input[type="text"], input[type="password"], textarea, select, input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: var(--input-padding);
+            margin-top: 6px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: transparent;
+            color: var(--text);
+        }
+
+        button.small-btn {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(250,250,250,0.9));
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+            button.small-btn:active {
+                transform: translateY(1px)
+            }
+
+        .muted {
+            color: var(--muted)
+        }
+
+        .composer textarea {
+            height: 90px;
+            resize: vertical
+        }
+
+        .post {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(0,0,0,0.06);
+            animation: fadeIn .28s;
+        }
+
+        .meta {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .hashtags a {
+            color: var(--accent);
+            text-decoration: none;
+            margin-right: 6px
+        }
+
+        .feed {
+            overflow: auto;
+            max-height: 60vh;
+            padding: 6px
+        }
+
+        .admin-badge {
+            background: var(--accent);
+            color: #000;
+            padding: 4px 7px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+            font-weight: 700
+        }
+
+        .danger {
+            color: #b00020;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            font-size: 0.9rem
+        }
+
+        footer {
+            grid-column: 1/-1;
+            text-align: center;
+            color: #777;
+            padding-top: 8px;
+            font-size: 0.9rem
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @media (max-width:1200px) {
+            .app {
+                grid-template-columns: 1fr;
+                padding: 8px
+            }
+        }
+
+        /* Overlays / popup */
+        .popup-login {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 60;
+            animation: fadeIn 0.2s;
+            width: 320px;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(2px);
+            display: none;
+            z-index: 50;
+        }
+
+        .banned-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+            z-index: 70;
+            display: none;
+            width: 360px;
+        }
+
+        .retro {
+            font-family: "Courier New", monospace;
+            background: #000;
+            color: #0f0;
+        }
+
+            .retro .card {
+                background: none;
+                border: 1px solid #0f0;
+                color: #0f0;
+                box-shadow: none;
+            }
+
+            .retro .small-btn {
+                background: #000;
+                color: #0f0;
+                border: 1px solid #0f0;
+            }
+
+            .retro textarea {
+                background: #000;
+                color: #0f0;
+                border: 1px solid #0f0;
+            }
+
+            .retro .feed {
+                border: 1px solid #0f0;
+            }
+
+        .theme-win95 {
+            background: linear-gradient(#C0C0C0,#A8A8A8);
+            color: black;
+            font-family: "MS Sans Serif", Tahoma, sans-serif;
+        }
+
+            .theme-win95 .card {
+                background: linear-gradient(#E0E0E0,#C8C8C8);
+                border: 2px solid #808080;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 8px;
+            }
+
+            .theme-win95 header {
+                border-bottom: 2px solid #808080;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+            }
+
+            .theme-win95 button.small-btn, .theme-win95 .follow-btn {
+                background: linear-gradient(#FFF,#E8E8E8);
+                border: 1px solid #000;
+                box-shadow: none;
+            }
+
+            .theme-win95 input, .theme-win95 textarea, .theme-win95 select {
+                border: 2px inset #fff;
+                background: #fff;
+                box-shadow: none;
+            }
+
+        .theme-highcontrast {
+            --bg: #000000;
+            --text: #ffffff;
+            --accent: #ffff00;
+            --muted: #cccccc;
+        }
+
+            .theme-highcontrast .card {
+                background: #000;
+                border: 2px solid #fff;
+                color: #fff;
+            }
+
+            .theme-highcontrast input, .theme-highcontrast textarea, .theme-highcontrast select {
+                background: #000;
+                color: #fff;
+                border: 2px solid #fff;
+            }
+
+            .theme-highcontrast button.small-btn {
+                border: 2px solid #fff;
+                background: #000;
+                color: #fff;
+            }
+
+        .theme-compact {
+            --gap: 6px;
+            --card-radius: 6px;
+            --input-padding: 6px;
+            --font-size: 14px;
+        }
+
+            .theme-compact .card {
+                padding: 8px;
+            }
+
+        .theme-elegant {
+            --bg: #fff9e6;
+            --text: #000000;
+            --accent: #f6c214;
+            --muted: rgba(0,0,0,0.54);
+        }
+
+        /* Discord theme */
+        .theme-discord {
+            --bg: #313338;
+            --text: #dcddde;
+            --accent: #5865f2;
+            --muted: #949ba4;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+            .theme-discord .app {
+                max-width: 100%;
+                margin: 0;
+                grid-template-columns: 240px 1fr 300px;
+                gap: 0;
+                height: 100vh;
+            }
+
+            .theme-discord header {
+                background: #1e1f22;
+                padding: 12px 16px;
+                border-bottom: 1px solid #2b2d31;
+            }
+
+                .theme-discord header h1, .theme-discord header .muted {
+                    color: #dcddde;
+                }
+
+                .theme-discord header #settingsBtn {
+                    background: transparent;
+                    border: 1px solid rgba(255,255,255,0.04);
+                    color: #dcddde;
+                    padding: 6px 10px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                }
+
+            .theme-discord .left-col {
+                background: #2b2d31;
+                padding: 12px;
+                min-height: calc(100vh - 64px);
+                box-sizing: border-box;
+                border-right: 1px solid #232428;
+            }
+
+            .theme-discord .mid-col {
+                background: #313338;
+                padding: 0;
+                min-height: calc(100vh - 64px);
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .theme-discord .right-col {
+                background: #2b2d31;
+                padding: 12px;
+                min-height: calc(100vh - 64px);
+                box-sizing: border-box;
+                border-left: 1px solid #232428;
+            }
+
+            .theme-discord .card {
+                background: transparent;
+                box-shadow: none;
+                border-radius: 0;
+                padding: 0;
+            }
+
+            .theme-discord .feed {
+                padding: 16px;
+                max-height: calc(100vh - 140px);
+                overflow: auto;
+            }
+
+            .theme-discord .post {
+                border: none;
+                padding: 8px 0;
+                margin: 0;
+                display: flex;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+                .theme-discord .post:hover {
+                    background: rgba(255,255,255,0.03);
+                }
+
+            .theme-discord .meta {
+                font-size: 0.9rem;
+                color: var(--muted);
+            }
+
+            .theme-discord .linklike {
+                color: #ffffff;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .theme-discord .composer textarea {
+                background: #383a40;
+                border: none;
+                border-radius: 8px;
+                color: #ffffff;
+            }
+
+            .theme-discord button.small-btn {
+                background: #5865f2;
+                border: none;
+                color: #fff;
+            }
+
+            .theme-discord .profile-card, .theme-discord #recentUsersCard {
+                background: #232428;
+                border-radius: 8px;
+                padding: 12px;
+            }
+
+            .theme-discord .admin-badge {
+                background: #5865f2;
+                color: #fff;
+            }
+
+            .theme-discord #channelsPanel {
+                display: block;
+                margin-bottom: 12px;
+            }
+
+                .theme-discord #channelsPanel .channels-header {
+                    color: #bfc3c8;
+                    font-weight: 700;
+                    padding: 6px 8px;
+                    font-size: 0.95rem;
+                }
+
+                .theme-discord #channelsPanel .channel {
+                    padding: 8px 10px;
+                    border-radius: 6px;
+                    color: #dcddde;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    margin: 4px 0;
+                }
+
+                    .theme-discord #channelsPanel .channel:hover {
+                        background: rgba(255,255,255,0.03);
+                    }
+
+                    .theme-discord #channelsPanel .channel.active {
+                        background: rgba(88,101,242,0.12);
+                        color: #ffffff;
+                    }
+
+        .settings-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            background: #1f2023;
+            color: #dcddde;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 6px 40px rgba(0,0,0,0.6);
+            display: none;
+            z-index: 80;
+            width: 520px;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+            .settings-popup input, .settings-popup textarea, .settings-popup select {
+                background: #2b2d31;
+                color: #dcddde;
+                border: 1px solid rgba(255,255,255,0.04);
+                border-radius: 8px;
+                padding: 8px;
+            }
+
+            .settings-popup .row {
+                margin-top: 8px;
+            }
+
+            .settings-popup .actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+        .channel-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .badge-banned {
+            background: #ffe6e6;
+            color: #b00020;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-left: 6px
+        }
+
+        .badge-muted {
+            background: #fff4e1;
+            color: #b06a00;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-left: 6px
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.04)
+        }
+
+        .user-tiny {
+            font-size: 0.9rem;
+            color: var(--muted)
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .small-action {
+            font-size: 0.85rem;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: #fff;
+            cursor: pointer
+        }
+
+        .danger-action {
+            border-color: rgba(176,0,32,0.15);
+            color: #b00020
+        }
+
+        .positive-action {
+            border-color: rgba(0,120,0,0.12);
+            color: #007700
+        }
+
+        .profile-card .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            background: linear-gradient(135deg,var(--accent),#fff);
+            display: inline-block;
+            margin-right: 12px;
+            vertical-align: middle
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .follow-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            background: linear-gradient(180deg,#fff,#f7f7f7)
+        }
+
+        .followers-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 8px
+        }
+
+        .profile-bio {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(0,0,0,0.06)
+        }
+
+        .profile-section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .linklike {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        #debugBanner {
+            grid-column: 1/-1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: none;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="theme-elegant">
+    <div class="app">
+        <div id="debugBanner" role="status" aria-live="polite"></div>
+        <header>
+            <div style="display:flex;align-items:center;gap:12px">
+                <h1 id="siteTitle">Max Socials</h1>
+                <div class="muted" id="siteSubtitle">A place to talk • hangout • and have funs with friends</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+                <div class="login-state card" id="loginState">Not signed in</div>
+                <button id="settingsBtn" style="display:none" aria-haspopup="dialog">Settings</button>
+            </div>
+        </header>
+
+        <div class="left-col">
+            <div class="card" id="channelsPanel" style="display:none">
+                <div class="channels-header">CHANNELS</div>
+                <div id="channelsList" style="padding:6px 8px"></div>
+            </div>
+
+            <div class="card" id="accountCard">
+                <strong>Account</strong>
+                <div id="accountForm" style="margin-top:8px">
+                    <label>Username<input id="username" type="text" placeholder="e.g. alice" autocomplete="off"></label>
+                    <label>Password<input id="password" type="password" placeholder="choose a pass" autocomplete="new-password"></label>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                        <button id="registerBtn" class="small-btn">Register</button>
+                        <button id="loginBtn" class="small-btn">Login</button>
+                        <button id="logoutBtn" class="small-btn" style="display:none">Logout</button>
+                    </div>
+                    <div style="margin-top:8px;font-size:0.9rem;color:var(--muted)">
+                        Reserved admin name: <span id="reservedList">—</span>
+                        <div style="margin-top:6px;color:#b00;font-weight:600" id="accountMsg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="leftComposeCard">
+                <strong>Compose</strong>
+                <div class="composer" style="margin-top:8px">
+                    <textarea id="leftMessageText" placeholder="Write a text message. Use #hashtags"></textarea>
+                    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                        <button id="leftPostBtn" class="small-btn">Post</button>
+                        <div style="flex:1"></div>
+                        <div class="muted" id="leftCharsLeft">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card style-controls" id="styleControlsCard" style="display:none">
+                <strong>Theme (admins only)</strong>
+                <label>
+                    Select Theme
+                    <select id="themeSelect">
+                        <option value="classic">Classic</option>
+                        <option value="modern">Modern</option>
+                        <option value="elegant">Elegant (yellow)</option>
+                        <option value="neon">Neon</option>
+                        <option value="compact">Compact</option>
+                        <option value="retro">Retro Terminal</option>
+                        <option value="win95">Classic (Windows 95)</option>
+                        <option value="high-contrast">High Contrast</option>
+                    </select>
+                </label>
+                <div style="display:flex;gap:8px;margin-top:8px">
+                    <button id="saveTheme" class="small-btn">Save Theme</button>
+                    <button id="resetTheme" class="small-btn">Reset Default</button>
+                </div>
+                <div id="styleMsg" style="margin-top:6px;color:#b00;font-weight:600"></div>
+            </div>
+
+            <div class="card" id="myProfileCard">
+                <strong>Your Profile</strong>
+                <div style="margin-top:8px">
+                    <label>Bio<textarea id="myBio" placeholder="Write something about yourself..." rows="3"></textarea></label>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                        <button id="saveBioBtn" class="small-btn">Save Bio</button>
+                        <button id="viewMyProfileBtn" class="small-btn">View Profile</button>
+                    </div>
+                    <div id="saveBioMsg" style="margin-top:6px;color:green;font-weight:600"></div>
+                </div>
+            </div>
+
+            <div class="card" id="adminUsersCard" style="display:none">
+                <strong>Admin — Users</strong>
+                <div style="margin-top:8px">
+                    <input id="userSearch" placeholder="Search username..." />
+                    <div id="usersList" style="margin-top:8px;max-height:36vh;overflow:auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mid-col">
+            <div class="card">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px">
+                    <strong>Feed</strong>
+                    <div class="muted" id="activeChannelLabel">Sorted: newer • admin controls</div>
+                </div>
+                <div id="feed" class="feed"></div>
+
+                <div id="midComposerWrapper" style="display:none;padding:12px 16px" class="composer">
+                    <textarea id="messageText" placeholder="Write a text message. Use #hashtags"></textarea>
+                    <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+                        <button id="postBtn" class="small-btn">Post</button>
+                        <button id="composerSettingsBtn" class="small-btn" title="Settings" style="display:none">⚙</button>
+                        <div style="flex:1"></div>
+                        <div class="muted" id="charsLeft">0</div>
+                    </div>
+
+                    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                        <button id="feedSettingsBtn" class="small-btn" style="display:none">Open Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="card profile-card" id="profileViewer">
+                <div class="muted">Open a profile by clicking a username in the feed.</div>
+            </div>
+
+            <div class="card" id="recentUsersCard">
+                <strong>Recent users</strong>
+                <div id="recentUsersList" style="margin-top:8px;max-height:30vh;overflow:auto"></div>
+            </div>
+        </div>
+
+        <footer id="siteFooter">Created with chatspace</footer>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="popup-login" id="popupLogin">
+        <h3>Sign in to Post</h3>
+        <label>Username<input id="popupUser" type="text"></label>
+        <label>Password<input id="popupPass" type="password"></label>
+        <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="popupLoginBtn" class="small-btn">Login</button>
+            <button id="popupClose" class="small-btn">Cancel</button>
+        </div>
+        <div id="popupMsg" style="margin-top:8px;color:#b00"></div>
+    </div>
+
+    <div class="settings-popup" id="settingsPopup" role="dialog" aria-modal="true" aria-hidden="true">
+        <h3 style="margin:0;color:#fff">Settings & Site Controls</h3>
+
+        <div class="row" style="margin-top:10px">
+            <label style="display:block;font-size:0.9rem;color:#bfc3c8">Site description</label>
+            <textarea id="settingsDescription" rows="2" style="width:100%"></textarea>
+        </div>
+
+        <div class="row">
+            <label style="display:block;font-size:0.9rem;color:#bfc3c8">Theme (admins only)</label>
+            <select id="settingsThemeSelect" style="width:100%">
+                <option value="classic">Classic</option>
+                <option value="modern">Modern</option>
+                <option value="elegant">Elegant (yellow)</option>
+                <option value="neon">Neon</option>
+                <option value="compact">Compact</option>
+                <option value="retro">Retro Terminal</option>
+                <option value="win95">Classic (Windows 95)</option>
+                <option value="high-contrast">High Contrast</option>
+            </select>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+            <div style="font-weight:700;color:#bfc3c8">Your Profile</div>
+            <label style="display:block;margin-top:8px;color:#bfc3c8">Bio</label>
+            <textarea id="settingsProfileBio" rows="3" style="width:100%"></textarea>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                <button id="settingsSaveProfile" class="small-btn">Save Profile</button>
+            </div>
+            <div id="settingsProfileMsg" style="margin-top:6px;color:#b00;font-weight:600"></div>
+        </div>
+
+        <div class="row" style="margin-top:12px" id="settingsChannelsArea">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-weight:700;color:#bfc3c8">Channels</div>
+                <div style="font-size:0.85rem;color:#9aa0a6">Admins can add/remove and edit</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="newChannelName" placeholder="channel-name (no #)" style="flex:1" />
+                <button id="addChannelBtn" class="small-btn">Add</button>
+            </div>
+            <div id="settingsChannelsList" style="margin-top:8px"></div>
+            <div id="settingsChannelsMsg" style="margin-top:6px;color:#b00;font-weight:600"></div>
+        </div>
+
+        <div class="row" style="margin-top:12px" id="settingsRanksArea">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="font-weight:700;color:#bfc3c8">Ranks (server owner)</div>
+                <div style="font-size:0.85rem;color:#9aa0a6">Ranks grant permissions for Discord theme only</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <input id="newRankName" placeholder="Rank name (e.g. Moderator)" style="flex:1" />
+                <button id="addRankBtn" class="small-btn">Add Rank</button>
+            </div>
+            <div id="settingsRanksList" style="margin-top:8px"></div>
+            <div id="settingsRanksMsg" style="margin-top:6px;color:#b00;font-weight:600"></div>
+        </div>
+
+        <div id="settingsAdminArea" style="margin-top:12px;display:none">
+            <div style="font-weight:700;color:#bfc3c8">Admin — Users</div>
+            <div style="margin-top:8px;color:#aaa">Manage users (ban, assign rank, mute). Ranks assignment only available to server owner.</div>
+            <div id="settingsAdminControls" style="margin-top:8px"></div>
+        </div>
+
+        <div class="actions">
+            <button id="settingsCancel" class="small-btn">Cancel</button>
+            <button id="settingsSaveDesc" class="small-btn">Save Description</button>
+            <button id="settingsSaveTheme" class="small-btn">Save Theme</button>
+        </div>
+        <div id="settingsMsg" style="margin-top:8px;color:#b00;font-weight:600"></div>
+    </div>
+
+    <div class="banned-popup" id="bannedPopup" role="dialog" aria-modal="true">
+        <h3>Account Banned</h3>
+        <p id="bannedReason">Your account has been banned by an administrator.</p>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+            <button id="bannedClose" class="small-btn">OK</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+            authDomain: "soicalnetworkcreator.firebaseapp.com",
+            projectId: "soicalnetworkcreator",
+            storageBucket: "soicalnetworkcreator.firebasestorage.app",
+            messagingSenderId: "374390703916",
+            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+            measurementId: "G-326LYE3XL3"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const debugBanner = document.getElementById('debugBanner');
+        function showDebug(msg, level = 'info') { if (!debugBanner) return; debugBanner.style.display = 'block'; debugBanner.className = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'info'; debugBanner.textContent = msg; }
+        function hideDebug() { if (!debugBanner) return; debugBanner.style.display = 'none'; debugBanner.textContent = ''; debugBanner.className = ''; }
+        console.log('Firebase initialized', { db: !!db });
+
+        const params = new URLSearchParams(location.search);
+        const siteId = params.get("siteId");
+        if (!siteId) killSite();
+        const siteRef = doc(db, "sites", siteId);
+        const siteSnap = await getDoc(siteRef);
+        if (!siteSnap.exists()) killSite();
+        const siteData = siteSnap.data();
+        if (!siteData || siteData.Approved !== true) { killSite(); }
+
+        let siteDocRef = null;
+        let styleDocRef = null;
+        let siteOwnerUsernameLower = null;
+        if (siteId) {
+            siteDocRef = doc(db, 'sites', siteId);
+            styleDocRef = doc(db, 'sites', siteId, 'site', 'styles');
+        }
+
+        function killSite() {
+            document.documentElement.innerHTML = `<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Site not found</title><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-family:system-ui, sans-serif;}h1{font-size:1.5rem;opacity:0.9;}</style></head><body><h1>Sorry this site does not exist</h1></body>`;
+            throw new Error("Site invalid — execution halted");
+        }
+
+        async function loadSiteMeta() {
+            try {
+                if (!siteDocRef) { showDebug('Missing siteId in URL. Provide ?siteId=...', 'warn'); return; }
+                const snap = await getDoc(siteDocRef);
+                if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
+                const s = snap.data();
+                document.getElementById('siteTitle').textContent = s.name || 'ChatSpace';
+                document.getElementById('MetaTAGName').textContent = s.name || 'ChatSpace'; 
+                document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
+                const owner = s.ownerUsername || s.owner || s.ownerUid || null;
+                siteOwnerUsernameLower = owner ? String(owner).toLowerCase() : null;
+                const reservedEl = document.getElementById('reservedList');
+                if (reservedEl) reservedEl.textContent = owner || '—';
+                hideDebug();
+            } catch (e) {
+                console.error('loadSiteMeta error:', e);
+                showDebug('Failed to load site metadata — see console for details', 'error');
+                document.getElementById('siteSubtitle').textContent = 'Failed to load site metadata — check console';
+            }
+        }
+        await loadSiteMeta();
+
+        const messagesRef = siteId ? collection(db, 'sites', siteId, 'messages') : collection(db, 'messages');
+        const usersRef = siteId ? collection(db, 'sites', siteId, 'users') : collection(db, 'users');
+        const chatsRoot = (usernameLower) => siteId ? collection(doc(db, 'sites', siteId, 'chats', usernameLower), 'messages') : collection(doc(db, 'chats', usernameLower), 'messages');
+
+        const themeSelect = document.getElementById('themeSelect');
+        function applyTheme(theme) {
+            document.body.classList.remove('theme-elegant', 'theme-compact', 'retro', 'theme-win95', 'theme-highcontrast', 'theme-discord');
+            document.documentElement.style.setProperty('--bg', '#ffffff');
+            document.documentElement.style.setProperty('--text', '#111');
+            document.documentElement.style.setProperty('--accent', '#fbc02d');
+            document.documentElement.style.setProperty('--muted', '#666');
+
+            const map = {
+                classic: () => { document.documentElement.style.setProperty('--bg', '#ffffff'); document.documentElement.style.setProperty('--text', '#111'); document.documentElement.style.setProperty('--accent', '#1976d2'); document.documentElement.style.setProperty('--muted', '#666'); },
+                modern: () => { document.documentElement.style.setProperty('--bg', '#f7f7f9'); document.documentElement.style.setProperty('--text', '#222'); document.documentElement.style.setProperty('--accent', '#007bff'); document.documentElement.style.setProperty('--muted', '#666'); },
+                elegant: () => { document.body.classList.add('theme-elegant'); },
+                neon: () => { document.documentElement.style.setProperty('--bg', '#000'); document.documentElement.style.setProperty('--text', '#39ff14'); document.documentElement.style.setProperty('--accent', '#ff00ff'); document.documentElement.style.setProperty('--muted', '#9f9'); },
+                compact: () => { document.body.classList.add('theme-compact'); document.documentElement.style.setProperty('--bg', '#fafafa'); document.documentElement.style.setProperty('--text', '#111'); document.documentElement.style.setProperty('--accent', '#333'); },
+                retro: () => { document.body.classList.add('retro'); document.documentElement.style.setProperty('--bg', '#000'); document.documentElement.style.setProperty('--text', '#0f0'); document.documentElement.style.setProperty('--accent', '#0f0'); },
+                win95: () => { document.body.classList.add('theme-win95'); },
+                'high-contrast': () => { document.body.classList.add('theme-highcontrast'); },
+                "discord chatroom": () => { document.body.classList.add('theme-discord'); }
+            };
+            if (map[theme]) map[theme]();
+
+            const isDiscord = document.body.classList.contains('theme-discord');
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (settingsBtn) settingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+
+            const styleCard = document.getElementById('styleControlsCard');
+            const adminUsersCard = document.getElementById('adminUsersCard');
+            const myProfileCard = document.getElementById('myProfileCard');
+            const leftComposeCard = document.getElementById('leftComposeCard');
+            const midComposerWrapper = document.getElementById('midComposerWrapper');
+
+            if (isDiscord) {
+                if (styleCard) styleCard.style.display = 'none';
+                if (adminUsersCard) adminUsersCard.style.display = 'none';
+                if (myProfileCard) myProfileCard.style.display = 'none';
+                if (leftComposeCard) leftComposeCard.style.display = 'none';
+                if (midComposerWrapper) midComposerWrapper.style.display = 'block';
+            } else {
+                if (styleCard) styleCard.style.display = (currentUser && isAdmin(currentUser)) ? 'block' : 'none';
+                if (adminUsersCard) adminUsersCard.style.display = (currentUser && isAdmin(currentUser)) ? 'block' : 'none';
+                if (myProfileCard) myProfileCard.style.display = 'block';
+                if (leftComposeCard) leftComposeCard.style.display = 'block';
+                if (midComposerWrapper) midComposerWrapper.style.display = 'none';
+            }
+
+            const feedSettingsBtn = document.getElementById('feedSettingsBtn');
+            const composerSettingsBtn = document.getElementById('composerSettingsBtn');
+            if (feedSettingsBtn) feedSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+            if (composerSettingsBtn) composerSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+
+            const channelsPanel = document.getElementById('channelsPanel');
+            if (channelsPanel) channelsPanel.style.display = isDiscord ? 'block' : 'none';
+        }
+
+        if (styleDocRef) {
+            try {
+                onSnapshot(styleDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data();
+                    const t = data.theme || 'classic';
+                    const themeSelectLocal = document.getElementById('themeSelect');
+                    if (themeSelectLocal) themeSelectLocal.value = t;
+                    applyTheme(t);
+                }, (err) => { console.error('styles onSnapshot error', err); });
+            } catch (e) { console.warn('styleDocRef subscription failed', e); }
+        }
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const accountMsg = document.getElementById('accountMsg');
+        const loginState = document.getElementById('loginState');
+
+        const leftMessageText = document.getElementById('leftMessageText');
+        const leftPostBtn = document.getElementById('leftPostBtn');
+        const leftCharsLeft = document.getElementById('leftCharsLeft');
+
+        const messageText = document.getElementById('messageText');
+        const postBtn = document.getElementById('postBtn');
+        const charsLeft = document.getElementById('charsLeft');
+
+        const feedEl = document.getElementById('feed');
+        const styleCard = document.getElementById('styleControlsCard');
+        const saveThemeBtn = document.getElementById('saveTheme');
+        const resetThemeBtn = document.getElementById('resetTheme');
+        const styleMsg = document.getElementById('styleMsg');
+        const popupLogin = document.getElementById('popupLogin');
+        const popupUser = document.getElementById('popupUser');
+        const popupPass = document.getElementById('popupPass');
+        const popupLoginBtn = document.getElementById('popupLoginBtn');
+        const popupClose = document.getElementById('popupClose');
+        const popupMsg = document.getElementById('popupMsg');
+        const overlay = document.getElementById('overlay');
+        const bannedPopup = document.getElementById('bannedPopup');
+        const bannedReasonEl = document.getElementById('bannedReason');
+        const bannedClose = document.getElementById('bannedClose');
+        const adminUsersCard = document.getElementById('adminUsersCard');
+        const usersList = document.getElementById('usersList');
+        const userSearch = document.getElementById('userSearch');
+        const myBioEl = document.getElementById('myBio');
+        const saveBioBtn = document.getElementById('saveBioBtn');
+        const saveBioMsg = document.getElementById('saveBioMsg');
+        const viewMyProfileBtn = document.getElementById('viewMyProfileBtn');
+        const profileViewer = document.getElementById('profileViewer');
+        const recentUsersList = document.getElementById('recentUsersList');
+
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPopup = document.getElementById('settingsPopup');
+        const settingsCancel = document.getElementById('settingsCancel');
+        const settingsSaveDesc = document.getElementById('settingsSaveDesc');
+        const settingsSaveTheme = document.getElementById('settingsSaveTheme');
+        const settingsMsg = document.getElementById('settingsMsg');
+        const settingsDescription = document.getElementById('settingsDescription');
+        const settingsThemeSelect = document.getElementById('settingsThemeSelect');
+        const settingsAdminArea = document.getElementById('settingsAdminArea');
+        const settingsAdminControls = document.getElementById('settingsAdminControls');
+
+        const channelsListEl = document.getElementById('channelsList');
+        const channelsPanel = document.getElementById('channelsPanel');
+
+        const feedSettingsBtn = document.getElementById('feedSettingsBtn');
+        const composerSettingsBtn = document.getElementById('composerSettingsBtn');
+
+        const newChannelName = document.getElementById('newChannelName');
+        const addChannelBtn = document.getElementById('addChannelBtn');
+        const settingsChannelsList = document.getElementById('settingsChannelsList');
+        const settingsChannelsMsg = document.getElementById('settingsChannelsMsg');
+        const settingsChannelsArea = document.getElementById('settingsChannelsArea');
+
+        const newRankName = document.getElementById('newRankName');
+        const addRankBtn = document.getElementById('addRankBtn');
+        const settingsRanksList = document.getElementById('settingsRanksList');
+        const settingsRanksMsg = document.getElementById('settingsRanksMsg');
+        const settingsRanksArea = document.getElementById('settingsRanksArea');
+
+        const settingsProfileBio = document.getElementById('settingsProfileBio');
+        const settingsSaveProfile = document.getElementById('settingsSaveProfile');
+        const settingsProfileMsg = document.getElementById('settingsProfileMsg');
+
+        const activeChannelLabel = document.getElementById('activeChannelLabel');
+
+        let currentUser = JSON.parse(localStorage.getItem('tf_user') || 'null');
+        let currentUserDocUnsub = null;
+        let usersUnsub = null;
+        let activeProfileChatUnsub = null;
+
+        let siteChannels = [];
+        let activeChannel = null;
+        let siteRanks = [];
+        let messagesUnsub = null;
+        const lastPostTimestamps = {};
+
+        function isOwner(user) { if (!user) return false; return siteOwnerUsernameLower && user.usernameLower === siteOwnerUsernameLower; }
+        function isAdmin(user) {
+            if (!user) return false;
+            if (user.isAdmin) return true;
+            if (isOwner(user)) return true;
+            if (user.rank) {
+                const r = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
+                if (r && r.permissions && r.permissions.admin) return true;
+            }
+            return false;
+        }
+        function hasRankPermission(user, perm) {
+            if (!user) return false;
+            if (user.isAdmin || isOwner(user)) return true;
+            if (!user.rank) return false;
+            const r = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
+            if (!r || !r.permissions) return false;
+            return !!r.permissions[perm];
+        }
+        function canViewChannel(user, channelObj) {
+            const isDiscord = document.body.classList.contains('theme-discord');
+            if (!isDiscord) return true;
+            if (!channelObj) return true;
+            if (!channelObj.hidden) return true;
+            if (isOwner(user) || isAdmin(user)) return true;
+            if (user && user.rank) {
+                const rank = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
+                if (rank && rank.permissions && rank.permissions.viewHidden) return true;
+            }
+            if (Array.isArray(channelObj.allowedRanks) && channelObj.allowedRanks.length && user && user.rank) {
+                return channelObj.allowedRanks.map(x => (x || '').toLowerCase()).includes((user.rank || '').toLowerCase());
+            }
+            return false;
+        }
+        function canSendInChannel(user, channelObj) {
+            const isDiscord = document.body.classList.contains('theme-discord');
+            if (!isDiscord) return true;
+            if (!channelObj) return true;
+            if (!channelObj.locked) return true;
+            if (isOwner(user) || isAdmin(user)) return true;
+            if (hasRankPermission(user, 'send')) return true;
+            return false;
+        }
+        function showOverlay() { overlay.style.display = 'block'; }
+        function hideOverlay() { overlay.style.display = 'none'; }
+        function showPopupLogin() { showOverlay(); popupLogin.style.display = 'block'; popupUser.focus(); }
+        function hidePopupLogin() { hideOverlay(); popupLogin.style.display = 'none'; popupMsg.textContent = ''; popupUser.value = ''; popupPass.value = ''; }
+        function showBannedPopup(reason) { bannedReasonEl.textContent = reason || 'Your account has been banned by an administrator.'; showOverlay(); bannedPopup.style.display = 'block'; }
+        function hideBannedPopup() { bannedPopup.style.display = 'none'; hideOverlay(); }
+        async function hashText(txt) { const enc = new TextEncoder(); const hash = await crypto.subtle.digest('SHA-256', enc.encode(txt)); return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); }
+
+        async function attachCurrentUserListener() {
+            if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; }
+            if (!currentUser || !currentUser.usernameLower) return;
+            const uref = siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower);
+            currentUserDocUnsub = onSnapshot(uref, (snap) => {
+                if (!snap.exists()) { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); return; }
+                const d = snap.data();
+                const prevBanned = !!currentUser?.banned;
+                currentUser = {
+                    username: d.username,
+                    usernameLower: (d.username || '').toLowerCase(),
+                    isAdmin: !!d.isAdmin,
+                    rank: d.rank || null,
+                    banned: !!d.banned,
+                    mutedUntil: d.mutedUntil || 0,
+                    bio: d.bio || '',
+                    followers: Array.isArray(d.followers) ? d.followers : [],
+                    followersCount: typeof d.followersCount === 'number' ? d.followersCount : (Array.isArray(d.followers) ? d.followers.length : 0),
+                    chatEnabled: !!d.chatEnabled,
+                    following: Array.isArray(d.following) ? d.following : []
+                };
+                localStorage.setItem('tf_user', JSON.stringify(currentUser));
+                updateLoginUI();
+                if (currentUser.banned && !prevBanned) showBannedPopup('Your account has been banned by an administrator. Posting disabled.');
+                if (!currentUser.banned) hideBannedPopup();
+                myBioEl.value = currentUser.bio || '';
+                settingsProfileBio.value = currentUser.bio || '';
+            }, (err) => { console.error('attachCurrentUserListener error', err); });
+        }
+
+        function updateLoginUI() {
+            const isDiscord = document.body.classList.contains('theme-discord');
+            const styleCard = document.getElementById('styleControlsCard');
+
+            if (currentUser) {
+                let badges = isAdmin(currentUser) ? '<span class="admin-badge">ADMIN</span>' : '';
+                let banBadge = (currentUser.banned) ? '<span class="badge-banned">BANNED</span>' : '';
+                loginState.innerHTML = `<div>Signed as <strong>${currentUser.username}</strong> ${badges} ${banBadge}</div>`;
+
+                // show/hide side panels depending on theme and permissions
+                if (isDiscord) {
+                    if (styleCard) styleCard.style.display = 'none';
+                    if (adminUsersCard) adminUsersCard.style.display = 'none';
+                } else {
+                    if (styleCard) styleCard.style.display = isAdmin(currentUser) ? 'block' : 'none';
+                    if (adminUsersCard) adminUsersCard.style.display = isAdmin(currentUser) ? 'block' : 'none';
+                }
+
+                registerBtn.style.display = loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                loginState.innerHTML = '<div class="muted">Not signed in</div>';
+                if (!document.body.classList.contains('theme-discord')) { if (styleCard) styleCard.style.display = 'none'; } else { if (styleCard) styleCard.style.display = 'none'; }
+                if (adminUsersCard) adminUsersCard.style.display = 'none';
+                registerBtn.style.display = loginBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+
+            if (settingsAdminArea) { settingsAdminArea.style.display = (currentUser && isAdmin(currentUser)) ? 'block' : 'none'; }
+            if (settingsChannelsArea) { const canEditChannels = currentUser && isAdmin(currentUser) && document.body.classList.contains('theme-discord'); settingsChannelsArea.style.display = canEditChannels ? 'block' : 'none'; }
+            if (settingsRanksArea) { settingsRanksArea.style.display = (currentUser && isOwner(currentUser) && document.body.classList.contains('theme-discord')) ? 'block' : 'none'; }
+        }
+
+        registerBtn.onclick = async () => {
+            accountMsg.textContent = '';
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            if (!username || !password) { accountMsg.textContent = 'Provide both username and password.'; return; }
+            const lower = username.toLowerCase();
+            const docRef = siteId ? doc(db, 'sites', siteId, 'users', lower) : doc(db, 'users', lower);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) { accountMsg.textContent = 'Username taken'; return; }
+            await setDoc(docRef, {
+                username,
+                passwordHash: await hashText(password),
+                createdAt: Date.now(),
+                isAdmin: false,
+                rank: null,
+                banned: false,
+                mutedUntil: 0,
+                bio: '',
+                followers: [],
+                followersCount: 0,
+                following: [],
+                chatEnabled: false
+            });
+            currentUser = { username, usernameLower: lower, isAdmin: false, rank: null, banned: false, mutedUntil: 0, bio: '', followers: [], followersCount: 0, chatEnabled: false, following: [] };
+            localStorage.setItem('tf_user', JSON.stringify(currentUser));
+            updateLoginUI();
+            accountMsg.style.color = 'green'; accountMsg.textContent = 'Registered and signed in';
+            await attachCurrentUserListener();
+        };
+
+        loginBtn.onclick = async () => {
+            accountMsg.textContent = '';
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            if (!username || !password) { accountMsg.textContent = 'Provide both username and password.'; return; }
+            const lower = username.toLowerCase();
+            const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', lower) : doc(db, 'users', lower));
+            if (!snap.exists()) { accountMsg.textContent = 'No such user'; return; }
+            const data = snap.data();
+            if (await hashText(password) !== data.passwordHash) { accountMsg.textContent = 'Wrong password'; return; }
+            currentUser = {
+                username: data.username,
+                usernameLower: lower,
+                isAdmin: !!data.isAdmin,
+                rank: data.rank || null,
+                banned: !!data.banned,
+                mutedUntil: data.mutedUntil || 0,
+                bio: data.bio || '',
+                followers: Array.isArray(data.followers) ? data.followers : [],
+                followersCount: typeof data.followersCount === 'number' ? data.followersCount : (Array.isArray(data.followers) ? data.followers.length : 0),
+                following: Array.isArray(data.following) ? data.following : [],
+                chatEnabled: !!data.chatEnabled
+            };
+            localStorage.setItem('tf_user', JSON.stringify(currentUser));
+            updateLoginUI();
+            accountMsg.style.color = 'green'; accountMsg.textContent = 'Signed in';
+            await attachCurrentUserListener();
+            if (currentUser.banned) showBannedPopup('Your account is banned. Contact an administrator.');
+        };
+
+        logoutBtn.onclick = () => { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; } };
+
+        saveThemeBtn.onclick = async () => {
+            if (!currentUser || !isAdmin(currentUser)) { styleMsg.style.color = ''; styleMsg.textContent = 'Not authorized'; return; }
+            if (!styleDocRef) { styleMsg.textContent = 'No site selected'; return; }
+            await setDoc(styleDocRef, { theme: themeSelect.value }, { merge: true });
+            styleMsg.style.color = 'green'; styleMsg.textContent = 'Theme saved';
+        };
+        resetThemeBtn.onclick = async () => {
+            if (!currentUser || !isAdmin(currentUser)) { styleMsg.style.color = ''; styleMsg.textContent = 'Not authorized'; return; }
+            if (!styleDocRef) { styleMsg.textContent = 'No site selected'; return; }
+            await setDoc(styleDocRef, { theme: 'classic' }, { merge: true });
+            styleMsg.style.color = 'green'; styleMsg.textContent = 'Reset to Classic';
+        };
+
+        popupClose.onclick = hidePopupLogin;
+        popupLoginBtn.onclick = async () => {
+            popupMsg.textContent = '';
+            const u = popupUser.value.trim(), p = popupPass.value;
+            if (!u || !p) { popupMsg.textContent = 'Enter both.'; return; }
+            const lower = u.toLowerCase();
+            const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', lower) : doc(db, 'users', lower));
+            if (!snap.exists()) { popupMsg.textContent = 'No such user'; return; }
+            const data = snap.data();
+            if (await hashText(p) !== data.passwordHash) { popupMsg.textContent = 'Wrong password'; return; }
+            if (data.banned) { popupMsg.textContent = 'Banned account.'; return; }
+            currentUser = { username: data.username, usernameLower: lower, isAdmin: !!data.isAdmin, rank: data.rank || null, banned: !!data.banned, mutedUntil: data.mutedUntil || 0, bio: data.bio || '', followers: Array.isArray(data.followers) ? data.followers : [], followersCount: data.followersCount || 0, following: Array.isArray(data.following) ? data.following : [], chatEnabled: !!data.chatEnabled };
+            localStorage.setItem('tf_user', JSON.stringify(currentUser));
+            updateLoginUI();
+            hidePopupLogin();
+            await attachCurrentUserListener();
+        };
+
+        async function postMessage(text) {
+            if (!currentUser) { showPopupLogin(); return; }
+            const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower));
+            if (!snap.exists()) { accountMsg.textContent = 'Account missing'; return; }
+            const d = snap.data();
+            if (d.banned) { accountMsg.textContent = 'You are banned from posting.'; showBannedPopup('Your account is banned. Contact an admin.'); return; }
+            const now = Date.now();
+            if (d.mutedUntil && d.mutedUntil > now) { const minutes = Math.ceil((d.mutedUntil - now) / 60000); accountMsg.textContent = `You are muted for ${minutes} more minute(s).`; return; }
+            if (!text || !text.trim()) return;
+
+            const isDiscord = document.body.classList.contains('theme-discord');
+            const docData = { author: d.username, authorLower: (d.username || '').toLowerCase(), text: text.trim(), createdAt: Date.now() };
+            if (isDiscord && activeChannel) {
+                const channelObj = (siteChannels || []).find(c => c.name.toLowerCase() === (activeChannel || '').toLowerCase());
+                if (!canViewChannel(currentUser, channelObj)) { accountMsg.textContent = 'You cannot view this channel.'; return; }
+                if (!canSendInChannel(currentUser, channelObj)) { accountMsg.textContent = 'Channel is locked. You cannot send messages.'; return; }
+                if (channelObj && channelObj.slowMode && channelObj.slowMode > 0) {
+                    const key = `${currentUser.usernameLower}|${channelObj.name.toLowerCase()}`;
+                    const last = lastPostTimestamps[key] || 0;
+                    const diff = Date.now() - last;
+                    if (diff < (channelObj.slowMode * 1000)) {
+                        const wait = Math.ceil(((channelObj.slowMode * 1000) - diff) / 1000);
+                        accountMsg.textContent = `Slow mode: wait ${wait}s before posting again.`;
+                        return;
+                    }
+                    lastPostTimestamps[key] = Date.now();
+                }
+                docData.channel = activeChannel;
+            }
+            await addDoc(messagesRef, docData);
+        }
+
+        postBtn && (postBtn.onclick = async () => { await postMessage(document.getElementById('messageText').value); document.getElementById('messageText').value = ''; charsLeft.textContent = '0'; });
+        leftPostBtn && (leftPostBtn.onclick = async () => { await postMessage(leftMessageText.value); leftMessageText.value = ''; leftCharsLeft.textContent = '0'; });
+        messageText && (messageText.oninput = () => charsLeft.textContent = messageText.value.length + ' chars');
+        leftMessageText && (leftMessageText.oninput = () => leftCharsLeft.textContent = leftMessageText.value.length + ' chars');
+
+        function unsubscribeMessages() { if (messagesUnsub) { try { messagesUnsub(); } catch (e) { } messagesUnsub = null; } }
+
+        async function subscribeMessages(channel) {
+            unsubscribeMessages();
+            activeChannel = channel || null;
+            activeChannelLabel.textContent = channel ? `Feed • #${channel}` : 'Feed • All';
+            messagesUnsub = onSnapshot(messagesRef, async (snap) => {
+                const docs = []; snap.forEach(s => docs.push({ id: s.id, data: s.data() }));
+                docs.sort((a, b) => (b.data.createdAt || 0) - (a.data.createdAt || 0));
+                const authorSet = new Set();
+                docs.forEach(d => { const al = d.data.authorLower || ((d.data.author || '').toLowerCase()); if (al) authorSet.add(al); });
+                const authorMap = {};
+                await Promise.all(Array.from(authorSet).map(async (al) => {
+                    try { const s = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', al) : doc(db, 'users', al)); authorMap[al] = s.exists() ? s.data() : null; } catch (e) { authorMap[al] = null; }
+                }));
+                feedEl.innerHTML = '';
+                for (const item of docs) {
+                    const m = item.data;
+                    if (channel) {
+                        if (!m.channel || (m.channel || '').toLowerCase() !== (channel || '').toLowerCase()) continue;
+                    }
+                    if (m.channel && document.body.classList.contains('theme-discord')) {
+                        const chObj = (siteChannels || []).find(c => c.name.toLowerCase() === (m.channel || '').toLowerCase());
+                        if (chObj && !canViewChannel(currentUser, chObj)) continue;
+                    }
+                    const div = document.createElement('div'); div.className = 'post';
+                    const avatar = document.createElement('div'); avatar.style.width = '40px'; avatar.style.height = '40px'; avatar.style.borderRadius = '6px'; avatar.style.background = 'linear-gradient(135deg,var(--accent),#fff)'; div.appendChild(avatar);
+                    const contentWrap = document.createElement('div'); contentWrap.style.flex = '1';
+                    const meta = document.createElement('div'); meta.className = 'meta';
+                    const authorStrong = document.createElement('strong');
+                    const authorLink = document.createElement('button'); authorLink.className = 'linklike'; authorLink.textContent = m.author || 'unknown';
+                    authorLink.onclick = () => openProfile(m.authorLower || ((m.author || '').toLowerCase()));
+                    authorStrong.appendChild(authorLink); meta.appendChild(authorStrong);
+                    const al = m.authorLower || ((m.author || '').toLowerCase());
+                    if (currentUser && isAdmin(currentUser) && al) {
+                        const udata = authorMap[al];
+                        if (udata) {
+                            if (udata.banned) { const b = document.createElement('span'); b.className = 'badge-banned'; b.textContent = 'BANNED'; meta.appendChild(b); }
+                            if (udata.mutedUntil && udata.mutedUntil > Date.now()) { const until = new Date(udata.mutedUntil); const pretty = until.toLocaleString(); const mu = document.createElement('span'); mu.className = 'badge-muted'; mu.textContent = `MUTED until ${pretty}`; meta.appendChild(mu); }
+                            if (udata.isAdmin) { const adm = document.createElement('span'); adm.className = 'admin-badge'; adm.textContent = 'ADMIN'; meta.appendChild(adm); }
+                            if (udata.rank) { const r = document.createElement('span'); r.className = 'admin-badge'; r.style.background = '#2f9f5f'; r.textContent = udata.rank; meta.appendChild(r); }
+                        }
+                    }
+                    const dateStr = m.createdAt ? new Date(m.createdAt).toLocaleString() : '';
+                    const metaInfo = document.createElement('span'); metaInfo.style.marginLeft = '6px'; metaInfo.textContent = ' • ' + dateStr; meta.appendChild(metaInfo);
+                    if (m.channel) { const ch = document.createElement('span'); ch.textContent = ` #${m.channel}`; ch.style.marginLeft = '8px'; ch.style.color = 'var(--muted)'; meta.appendChild(ch); }
+                    const content = document.createElement('div'); content.innerText = m.text || ''; content.style.marginTop = '6px';
+                    const actions = document.createElement('div'); actions.style.marginTop = '8px';
+
+                    // admin / rank-based message actions
+                    {
+                        const canBan = hasRankPermission(currentUser, 'ban');
+                        const canMute = hasRankPermission(currentUser, 'mute');
+                        const canDelete = hasRankPermission(currentUser, 'deletePost');
+                        const canMakeAdmin = hasRankPermission(currentUser, 'admin') || isOwner(currentUser);
+
+                        async function loadUserDoc(authorLower) { const ref = siteId ? doc(db, 'sites', siteId, 'users', authorLower) : doc(db, 'users', authorLower); const s = await getDoc(ref); return { ref, exists: s.exists(), data: s.exists() ? s.data() : null }; }
+
+                        if (canBan) {
+                            const banBtn = document.createElement('button'); banBtn.className = 'small-action danger-action'; banBtn.textContent = 'Ban';
+                            banBtn.onclick = async () => { if (!al) return; const res = await loadUserDoc(al); if (!res.exists) { alert('User doc not found'); return; } await updateDoc(res.ref, { banned: !res.data.banned }); };
+                            actions.appendChild(banBtn);
+                        }
+                        if (canMakeAdmin) {
+                            const adminBtn = document.createElement('button'); adminBtn.className = 'small-action positive-action'; adminBtn.textContent = 'Toggle Admin';
+                            adminBtn.onclick = async () => { if (!al) return; const res = await loadUserDoc(al); if (!res.exists) { alert('User doc not found'); return; } await updateDoc(res.ref, { isAdmin: !res.data.isAdmin }); };
+                            actions.appendChild(adminBtn);
+                        }
+                        if (canMute) {
+                            const muteBtn = document.createElement('button'); muteBtn.className = 'small-action'; muteBtn.textContent = 'Mute 1h';
+                            muteBtn.onclick = async () => { if (!al) return; const res = await loadUserDoc(al); if (!res.exists) { alert('User doc not found'); return; } const currentlyMutedUntil = res.data.mutedUntil || 0; if (currentlyMutedUntil > Date.now()) { await updateDoc(res.ref, { mutedUntil: 0 }); } else { await updateDoc(res.ref, { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
+                            actions.appendChild(muteBtn);
+                        }
+                        if (canDelete) {
+                            const delBtn = document.createElement('button'); delBtn.className = 'small-action danger-action'; delBtn.textContent = 'Delete Post';
+                            delBtn.onclick = async () => { const ok = confirm('Delete this post?'); if (!ok) return; if (siteId) { await deleteDoc(doc(db, 'sites', siteId, 'messages', item.id)); } else { await deleteDoc(doc(db, 'messages', item.id)); } };
+                            actions.appendChild(delBtn);
+                        }
+                    }
+
+                    contentWrap.appendChild(meta);
+                    contentWrap.appendChild(content);
+                    if (actions.children.length) contentWrap.appendChild(actions);
+                    div.appendChild(contentWrap);
+                    feedEl.appendChild(div);
+                }
+            }, (err) => { console.error('messages onSnapshot error', err); showDebug('Failed to listen for messages (permission or network error). Check console.', 'error'); });
+        }
+
+        async function loadSiteChannelsOnce() {
+            try {
+                const s = await getDoc(siteDocRef);
+                if (s.exists()) {
+                    const data = s.data();
+                    if (Array.isArray(data.ranks)) { siteRanks = data.ranks.slice(); } else { siteRanks = []; }
+                    if (Array.isArray(data.channels)) {
+                        siteChannels = data.channels.map(c => {
+                            if (typeof c === 'string') return { name: c, locked: false, hidden: false, slowMode: 0, allowedRanks: [] };
+                            return { name: c.name || (c.value || ''), locked: !!c.locked, hidden: !!c.hidden, slowMode: Number(c.slowMode || 0) || 0, allowedRanks: Array.isArray(c.allowedRanks) ? c.allowedRanks.slice() : [] };
+                        });
+                    } else {
+                        siteChannels = ['general', 'announcements', 'random', 'memes', 'help'].map(n => ({ name: n, locked: false, hidden: false, slowMode: 0, allowedRanks: [] }));
+                        try { await updateDoc(siteDocRef, { channels: siteChannels }); } catch (e) { }
+                    }
+                }
+            } catch (e) { console.error('loadSiteChannelsOnce error', e); }
+            renderChannelsUI();
+        }
+
+        if (siteDocRef) {
+            try {
+                onSnapshot(siteDocRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const d = snap.data();
+                    if (Array.isArray(d.channels)) {
+                        siteChannels = d.channels.map(c => {
+                            if (typeof c === 'string') return { name: c, locked: false, hidden: false, slowMode: 0, allowedRanks: [] };
+                            return { name: c.name || (c.value || ''), locked: !!c.locked, hidden: !!c.hidden, slowMode: Number(c.slowMode || 0) || 0, allowedRanks: Array.isArray(c.allowedRanks) ? c.allowedRanks.slice() : [] };
+                        });
+                        renderChannelsUI();
+                        renderSettingsChannelsList();
+                    }
+                    if (Array.isArray(d.ranks)) { siteRanks = d.ranks.slice(); renderSettingsRanksList(); }
+                    if (typeof d.description === 'string') { document.getElementById('siteSubtitle').textContent = d.description; }
+                }, (err) => { console.error('siteDocRef onSnapshot error', err); });
+            } catch (e) { console.warn('siteDocRef subscription failed', e); }
+        }
+
+        function renderChannelsUI() {
+            if (!channelsListEl) return;
+            channelsListEl.innerHTML = '';
+            const allBtn = document.createElement('div');
+            allBtn.className = 'channel' + (!activeChannel ? ' active' : '');
+            allBtn.textContent = '# All';
+            allBtn.onclick = () => { activeChannel = null; updateChannelActiveStates(); subscribeMessages(null); };
+            channelsListEl.appendChild(allBtn);
+            (siteChannels || []).forEach(ch => {
+                if (!canViewChannel(currentUser, ch)) return;
+                const el = document.createElement('div');
+                el.className = 'channel' + (activeChannel === ch.name ? ' active' : '');
+                el.innerHTML = `<span class="prefix">#</span> ${ch.name}` + (ch.locked ? ' 🔒' : '') + (ch.slowMode ? ` ⏱${ch.slowMode}s` : '');
+                el.onclick = () => { activeChannel = ch.name; updateChannelActiveStates(); subscribeMessages(ch.name); };
+                channelsListEl.appendChild(el);
+            });
+        }
+
+        function updateChannelActiveStates() {
+            if (!channelsListEl) return;
+            Array.from(channelsListEl.children).forEach(child => {
+                const text = child.textContent || '';
+                const name = text.replace('#', '').trim().split(' ')[0];
+                if ((!activeChannel && name.toLowerCase() === 'all') || (activeChannel && name.toLowerCase() === activeChannel.toLowerCase())) child.classList.add('active'); else child.classList.remove('active');
+            });
+            if (feedEl) feedEl.scrollTop = 0;
+        }
+
+        function renderSettingsChannelsList() {
+            if (!settingsChannelsList) return;
+            settingsChannelsList.innerHTML = '';
+            (siteChannels || []).forEach(ch => {
+                const row = document.createElement('div'); row.className = 'channel-row';
+                const left = document.createElement('div'); left.style.display = 'flex'; left.style.flexDirection = 'column';
+                left.innerHTML = `<div style="font-weight:700"># ${ch.name}</div>`;
+                const controls = document.createElement('div'); controls.style.display = 'flex'; controls.style.gap = '8px'; controls.style.alignItems = 'center';
+                const lockedLbl = document.createElement('label'); lockedLbl.style.fontSize = '0.85rem'; lockedLbl.style.color = '#bfc3c8';
+                const lockedCb = document.createElement('input'); lockedCb.type = 'checkbox'; lockedCb.checked = !!ch.locked; lockedCb.style.marginRight = '6px';
+                lockedLbl.appendChild(lockedCb); lockedLbl.appendChild(document.createTextNode('Locked')); controls.appendChild(lockedLbl);
+                const hiddenLbl = document.createElement('label'); hiddenLbl.style.fontSize = '0.85rem'; hiddenLbl.style.color = '#bfc3c8';
+                const hiddenCb = document.createElement('input'); hiddenCb.type = 'checkbox'; hiddenCb.checked = !!ch.hidden; hiddenCb.style.marginLeft = '8px'; hiddenCb.style.marginRight = '6px';
+                hiddenLbl.appendChild(hiddenCb); hiddenLbl.appendChild(document.createTextNode('Hidden')); controls.appendChild(hiddenLbl);
+                const slowInput = document.createElement('input'); slowInput.type = 'number'; slowInput.min = '0'; slowInput.placeholder = 'slow(s)'; slowInput.value = ch.slowMode || 0; slowInput.style.width = '90px'; controls.appendChild(slowInput);
+                const ranksSelect = document.createElement('input'); ranksSelect.placeholder = 'Allowed ranks (comma)'; ranksSelect.value = Array.isArray(ch.allowedRanks) ? ch.allowedRanks.join(', ') : ''; ranksSelect.style.width = '160px'; controls.appendChild(ranksSelect);
+                left.appendChild(controls);
+                const right = document.createElement('div');
+                const saveBtn = document.createElement('button'); saveBtn.className = 'small-btn'; saveBtn.textContent = 'Save';
+                saveBtn.onclick = async () => {
+                    if (!currentUser || !isAdmin(currentUser)) { settingsChannelsMsg.textContent = 'Not authorized'; return; }
+                    ch.locked = !!lockedCb.checked;
+                    ch.hidden = !!hiddenCb.checked;
+                    ch.slowMode = Number(slowInput.value || 0) || 0;
+                    ch.allowedRanks = ranksSelect.value.split(',').map(x => x.trim()).filter(x => x);
+                    try { await updateDoc(siteDocRef, { channels: siteChannels }); settingsChannelsMsg.style.color = 'green'; settingsChannelsMsg.textContent = 'Saved'; setTimeout(() => settingsChannelsMsg.textContent = '', 2000); } catch (e) { console.error('save channel error', e); settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Save failed'; }
+                };
+                const delBtn = document.createElement('button'); delBtn.className = 'small-btn danger-action'; delBtn.textContent = 'Delete';
+                delBtn.onclick = async () => {
+                    if (!currentUser || !isAdmin(currentUser)) { settingsChannelsMsg.textContent = 'Not authorized'; return; }
+                    if (!confirm(`Delete channel "${ch.name}"? People may still use the hashtag in posts.`)) return;
+                    const newChannels = (siteChannels || []).filter(x => x.name !== ch.name);
+                    try { await updateDoc(siteDocRef, { channels: newChannels }); settingsChannelsMsg.style.color = 'green'; settingsChannelsMsg.textContent = 'Channel removed'; setTimeout(() => settingsChannelsMsg.textContent = '', 2500); } catch (e) { console.error('remove channel error', e); settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Failed to remove'; }
+                };
+                right.appendChild(saveBtn); right.appendChild(delBtn);
+                row.appendChild(left); row.appendChild(right);
+                settingsChannelsList.appendChild(row);
+            });
+        }
+
+        addChannelBtn && (addChannelBtn.onclick = async () => {
+            const name = (newChannelName.value || '').trim();
+            if (!name) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Enter a channel name'; return; }
+            const sanitized = name.toLowerCase().replace(/[^a-z0-9\-_]/g, '');
+            if (!sanitized) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Invalid name'; return; }
+            if (!currentUser || !isAdmin(currentUser)) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Not authorized'; return; }
+            if ((siteChannels || []).some(c => c.name === sanitized)) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Channel exists'; return; }
+            siteChannels.push({ name: sanitized, locked: false, hidden: false, slowMode: 0, allowedRanks: [] });
+            try { await updateDoc(siteDocRef, { channels: siteChannels }); newChannelName.value = ''; settingsChannelsMsg.style.color = 'green'; settingsChannelsMsg.textContent = 'Channel added'; setTimeout(() => settingsChannelsMsg.textContent = '', 2500); } catch (e) { console.error('add channel error', e); settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Failed to add'; }
+        });
+
+        function renderSettingsRanksList() {
+            if (!settingsRanksList) return;
+            settingsRanksList.innerHTML = '';
+            (siteRanks || []).forEach(r => {
+                const row = document.createElement('div'); row.className = 'channel-row';
+                const left = document.createElement('div'); left.style.display = 'flex'; left.style.flexDirection = 'column';
+                left.innerHTML = `<div style="font-weight:700">${r.name}</div>`;
+                const controls = document.createElement('div'); controls.style.display = 'flex'; controls.style.gap = '8px'; controls.style.alignItems = 'center';
+                const viewHiddenCb = document.createElement('input'); viewHiddenCb.type = 'checkbox'; viewHiddenCb.checked = !!(r.permissions && r.permissions.viewHidden); const vlbl = document.createElement('label'); vlbl.style.color = '#bfc3c8'; vlbl.appendChild(viewHiddenCb); vlbl.appendChild(document.createTextNode('Can view hidden')); controls.appendChild(vlbl);
+                const sendCb = document.createElement('input'); sendCb.type = 'checkbox'; sendCb.checked = !!(r.permissions && r.permissions.send); const slbl = document.createElement('label'); slbl.style.color = '#bfc3c8'; slbl.appendChild(sendCb); slbl.appendChild(document.createTextNode('Can send in locked')); controls.appendChild(slbl);
+                const adminCb = document.createElement('input'); adminCb.type = 'checkbox'; adminCb.checked = !!(r.permissions && r.permissions.admin); const albl = document.createElement('label'); albl.style.color = '#bfc3c8'; albl.appendChild(adminCb); albl.appendChild(document.createTextNode('Admin perms')); controls.appendChild(albl);
+                const banCb = document.createElement('input'); banCb.type = 'checkbox'; banCb.checked = !!(r.permissions && r.permissions.ban); const banLbl = document.createElement('label'); banLbl.style.color = '#bfc3c8'; banLbl.appendChild(banCb); banLbl.appendChild(document.createTextNode('Can ban')); controls.appendChild(banLbl);
+                const muteCb = document.createElement('input'); muteCb.type = 'checkbox'; muteCb.checked = !!(r.permissions && r.permissions.mute); const muteLbl = document.createElement('label'); muteLbl.style.color = '#bfc3c8'; muteLbl.appendChild(muteCb); muteLbl.appendChild(document.createTextNode('Can mute')); controls.appendChild(muteLbl);
+                const delCb = document.createElement('input'); delCb.type = 'checkbox'; delCb.checked = !!(r.permissions && r.permissions.deletePost); const delLbl = document.createElement('label'); delLbl.style.color = '#bfc3c8'; delLbl.appendChild(delCb); delLbl.appendChild(document.createTextNode('Can delete posts')); controls.appendChild(delLbl);
+                left.appendChild(controls);
+                const right = document.createElement('div');
+                const saveBtn = document.createElement('button'); saveBtn.className = 'small-btn'; saveBtn.textContent = 'Save';
+                saveBtn.onclick = async () => {
+                    if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.textContent = 'Not authorized'; return; }
+                    r.permissions = { viewHidden: !!viewHiddenCb.checked, send: !!sendCb.checked, admin: !!adminCb.checked, ban: !!banCb.checked, mute: !!muteCb.checked, deletePost: !!delCb.checked };
+                    try { await updateDoc(siteDocRef, { ranks: siteRanks }); settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Saved'; setTimeout(() => { settingsRanksMsg.textContent = ''; }, 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Save failed'; }
+                };
+                const delBtn = document.createElement('button'); delBtn.className = 'small-btn danger-action'; delBtn.textContent = 'Delete';
+                delBtn.onclick = async () => {
+                    if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.textContent = 'Not authorized'; return; }
+                    if (!confirm(`Delete rank "${r.name}"? Users assigned that rank will lose it.`)) return;
+                    siteRanks = siteRanks.filter(x => x.name !== r.name);
+                    try { await updateDoc(siteDocRef, { ranks: siteRanks }); settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Deleted'; setTimeout(() => settingsRanksMsg.textContent = '', 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Delete failed'; }
+                };
+                right.appendChild(saveBtn); right.appendChild(delBtn);
+                row.appendChild(left); row.appendChild(right);
+                settingsRanksList.appendChild(row);
+            });
+        }
+
+        addRankBtn && (addRankBtn.onclick = async () => {
+            const name = (newRankName.value || '').trim();
+            if (!name) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Enter a rank name'; return; }
+            if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Not authorized'; return; }
+            if ((siteRanks || []).some(r => r.name.toLowerCase() === name.toLowerCase())) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Rank exists'; return; }
+            siteRanks.push({ name, permissions: { viewHidden: false, send: false, admin: false, ban: false, mute: false, deletePost: false } });
+            try { await updateDoc(siteDocRef, { ranks: siteRanks }); newRankName.value = ''; settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Added'; setTimeout(() => settingsRanksMsg.textContent = '', 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Add failed'; }
+        });
+
+        settingsSaveProfile && (settingsSaveProfile.onclick = async () => {
+            if (!currentUser) { settingsProfileMsg.style.color = 'red'; settingsProfileMsg.textContent = 'Login first'; return; }
+            try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { bio: settingsProfileBio.value }); settingsProfileMsg.style.color = 'green'; settingsProfileMsg.textContent = 'Saved'; setTimeout(() => settingsProfileMsg.textContent = '', 2000); } catch (e) { console.error('save profile error', e); settingsProfileMsg.style.color = 'red'; settingsProfileMsg.textContent = 'Save failed'; }
+        });
+
+        let usersCache = {};
+        if (usersUnsub) usersUnsub();
+        usersUnsub = onSnapshot(usersRef, (snap) => {
+            usersCache = {};
+            snap.forEach(s => { usersCache[s.id] = s.data(); });
+            renderUsersList();
+            renderRecentUsers();
+            renderSettingsAdminControls();
+        }, (err) => { console.error('users onSnapshot error', err); showDebug('Failed to load users (permission or network error). See console.', 'error'); });
+
+        // SIDE admin panel list — NO rank selector here (ranks only in Settings → Admin)
+        function renderUsersList() {
+            if (!isAdmin(currentUser)) { usersList.innerHTML = '<div class="muted">Admins only</div>'; return; }
+            const search = (userSearch.value || '').toLowerCase();
+            const keys = Object.keys(usersCache).sort();
+            usersList.innerHTML = '';
+            keys.forEach(k => {
+                const u = usersCache[k];
+                if (search && !(u.username || '').toLowerCase().includes(search)) return;
+                const row = document.createElement('div'); row.className = 'user-row';
+                const left = document.createElement('div'); left.innerHTML = `<div><strong>${u.username || k}</strong> <span class="user-tiny">(${k})</span></div>`;
+                const badges = document.createElement('div');
+                if (u.banned) { const b = document.createElement('span'); b.className = 'badge-banned'; b.textContent = 'BANNED'; badges.appendChild(b); }
+                if (u.isAdmin) { const a = document.createElement('span'); a.className = 'admin-badge'; a.style.marginLeft = '6px'; a.textContent = 'ADMIN'; badges.appendChild(a); }
+                if (u.mutedUntil && u.mutedUntil > Date.now()) { const m = document.createElement('span'); m.className = 'badge-muted'; m.textContent = 'MUTED'; badges.appendChild(m); }
+                if (u.rank) { const r = document.createElement('span'); r.className = 'admin-badge'; r.style.background = '#2f9f5f'; r.style.marginLeft = '6px'; r.textContent = u.rank; badges.appendChild(r); }
+                left.appendChild(badges);
+
+                const right = document.createElement('div'); right.className = 'controls-row';
+
+                // Ban button
+                const banBtn = document.createElement('button'); banBtn.className = 'small-action danger-action'; banBtn.textContent = u.banned ? 'Unban' : 'Ban';
+                banBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { banned: !u.banned }); };
+                right.appendChild(banBtn);
+
+                // Admin toggle (legacy)
+                const adminBtn = document.createElement('button'); adminBtn.className = 'small-action positive-action'; adminBtn.textContent = u.isAdmin ? 'Remove Admin' : 'Make Admin';
+                adminBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { isAdmin: !u.isAdmin }); };
+                right.appendChild(adminBtn);
+
+                // Mute toggle
+                const muteBtn = document.createElement('button'); muteBtn.className = 'small-action'; muteBtn.textContent = (u.mutedUntil && u.mutedUntil > Date.now()) ? 'Unmute' : 'Mute 1h';
+                muteBtn.onclick = async () => { if (u.mutedUntil && u.mutedUntil > Date.now()) { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: 0 }); } else { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
+                right.appendChild(muteBtn);
+
+                // Followers controls
+                const followersInput = document.createElement('input'); followersInput.type = 'number'; followersInput.min = '0'; followersInput.placeholder = 'Followers count'; followersInput.value = (typeof u.followersCount === 'number') ? u.followersCount : (Array.isArray(u.followers) ? u.followers.length : 0); followersInput.style.width = '90px';
+                const setFollowersBtn = document.createElement('button'); setFollowersBtn.className = 'small-action'; setFollowersBtn.textContent = 'Set';
+                setFollowersBtn.onclick = async () => { const val = parseInt(followersInput.value || '0', 10); if (isNaN(val) || val < 0) { alert('Invalid number'); return; } await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { followersCount: val }); };
+                right.appendChild(followersInput); right.appendChild(setFollowersBtn);
+
+                const viewBtn = document.createElement('button'); viewBtn.className = 'small-action'; viewBtn.textContent = 'View'; viewBtn.onclick = () => openProfile(k);
+                right.appendChild(viewBtn);
+
+                row.appendChild(left); row.appendChild(right); usersList.appendChild(row);
+            });
+        }
+        userSearch.oninput = renderUsersList;
+
+        function renderRecentUsers() {
+            recentUsersList.innerHTML = '';
+            const keys = Object.keys(usersCache).sort((a, b) => { const ta = usersCache[a].createdAt || 0; const tb = usersCache[b].createdAt || 0; return tb - ta; }).slice(0, 30);
+            keys.forEach(k => { const u = usersCache[k]; const el = document.createElement('div'); el.style.padding = '6px 0'; el.style.borderBottom = '1px solid rgba(0,0,0,0.04)'; el.innerHTML = `<strong style="font-size:0.95rem">${u.username}</strong> <span class="user-tiny"> • ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : ''}</span>`; el.style.cursor = 'pointer'; el.onclick = () => openProfile(k); recentUsersList.appendChild(el); });
+        }
+
+        // SETTINGS popup admin controls (owner-only rank assignment present here)
+        function renderSettingsAdminControls() {
+            if (!settingsAdminControls) return;
+            settingsAdminControls.innerHTML = '';
+
+            if (!isAdmin(currentUser)) {
+                settingsAdminControls.innerHTML = '<div class="muted">Admins only</div>';
+                return;
+            }
+
+            const keys = Object.keys(usersCache).sort();
+            keys.forEach(k => {
+                const u = usersCache[k];
+
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.gap = '8px';
+                row.style.marginBottom = '8px';
+                row.style.alignItems = 'center';
+
+                const left = document.createElement('div');
+                left.style.fontWeight = '700';
+                left.textContent = u.username || k;
+
+                const right = document.createElement('div');
+                right.style.display = 'flex';
+                right.style.gap = '8px';
+                right.style.alignItems = 'center';
+
+                const banBtn = document.createElement('button');
+                banBtn.className = 'small-btn';
+                banBtn.textContent = u.banned ? 'Unban' : 'Ban';
+                banBtn.onclick = async () => {
+                    try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { banned: !u.banned }); } catch (e) { console.error('ban toggle failed', e); alert('Ban toggle failed (see console).'); }
+                };
+                right.appendChild(banBtn);
+
+                if (currentUser && isOwner(currentUser)) {
+                    const rankSelect = document.createElement('select');
+                    rankSelect.style.minWidth = '160px';
+                    const noneOpt = document.createElement('option'); noneOpt.value = ''; noneOpt.textContent = '(no rank)'; rankSelect.appendChild(noneOpt);
+                    (siteRanks || []).forEach(rk => { const opt = document.createElement('option'); opt.value = rk.name; opt.textContent = rk.name; rankSelect.appendChild(opt); });
+                    rankSelect.value = u.rank || '';
+                    rankSelect.onchange = async () => {
+                        try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { rank: rankSelect.value || null }); usersCache[k] = usersCache[k] || {}; usersCache[k].rank = rankSelect.value || null; renderUsersList(); renderSettingsAdminControls(); } catch (e) { console.error('assign rank failed', e); alert('Failed to assign rank (see console).'); }
+                    };
+                    right.appendChild(rankSelect);
+                } else {
+                    const canToggleAdmin = hasRankPermission(currentUser, 'admin') || isOwner(currentUser) || currentUser?.isAdmin;
+                    if (canToggleAdmin) {
+                        const adminBtn = document.createElement('button');
+                        adminBtn.className = 'small-btn';
+                        adminBtn.textContent = u.isAdmin ? 'Remove Admin' : 'Make Admin';
+                        adminBtn.onclick = async () => {
+                            try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { isAdmin: !u.isAdmin }); } catch (e) { console.error('toggle admin failed', e); alert('Toggle admin failed (see console).'); }
+                        };
+                        right.appendChild(adminBtn);
+                    }
+                }
+
+                const muteBtn = document.createElement('button');
+                muteBtn.className = 'small-btn';
+                muteBtn.textContent = (u.mutedUntil && u.mutedUntil > Date.now()) ? 'Unmute' : 'Mute 1h';
+                muteBtn.onclick = async () => {
+                    try {
+                        if (u.mutedUntil && u.mutedUntil > Date.now()) {
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: 0 });
+                        } else {
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: Date.now() + (60 * 60 * 1000) });
+                        }
+                    } catch (e) { console.error('mute toggle failed', e); alert('Mute toggle failed (see console).'); }
+                };
+                right.appendChild(muteBtn);
+
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'small-btn';
+                viewBtn.textContent = 'View';
+                viewBtn.onclick = () => openProfile(k);
+                right.appendChild(viewBtn);
+
+                row.appendChild(left);
+                row.appendChild(right);
+                settingsAdminControls.appendChild(row);
+            });
+        }
+
+        bannedClose.onclick = () => { hideBannedPopup(); };
+
+        async function openProfile(usernameLower) {
+            if (!usernameLower) return;
+            if (activeProfileChatUnsub) { activeProfileChatUnsub(); activeProfileChatUnsub = null; }
+            const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower));
+            if (!snap.exists()) { profileViewer.innerHTML = `<div class="muted">User not found</div>`; return; }
+            const u = snap.data();
+            const followersArr = Array.isArray(u.followers) ? u.followers : [];
+            const followersCount = typeof u.followersCount === 'number' ? u.followersCount : followersArr.length;
+            const followingArr = Array.isArray(u.following) ? u.following : [];
+            const isOwner = currentUser && currentUser.usernameLower === usernameLower;
+            const isFollowing = currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(usernameLower);
+            const chatEnabled = !!u.chatEnabled;
+            profileViewer.innerHTML = '';
+            const header = document.createElement('div'); header.className = 'profile-header';
+            header.innerHTML = `<div class="avatar" aria-hidden="true"></div>
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
+                    ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                  </div>
+                  <div class="followers-row">
+                    <div><strong id="followersCount">${followersCount}</strong> followers</div>
+                    <div>${followingArr.length} following</div>
+                    <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</div>
+                  </div>
+                </div>`;
+            profileViewer.appendChild(header);
+            const bio = document.createElement('div'); bio.className = 'profile-bio'; bio.textContent = u.bio || 'No bio yet.'; profileViewer.appendChild(bio);
+            const controls = document.createElement('div'); controls.style.marginTop = '8px';
+            if (isOwner) {
+                if (!chatEnabled && followersCount >= 100) {
+                    const enableBtn = document.createElement('button'); enableBtn.className = 'small-btn'; enableBtn.textContent = 'Enable Chatroom (permanent)';
+                    enableBtn.onclick = async () => { if (!confirm('Enable chatroom permanently for your profile?')) return; await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { chatEnabled: true }); await openProfile(usernameLower); };
+                    controls.appendChild(enableBtn);
+                }
+                if (chatEnabled) { const enabledNote = document.createElement('div'); enabledNote.style.marginTop = '8px'; enabledNote.className = 'muted'; enabledNote.textContent = 'Chatroom is enabled for this profile.'; controls.appendChild(enabledNote); }
+                const editBioBtn = document.createElement('button'); editBioBtn.className = 'small-btn'; editBioBtn.textContent = 'Edit Bio';
+                editBioBtn.onclick = () => {
+                    const ta = document.createElement('textarea'); ta.value = u.bio || ''; ta.rows = 4;
+                    const save = document.createElement('button'); save.className = 'small-btn'; save.textContent = 'Save';
+                    const cancel = document.createElement('button'); cancel.className = 'small-btn'; cancel.textContent = 'Cancel';
+                    controls.innerHTML = ''; controls.appendChild(ta); controls.appendChild(save); controls.appendChild(cancel);
+                    save.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { bio: ta.value }); openProfile(usernameLower); };
+                    cancel.onclick = () => openProfile(usernameLower);
+                };
+                controls.appendChild(editBioBtn);
+            } else {
+                if (currentUser) {
+                    const followBtn = document.createElement('button'); followBtn.className = 'follow-btn'; followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
+                    followBtn.onclick = async () => {
+                        if (!currentUser) { alert('Login first'); return; }
+                        if (isFollowing) {
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followers: arrayRemove(currentUser.usernameLower) });
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { following: arrayRemove(usernameLower) });
+                        } else {
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followers: arrayUnion(currentUser.usernameLower) });
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { following: arrayUnion(usernameLower) });
+                        }
+                    };
+                    controls.appendChild(followBtn);
+                } else {
+                    const loginPrompt = document.createElement('button'); loginPrompt.className = 'small-btn'; loginPrompt.textContent = 'Log in to follow'; loginPrompt.onclick = showPopupLogin;
+                    controls.appendChild(loginPrompt);
+                }
+            }
+            if (currentUser && isAdmin(currentUser)) {
+                const adminControls = document.createElement('div'); adminControls.style.marginTop = '10px';
+                const numInput = document.createElement('input'); numInput.type = 'number'; numInput.min = '0'; numInput.placeholder = 'Set followers count'; numInput.value = followersCount;
+                const setBtn = document.createElement('button'); setBtn.className = 'small-btn'; setBtn.textContent = 'Set Followers (admin)';
+                setBtn.onclick = async () => { const val = parseInt(numInput.value || '0', 10); if (isNaN(val) || val < 0) { alert('Invalid number'); return; } await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followersCount: val }); await openProfile(usernameLower); };
+                adminControls.appendChild(numInput); adminControls.appendChild(setBtn); controls.appendChild(adminControls);
+            }
+            profileViewer.appendChild(controls);
+
+            const section = document.createElement('div'); section.style.marginTop = '12px';
+            const title = document.createElement('div'); title.className = 'profile-section-title'; const leftTitle = document.createElement('strong'); leftTitle.textContent = chatEnabled ? 'Chat' : 'User posts'; title.appendChild(leftTitle); section.appendChild(title);
+
+            if (chatEnabled) {
+                const chatWrap = document.createElement('div'); chatWrap.style.marginTop = '8px';
+                const chatBox = document.createElement('div'); chatBox.style.maxHeight = '300px'; chatBox.style.overflow = 'auto'; chatBox.style.border = '1px solid rgba(0,0,0,0.08)'; chatBox.style.padding = '8px'; chatBox.id = 'profileChatBox';
+                chatWrap.appendChild(chatBox);
+                const chatInput = document.createElement('textarea'); chatInput.rows = 3; chatInput.placeholder = 'Write a chat message...';
+                const sendBtn = document.createElement('button'); sendBtn.className = 'small-btn'; sendBtn.textContent = 'Send';
+                const sendRow = document.createElement('div'); sendRow.style.display = 'flex'; sendRow.style.gap = '8px'; sendRow.style.marginTop = '8px';
+                sendRow.appendChild(sendBtn); sendRow.appendChild(document.createElement('div'));
+                chatWrap.appendChild(chatInput); chatWrap.appendChild(sendRow); section.appendChild(chatWrap); profileViewer.appendChild(section);
+                const chatMessagesCol = chatsRoot(usernameLower);
+                activeProfileChatUnsub = onSnapshot(chatMessagesCol, (snap) => {
+                    const rows = [];
+                    snap.forEach(s => rows.push(s.data()));
+                    rows.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+                    chatBox.innerHTML = '';
+                    rows.forEach(d => {
+                        const row = document.createElement('div'); row.style.marginBottom = '6px';
+                        const who = document.createElement('div'); who.style.fontSize = '0.85rem'; who.style.color = 'var(--muted)'; who.textContent = `${d.author} • ${d.createdAt ? new Date(d.createdAt).toLocaleString() : ''}`;
+                        const txt = document.createElement('div'); txt.textContent = d.text;
+                        row.appendChild(who); row.appendChild(txt); chatBox.appendChild(row);
+                    });
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, (err) => { console.error('profile chat onSnapshot error', err); });
+                sendBtn.onclick = async () => { const txt = chatInput.value.trim(); if (!txt) return; if (!currentUser) { alert('Login to send chat messages'); return; } await addDoc(chatMessagesCol, { author: currentUser.username, authorLower: currentUser.usernameLower, text: txt, createdAt: Date.now() }); chatInput.value = ''; };
+            } else {
+                const postsWrap = document.createElement('div'); postsWrap.style.marginTop = '8px';
+                const postsList = document.createElement('div'); postsList.style.maxHeight = '300px'; postsList.style.overflow = 'auto'; postsList.style.padding = '6px';
+                postsWrap.appendChild(postsList); section.appendChild(postsWrap); profileViewer.appendChild(section);
+                try {
+                    const allSnap = await getDocs(messagesRef);
+                    const all = [];
+                    allSnap.forEach(s => { const d = s.data(); all.push(d); });
+                    const userPosts = all.filter(d => (d.authorLower || '').toLowerCase() === (usernameLower || '').toLowerCase());
+                    userPosts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    postsList.innerHTML = '';
+                    userPosts.forEach(d => {
+                        const p = document.createElement('div'); p.style.marginBottom = '8px';
+                        const meta = document.createElement('div'); meta.style.fontSize = '0.85rem'; meta.style.color = 'var(--muted)'; meta.textContent = d.createdAt ? new Date(d.createdAt).toLocaleString() : '';
+                        const c = document.createElement('div'); c.textContent = d.text;
+                        p.appendChild(meta); p.appendChild(c); postsList.appendChild(p);
+                    });
+                } catch (e) { console.error('fetch user posts error', e); }
+            }
+
+            const userDocRef = siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower);
+            const unsubLive = onSnapshot(userDocRef, (s) => { if (!s.exists()) return; const d = s.data(); const arr = Array.isArray(d.followers) ? d.followers : []; const count = typeof d.followersCount === 'number' ? d.followersCount : arr.length; const fcEl = document.getElementById('followersCount'); if (fcEl) fcEl.textContent = count; });
+            profileViewer.dataset.currentProfile = usernameLower;
+            profileViewer.dataset.unsubscribeId = Math.random().toString(36).slice(2);
+            const uid = profileViewer.dataset.unsubscribeId;
+            if (!window._profileUnsubs) window._profileUnsubs = {};
+            window._profileUnsubs[uid] = unsubLive;
+        }
+
+        settingsBtn.onclick = async () => {
+            if (!settingsPopup) return;
+            if (!document.body.classList.contains('theme-discord')) return;
+            settingsDescription.value = document.getElementById('siteSubtitle').textContent || '';
+            settingsThemeSelect.value = themeSelect ? themeSelect.value : 'classic';
+            settingsProfileBio.value = (currentUser && currentUser.bio) ? currentUser.bio : '';
+            renderSettingsChannelsList();
+            renderSettingsRanksList();
+            renderSettingsAdminControls();
+            showOverlay();
+            settingsPopup.style.display = 'block';
+            settingsPopup.setAttribute('aria-hidden', 'false');
+        };
+
+        feedSettingsBtn && (feedSettingsBtn.onclick = () => settingsBtn.onclick());
+        composerSettingsBtn && (composerSettingsBtn.onclick = () => settingsBtn.onclick());
+
+        settingsCancel.onclick = () => { settingsPopup.style.display = 'none'; settingsPopup.setAttribute('aria-hidden', 'true'); hideOverlay(); settingsMsg.textContent = ''; settingsChannelsMsg.textContent = ''; settingsProfileMsg.textContent = ''; };
+
+        settingsSaveDesc.onclick = async () => {
+            if (!siteDocRef) { settingsMsg.textContent = 'No site selected'; return; }
+            if (!currentUser || !isAdmin(currentUser)) { settingsMsg.textContent = 'Not authorized'; return; }
+            try { await updateDoc(siteDocRef, { description: settingsDescription.value }); document.getElementById('siteSubtitle').textContent = settingsDescription.value; settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Description saved'; setTimeout(() => settingsMsg.textContent = '', 2500); } catch (e) { console.error('save desc error', e); settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Failed to save'; }
+        };
+
+        settingsSaveTheme.onclick = async () => {
+            if (!currentUser || !isAdmin(currentUser)) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Not authorized'; return; }
+            if (!styleDocRef) { settingsMsg.textContent = 'No site selected'; return; }
+            try { await setDoc(styleDocRef, { theme: settingsThemeSelect.value }, { merge: true }); settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Theme saved'; setTimeout(() => settingsMsg.textContent = '', 2500); } catch (e) { console.error('save theme error', e); settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Save failed'; }
+        };
+
+        function initDiscordExtras() {
+            renderChannelsUI();
+            renderSettingsChannelsList();
+            renderSettingsAdminControls();
+            const isDiscord = document.body.classList.contains('theme-discord');
+            const feedSettingsBtn = document.getElementById('feedSettingsBtn');
+            const composerSettingsBtn = document.getElementById('composerSettingsBtn');
+            if (feedSettingsBtn) feedSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+            if (composerSettingsBtn) composerSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+        }
+
+        (async function init() {
+            await loadSiteMeta();
+            await loadSiteChannelsOnce();
+            subscribeMessages(null);
+            if (currentUser && currentUser.usernameLower) { await attachCurrentUserListener(); if (currentUser.banned) showBannedPopup('Your account is currently banned. Posting is disabled.'); }
+            updateLoginUI();
+            initDiscordExtras();
+            const observer = new MutationObserver(() => { initDiscordExtras(); updateLoginUI(); });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+            try { if (styleDocRef) { const s = await getDoc(styleDocRef); if (s.exists()) { const t = s.data().theme || 'classic'; applyTheme(t); } } } catch (e) { }
+        })();
+
+        window.addEventListener('beforeunload', () => {
+            if (currentUserDocUnsub) currentUserDocUnsub();
+            if (usersUnsub) usersUnsub();
+            if (activeProfileChatUnsub) activeProfileChatUnsub();
+            if (messagesUnsub) messagesUnsub();
+            if (window._profileUnsubs) { Object.values(window._profileUnsubs).forEach(fn => { try { fn(); } catch (e) { } }); }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,828 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>hub</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0c0f;
+            --panel: #0f1114;
+            --muted: #9aa0ac;
+            --accent: #7b66ff;
+            --card: #141417;
+            --glass: rgba(255,255,255,0.02);
+            --shadow: rgba(0,0,0,0.55);
+            --scroll-track: #141416;
+            --scroll-thumb: #2b2d31;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: linear-gradient(180deg,var(--bg),#080809);
+            color: #e6eef8;
+            -webkit-font-smoothing: antialiased
+        }
+
+        :root {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+        }
+
+        ::-webkit-scrollbar {
+            height: 12px;
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--scroll-track);
+            border-radius: 12px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--scroll-thumb);
+            border-radius: 12px;
+            border: 2px solid var(--scroll-track);
+        }
+
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: linear-gradient(180deg,#0f1114,#0c0d10);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .logo {
+            width: 36px;
+            height: 36;
+            border-radius: 8px;
+            background: linear-gradient(135deg,var(--accent),#8ab4f8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.5)
+        }
+
+        .top-title {
+            display: flex;
+            flex-direction: column
+        }
+
+            .top-title .username {
+                font-weight: 700;
+                color: #e6eef8
+            }
+
+            .top-title .sub {
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 2px
+            }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 0;
+            cursor: pointer;
+            font-weight: 700
+        }
+
+        .page {
+            padding: 22px 28px;
+            max-width: 1360px;
+            margin: 0 auto
+        }
+
+        .section {
+            margin-bottom: 28px
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+            .section-header h2 {
+                margin: 0;
+                font-size: 18px;
+                color: #e6eef8
+            }
+
+            .section-header .muted {
+                color: var(--muted);
+                font-size: 13px
+            }
+
+        .blank-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            padding-top: 6px;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .blank-template {
+            min-width: 220px;
+            max-width: 220px;
+            background: linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.02));
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.03);
+            flex: 0 0 auto;
+            color: var(--muted);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+        }
+
+            .blank-template .icon {
+                width: 64px;
+                height: 64;
+                border-radius: 12px;
+                background: rgba(255,255,255,0.025);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                color: #fff;
+            }
+
+            .blank-template .label {
+                font-weight: 700;
+                color: #e6eef8
+            }
+
+            .blank-template .sub {
+                font-size: 13px;
+                color: var(--muted)
+            }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+            .controls-row .left {
+                font-weight: 700;
+                color: #e6eef8;
+                font-size: 18px
+            }
+
+            .controls-row .right {
+                margin-left: auto;
+                display: flex;
+                gap: 8px;
+                align-items: center
+            }
+
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+            gap: 18px;
+        }
+
+        .site-card {
+            background: linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.02));
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 8px 24px var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 220px;
+            color: var(--muted)
+        }
+
+        .site-thumb {
+            height: 110px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 10px
+        }
+
+        .site-title {
+            font-weight: 700;
+            color: #e6eef8;
+            padding: 10px 12px 6px 12px
+        }
+
+        .site-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px 12px 12px;
+            margin-top: auto
+        }
+
+        .small-icon {
+            width: 20px;
+            height: 20;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .date {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .site-description {
+            padding: 0 12px 8px 12px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .pill {
+            padding: 6px 8px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 12px
+        }
+
+            .pill.pending {
+                background: rgba(255,255,255,0.02);
+                color: var(--muted)
+            }
+
+            .pill.approved {
+                background: rgba(42,164,106,0.12);
+                color: #66d39f
+            }
+
+            .pill.denied {
+                background: rgba(199,43,43,0.12);
+                color: #ffb4b4
+            }
+
+        .site-card:hover {
+            transform: translateY(-6px);
+            transition: transform 180ms ease
+        }
+
+        .blank-template:hover {
+            transform: translateY(-4px);
+            transition: transform 160ms ease
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 60
+        }
+
+        .modal {
+            background: #0f0f12;
+            padding: 20px;
+            border-radius: 12px;
+            min-width: 360px;
+            border: 1px solid rgba(255,255,255,0.03)
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px
+        }
+
+        label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px
+        }
+
+        input[type="text"], textarea {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            padding: 10px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 8px
+        }
+
+        /* Bigger, clearer ban panel */
+        .ban-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(123,31,31,0.95), rgba(123,15,15,0.95));
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 70;
+            padding-top: 60px
+        }
+
+        .ban-panel {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            padding: 36px;
+            border-radius: 14px;
+            max-width: 920px;
+            width: 86%;
+            color: #fff;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.03)
+        }
+
+            .ban-panel .heading {
+                font-size: 38px;
+                font-weight: 800;
+                margin: 0 0 12px 0;
+                color: #fff
+            }
+
+            .ban-panel .top-note {
+                font-size: 16px;
+                color: #ffdede;
+                margin-bottom: 18px;
+                line-height: 1.45
+            }
+
+            .ban-panel .reason {
+                font-size: 18px;
+                font-weight: 700;
+                margin: 12px 0;
+                color: #ffecec
+            }
+
+            .ban-panel .offensive {
+                font-size: 16px;
+                margin: 8px 0;
+                color: #fff9
+            }
+
+            .ban-panel .final-note {
+                font-size: 15px;
+                color: #ffdede;
+                margin-top: 18px;
+                line-height: 1.5
+            }
+
+                .ban-panel .final-note a {
+                    color: #fff;
+                    text-decoration: underline
+                }
+
+            .ban-panel .appeal-row {
+                margin-top: 22px
+            }
+
+        .appeal-btn {
+            background: #fff;
+            color: #b02b2b;
+            padding: 12px 18px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 800
+        }
+
+        @media (max-width:980px) {
+            .page {
+                padding: 12px
+            }
+
+            .blank-row {
+                gap: 12px
+            }
+
+            .blank-template {
+                min-width: 160px;
+                max-width: 160px;
+                height: 120px
+            }
+
+            .recent-grid {
+                grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+                gap: 12px
+            }
+
+            .ban-panel {
+                padding: 24px;
+                width: 94%
+            }
+
+                .ban-panel .heading {
+                    font-size: 28px
+                }
+
+                .ban-panel .top-note {
+                    font-size: 14px
+                }
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <div class="top-left">
+            <div class="logo">SNC</div>
+            <div class="top-title">
+                <div id="topUsername" class="username">...</div>
+                <div class="sub">Sites • Dark dashboard</div>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="title" style="font-weight:700;color:#e6eef8"> </div>
+        </div>
+
+        <div class="top-actions">
+            <div id="signOutBtn" class="btn-ghost">Sign out</div>
+        </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="page" id="mainContainer">
+        <section class="section" aria-label="Start a new site">
+            <div class="section-header">
+                <h2>Start a new site</h2>
+                <div class="muted">Template gallery ▾</div>
+            </div>
+
+            <div class="blank-row" id="blankRow">
+                <div class="blank-template" id="blankTemplate" title="Create a blank site">
+                    <div class="icon">＋</div>
+                    <div class="label">Blank site</div>
+                    <div class="sub">Create a blank site</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" aria-label="Recent sites">
+            <div class="controls-row">
+                <div class="left">My sites</div>
+                <div class="muted">Owned by me ▾</div>
+                <div class="right">
+                    <button class="btn-ghost" id="gridToggle" title="Toggle grid/list">☷</button>
+                    <button class="btn-ghost" id="sortBtn" title="Sort">A⋮Z</button>
+                </div>
+            </div>
+
+            <div id="sitesGrid" class="recent-grid" aria-live="polite"></div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div id="modalBackdrop" class="modal-backdrop" style="display:none">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <h3 id="modalTitle" style="margin:0 0 12px 0">Create a new site</h3>
+            <div class="field">
+                <label for="siteName">Site name (required)</label>
+                <input id="siteName" type="text" placeholder="My Photo Community" />
+            </div>
+            <div class="field">
+                <label for="siteDesc">Description (required)</label>
+                <textarea id="siteDesc" placeholder="What is this site about?"></textarea>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="color:var(--muted);font-size:13px">Pending approval after creation</div>
+                <div class="modal-actions">
+                    <button id="cancelModal" class="btn btn-ghost" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)">Cancel</button>
+                    <button id="createSite" class="btn-primary">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATED Ban screen -->
+    <div id="banScreen" class="ban-screen" style="display:none">
+        <div class="ban-panel" role="alert" aria-live="assertive">
+            <div class="heading">Suspended</div>
+            <div class="top-note" id="banTopNote"></div>
+
+            <div class="reason">Reason: <span id="banReason" style="font-weight:800">Violative Content</span></div>
+            <div class="offensive">Offensive Item: <strong id="offensiveItem">—</strong></div>
+
+            <div class="final-note">
+                <div>Your account has been disabled. Your account will soon be deleted.</div>
+                <div>If you wish to appeal, please contact us via the Support Form.</div>
+            </div>
+
+            <div class="appeal-row">
+                <button id="appealBtn" class="appeal-btn">Appeal</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        /* Firebase config + imports (unchanged) */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+            authDomain: "soicalnetworkcreator.firebaseapp.com",
+            projectId: "soicalnetworkcreator",
+            storageBucket: "soicalnetworkcreator.firebasestorage.app",
+            messagingSenderId: "374390703916",
+            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+            measurementId: "G-326LYE3XL3"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import {
+            getFirestore, collection, query, where, onSnapshot, addDoc, doc,
+            setDoc, getDoc, serverTimestamp, getDocs
+        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        /* DOM refs */
+        const topUsername = document.getElementById('topUsername');
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const cancelModal = document.getElementById('cancelModal');
+        const createSiteBtn = document.getElementById('createSite');
+        const siteNameInput = document.getElementById('siteName');
+        const siteDescInput = document.getElementById('siteDesc');
+        const sitesGrid = document.getElementById('sitesGrid');
+        const blankTemplate = document.getElementById('blankTemplate');
+        const banScreen = document.getElementById('banScreen');
+        const banTopNote = document.getElementById('banTopNote');
+        const banReasonEl = document.getElementById('banReason');
+        const offensiveItemEl = document.getElementById('offensiveItem');
+        const appealBtn = document.getElementById('appealBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const sortBtn = document.getElementById('sortBtn');
+
+        // state
+        let currentUser = null;
+        let userDoc = null;
+        let sitesUnsub = null;
+        let currentSites = [];
+        let selectedSiteId = null;
+        let lastBannedSite = null;
+
+        function goToLogin() { window.location.href = 'login.html'; }
+
+        // modal controls
+        function openModal() { siteNameInput.value = ''; siteDescInput.value = ''; modalBackdrop.style.display = 'flex'; siteNameInput.focus(); }
+        function closeModal() { modalBackdrop.style.display = 'none'; }
+
+        // UPDATED ban screen show/hide
+        function showBanScreen(bannedSite) {
+            lastBannedSite = bannedSite || null;
+            const siteName = (bannedSite && (bannedSite.name || 'Untitled')) || '—';
+            const reasonText = (bannedSite && (bannedSite.banReason || bannedSite.bannedReason || bannedSite.reason)) || 'Violative Content';
+
+            // updated top message (no mention of Roblox)
+            banTopNote.textContent = "Our content monitors have determined that your behavior on our site has been in violation of our Terms of Use.";
+            banReasonEl.textContent = reasonText;
+            offensiveItemEl.textContent = siteName;
+
+            banScreen.style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.querySelector('.topbar').style.display = 'none';
+        }
+        function hideBanScreen() {
+            lastBannedSite = null;
+            banScreen.style.display = 'none';
+            document.getElementById('mainContainer').style.display = '';
+            document.querySelector('.topbar').style.display = 'flex';
+        }
+
+        // sign out
+        signOutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            localStorage.removeItem('accessToken');
+            goToLogin();
+        });
+
+        // blank template click opens modal
+        blankTemplate.addEventListener('click', () => {
+            siteNameInput.value = 'Blank site';
+            siteDescInput.value = 'A blank site';
+            openModal();
+        });
+
+        cancelModal.addEventListener('click', closeModal);
+
+        // create site action (unchanged)
+        createSiteBtn.addEventListener('click', async () => {
+            const name = (siteNameInput.value || '').trim();
+            const desc = (siteDescInput.value || '').trim();
+            if (!name) { alert('Site name is required'); siteNameInput.focus(); return; }
+            if (!desc) { alert('Description is required'); siteDescInput.focus(); return; }
+            createSiteBtn.disabled = true;
+            createSiteBtn.textContent = 'Creating...';
+            try {
+                await addDoc(collection(db, 'sites'), {
+                    ownerUid: currentUser.uid,
+                    ownerUsername: (userDoc && userDoc.username) || currentUser.displayName || null,
+                    name: name,
+                    description: desc,
+                    pending: true,
+                    Approved: false,
+                    Denied: false,
+                    Banned: false,
+                    createdAt: serverTimestamp()
+                });
+                closeModal();
+            } catch (err) {
+                console.error('create site error', err);
+                alert('Failed to create site: ' + (err.message || err));
+            } finally {
+                createSiteBtn.disabled = false;
+                createSiteBtn.textContent = 'Create';
+            }
+        });
+
+        // Appeal button now opens the Google Form in a new tab (per request)
+        const APPEAL_FORM_URL = 'https://forms.gle/fR1XRfoCyWgMqS2JA';
+        appealBtn.addEventListener('click', () => {
+            window.open(APPEAL_FORM_URL, '_blank', 'noopener');
+        });
+
+        function thumbnailBackgroundForSite(s) {
+            const url = s.thumbnail || s.banner || s.thumbnailUrl || s.bannerUrl || s.imageUrl;
+            if (url) { return `url("${url.replace(/"/g, '')}")`; }
+            const name = (s.name || 'Site').toLowerCase();
+            let hash = 0; for (let i = 0; i < name.length; i++) hash = (hash << 5) - hash + name.charCodeAt(i);
+            const hue = Math.abs(hash) % 360;
+            return `linear-gradient(180deg, hsl(${hue} 25% 22%), hsl(${(hue + 18) % 360} 22% 18%))`;
+        }
+
+        function renderSitesGrid(sites) {
+            const bannedSite = sites.find(s => s.Banned === true || s.banned === true);
+            if (bannedSite) {
+                showBanScreen(bannedSite);
+                return;
+            } else {
+                hideBanScreen();
+            }
+
+            sitesGrid.innerHTML = '';
+            for (const s of sites) {
+                const Approved = s.Approved === true || s.approved === true;
+                const Denied = s.Denied === true || s.denied === true;
+                const Pending = (s.pending === true || s.Pending === true) && !Approved && !Denied;
+                const Banned = s.Banned === true || s.banned === true;
+
+                const card = document.createElement('div'); card.className = 'site-card'; card.dataset.id = s.id;
+                const thumb = document.createElement('div'); thumb.className = 'site-thumb';
+                thumb.style.backgroundImage = thumbnailBackgroundForSite(s);
+
+                const title = document.createElement('div'); title.className = 'site-title'; title.textContent = s.name || 'Untitled';
+                const desc = document.createElement('div'); desc.className = 'site-description'; desc.textContent = s.description || '';
+
+                const meta = document.createElement('div'); meta.className = 'site-meta';
+                const icon = document.createElement('div'); icon.className = 'small-icon'; icon.textContent = '📄';
+                const pill = document.createElement('div'); pill.className = 'pill';
+                if (Banned) { pill.classList.add('denied'); pill.textContent = 'Banned'; card.classList.add('grayed'); }
+                else if (Denied) { pill.classList.add('denied'); pill.textContent = 'Denied'; }
+                else if (Approved) { pill.classList.add('approved'); pill.textContent = 'Approved'; }
+                else { pill.classList.add('pending'); pill.textContent = 'Pending'; card.classList.add('grayed'); }
+
+                const date = document.createElement('div'); date.className = 'date';
+                const createdVal = (s.createdAt && s.createdAt.toDate ? s.createdAt.toDate().toLocaleDateString() : (s.createdAt || ''));
+                date.textContent = createdVal;
+
+                meta.appendChild(icon);
+                meta.appendChild(pill);
+                meta.appendChild(date);
+
+                if (Approved) {
+                    const openBtn = document.createElement('button'); openBtn.className = 'btn-ghost'; openBtn.textContent = 'Open';
+                    openBtn.style.margin = '8px 12px';
+                    openBtn.style.background = 'transparent';
+                    openBtn.style.border = '1px solid rgba(255,255,255,0.04)';
+                    openBtn.style.color = '#e6eef8';
+                    openBtn.style.padding = '8px 10px';
+                    openBtn.style.borderRadius = '8px';
+                    openBtn.style.fontWeight = '700';
+                    openBtn.addEventListener('click', () => {
+                        const url = `Dashboard.html?siteId=${encodeURIComponent(s.id)}&name=${encodeURIComponent(s.name || '')}`;
+                        window.open(url, '_blank');
+                    });
+                    card.appendChild(thumb);
+                    card.appendChild(title);
+                    card.appendChild(desc);
+                    card.appendChild(openBtn);
+                    card.appendChild(meta);
+                } else {
+                    card.appendChild(thumb);
+                    card.appendChild(title);
+                    card.appendChild(desc);
+                    card.appendChild(meta);
+                }
+
+                sitesGrid.appendChild(card);
+            }
+        }
+
+        function startSitesListener(uid) {
+            if (sitesUnsub) sitesUnsub();
+            const sitesCol = collection(db, 'sites');
+            const q = query(sitesCol, where('ownerUid', '==', uid));
+            sitesUnsub = onSnapshot(q, (snapshot) => {
+                const docs = [];
+                snapshot.forEach(snap => docs.push({ id: snap.id, ...snap.data() }));
+                currentSites = docs;
+                renderSitesGrid(docs);
+            }, (err) => { console.error('sites onSnapshot error', err); });
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { goToLogin(); return; }
+            const token = localStorage.getItem('accessToken');
+            try {
+                const uRef = doc(db, 'users', user.uid);
+                const uSnap = await getDoc(uRef);
+                if (!uSnap.exists()) { goToLogin(); return; }
+                const uData = uSnap.data();
+                if (!token || token !== uData.accessToken) { goToLogin(); return; }
+                currentUser = user;
+                userDoc = uData;
+                topUsername.textContent = uData.username || user.displayName || 'You';
+                startSitesListener(user.uid);
+            } catch (err) {
+                console.error('auth handler error', err);
+                goToLogin();
+            }
+        });
+
+        // sort action
+        sortBtn.addEventListener('click', () => {
+            currentSites.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            renderSitesGrid(currentSites);
+        });
+    </script>
+</body>
+</html>

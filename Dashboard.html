@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0c0f;
+            --panel: #0f1114;
+            --muted: #9aa0ac;
+            --accent: #7b66ff;
+            --card: #141417;
+            --glass: rgba(255,255,255,0.02);
+            --shadow: rgba(0,0,0,0.55);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: linear-gradient(180deg,var(--bg),#080809);
+            color: #e6eef8;
+            -webkit-font-smoothing: antialiased
+        }
+
+        .topbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: linear-gradient(180deg,#0f1114,#0c0d10);
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+
+        .logo {
+            width: 36px;
+            height: 36;
+            border-radius: 8px;
+            background: linear-gradient(135deg,var(--accent),#8ab4f8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.5)
+        }
+
+        .top-title {
+            display: flex;
+            flex-direction: column
+        }
+
+            .top-title .username {
+                font-weight: 700;
+                color: #e6eef8
+            }
+
+            .top-title .sub {
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 2px
+            }
+
+        .btn-ghost {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 0;
+            cursor: pointer;
+            font-weight: 700
+        }
+
+        .page {
+            padding: 22px 28px;
+            max-width: 1360px;
+            margin: 0 auto
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px
+        }
+
+        .site-main {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start
+        }
+
+        .left-col {
+            flex: 1
+        }
+
+        .right-col {
+            width: 420px
+        }
+
+        .title-large {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            color: #e6eef8
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin-top: 4px;
+            font-size: 13px
+        }
+
+        .status-pill {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 13px
+        }
+
+        .status-approved {
+            background: rgba(42,164,106,0.12);
+            color: #66d39f
+        }
+
+        .status-pending {
+            background: rgba(255,255,255,0.02);
+            color: var(--muted)
+        }
+
+        .status-denied {
+            background: rgba(199,43,43,0.12);
+            color: #ffb4b4
+        }
+
+        .status-hack {
+            background: rgba(199,43,43,0.06);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,0,0,0.08);
+            padding: 6px 8px;
+            margin-left: 8px;
+            border-radius: 6px;
+            font-weight: 800
+        }
+
+        .card-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+            gap: 16px;
+            margin-top: 18px
+        }
+
+        .card {
+            background: linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.02));
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 8px 24px var(--shadow)
+        }
+
+        .site-card-main {
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .site-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #e6eef8
+        }
+
+        .site-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .create-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: #e6eef8;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+            .create-btn[disabled] {
+                opacity: 0.5;
+                cursor: not-allowed
+            }
+
+        .small-muted {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .grayed {
+            opacity: 0.34;
+            filter: grayscale(40%)
+        }
+
+        .uadp-banner {
+            background: linear-gradient(90deg,#fff1f1,#ffecec);
+            color: #7a1212;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 800
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 12px;
+            margin-top: 12px
+        }
+
+        .stat-box {
+            background: #0b0c0f;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.02);
+            text-align: left
+        }
+
+        .stat-num {
+            font-size: 20px;
+            font-weight: 800;
+            margin-top: 6px;
+            color: #e6eef8
+        }
+
+        .tab-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .tab-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.03);
+            background: transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 700
+        }
+
+            .tab-btn.disabled {
+                opacity: 0.45;
+                pointer-events: none
+            }
+
+            .tab-btn.active {
+                color: #e6eef8;
+                background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02))
+            }
+
+        .panel {
+            margin-top: 12px
+        }
+
+        .list-item {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.03);
+            background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center
+        }
+
+            .list-item + .list-item {
+                margin-top: 8px
+            }
+
+        .muted-small {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.03);
+            color: #fff;
+            margin-top: 6px
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px
+        }
+
+        /* popup modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #0f0f12;
+            padding: 18px;
+            border-radius: 10px;
+            width: min(860px, 94%);
+            border: 1px solid rgba(255,255,255,0.03);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            color: #e6eef8;
+        }
+
+            .modal h3 {
+                margin: 0 0 8px 0;
+                font-size: 18px;
+            }
+
+            .modal .content {
+                max-height: 60vh;
+                overflow: auto;
+                color: var(--muted);
+                margin-top: 8px;
+                font-size: 14px;
+            }
+
+            .modal pre {
+                white-space: pre-wrap;
+                word-break: break-word;
+                font-family: monospace;
+                background: rgba(255,255,255,0.02);
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .modal .actions {
+                display: flex;
+                gap: 8px;
+                justify-content: flex-end;
+                margin-top: 12px;
+            }
+
+        .close-btn {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid rgba(255,255,255,0.03);
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .confirm-btn {
+            background: var(--accent);
+            color: white;
+            border: 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+            .confirm-btn[disabled] {
+                opacity: 0.5;
+                cursor: not-allowed
+            }
+
+        @media (max-width:980px) {
+            .site-main {
+                flex-direction: column
+            }
+
+            .right-col {
+                width: 100%
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="logo">SNC</div>
+            <div class="top-title">
+                <div id="topUsername" class="username">...</div>
+                <div class="sub">Dashboard  Site overview</div>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+            <div id="signOutBtn" class="btn-ghost">Sign out</div>
+            <button id="openHub" class="btn-ghost">Hub</button>
+        </div>
+    </div>
+
+    <div class="page" id="mainContainer">
+        <div id="uadpBanner" style="display:none" class="uadp-banner">(UADP) Someone appears to have gotten unauthorized access to this site.</div>
+
+        <div class="header-row">
+            <div class="left-col">
+                <div class="title-large" id="siteTitle">Loading</div>
+                <div class="subtitle" id="siteSubtitle"></div>
+
+                <div class="tab-row" id="tabRow" aria-hidden="false">
+                    <button class="tab-btn" data-tab="overview">Overview</button>
+                    <button class="tab-btn" data-tab="database">Database</button>
+                    <button class="tab-btn" data-tab="auth">Auth</button>
+                    <button class="tab-btn" data-tab="members">Members</button>
+                    <button class="tab-btn" data-tab="settings">Settings</button>
+                </div>
+            </div>
+
+            <div class="right-col" id="rightCol">
+                <div style="display:flex;gap:10px;align-items:center">
+                    <div id="statusWrap" style="display:flex;align-items:center"></div>
+                </div>
+
+                <div class="card" style="margin-top:12px">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                        <div style="font-weight:800">Site Controls</div>
+                    </div>
+
+                    <div class="site-card-main" style="margin-top:12px">
+                        <div>
+                            <div class="small-muted">Created</div>
+                            <div id="createdVal" style="font-weight:700"></div>
+                        </div>
+
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <button id="createOpenBtn" class="create-btn">Loading</button>
+                            <div id="createInfo" class="small-muted"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="site-main">
+            <div class="left-col">
+                <div id="panelWrap" class="card">
+                    <!-- Overview panel shown by default -->
+                    <div id="overviewPanel" class="panel">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                            <div style="font-weight:800">Overview</div>
+                            <div class="small-muted">Live</div>
+                        </div>
+
+                        <div class="stats-grid" style="margin-top:12px">
+                            <div class="stat-box">
+                                <div class="small-muted">Database</div>
+                                <div class="stat-num" id="dbNum"></div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="small-muted">Auth</div>
+                                <div class="stat-num" id="authNum"></div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="small-muted">Storage</div>
+                                <div class="stat-num" id="storageNum"></div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="small-muted">Realtime</div>
+                                <div class="stat-num" id="realtimeNum"></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:14px">
+                            <div class="small-muted">Quick panels  click to open a popup with content</div>
+                            <div class="tab-row" style="margin-top:10px">
+                                <button class="tab-btn" data-tab="database">Database</button>
+                                <button class="tab-btn" data-tab="auth">Auth</button>
+                                <button class="tab-btn" data-tab="members">Members</button>
+                                <button class="tab-btn" data-tab="settings">Settings</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- contentPanel is no longer used to show content inline -->
+                    <div id="contentPanel" class="panel" style="margin-top:12px">
+                        <div class="muted-small">Use the tabs above  each will open a popup with the requested content.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="card">
+                    <div style="font-weight:800;margin-bottom:8px">Site Info</div>
+                    <div class="small-muted">ID</div>
+                    <div id="siteIdDisplay" style="word-break:break-all;font-weight:700;margin-top:6px"></div>
+
+                    <div style="margin-top:12px">
+                        <div class="small-muted">Owner</div>
+                        <div id="ownerDisplay" style="font-weight:700;margin-top:6px"></div>
+                    </div>
+
+                    <div style="margin-top:12px">
+                        <div class="small-muted">Description</div>
+                        <div id="descDisplay" style="margin-top:6px;color:var(--muted)"></div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:12px">
+                    <div style="font-weight:800;margin-bottom:8px">More</div>
+                    <div id="siteMoreInfo" class="small-muted"> The site is conpleting custamizable </div>
+                    <div id="siteMoreInfoDate" style="margin-top:12px" class="muted-small">Date.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup modal -->
+    <div id="modalBackdrop" class="modal-backdrop" style="display:none">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <h3 id="modalTitle">Details</h3>
+            <div class="content" id="modalContent">
+                <!-- filled dynamically -->
+            </div>
+            <div class="actions">
+                <button id="modalClose" class="close-btn">Close</button>
+                <button id="modalConfirm" class="confirm-btn" style="display:none">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase config + imports (same as hub.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+            authDomain: "soicalnetworkcreator.firebaseapp.com",
+            projectId: "soicalnetworkcreator",
+            storageBucket: "soicalnetworkcreator.firebasestorage.app",
+            messagingSenderId: "374390703916",
+            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+            measurementId: "G-326LYE3XL3"
+        };
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+        import {
+            getFirestore, doc, getDoc, updateDoc, collection, getDocs,
+            setDoc, serverTimestamp, query, orderBy
+        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM refs
+        const topUsername = document.getElementById('topUsername');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const openHubBtn = document.getElementById('openHub');
+        const siteTitle = document.getElementById('siteTitle');
+        const siteSubtitle = document.getElementById('siteSubtitle');
+        const statusWrap = document.getElementById('statusWrap');
+        const uadpBanner = document.getElementById('uadpBanner');
+        const createOpenBtn = document.getElementById('createOpenBtn');
+        const createdVal = document.getElementById('createdVal');
+        const createInfo = document.getElementById('createInfo');
+        const siteIdDisplay = document.getElementById('siteIdDisplay');
+        const ownerDisplay = document.getElementById('ownerDisplay');
+        const descDisplay = document.getElementById('descDisplay');
+
+        const dbNum = document.getElementById('dbNum');
+        const authNum = document.getElementById('authNum');
+        const storageNum = document.getElementById('storageNum');
+        const realtimeNum = document.getElementById('realtimeNum');
+
+        const tabRow = document.getElementById('tabRow');
+        const contentPanel = document.getElementById('contentPanel');
+        const panelWrap = document.getElementById('panelWrap');
+
+        const modalBackdrop = document.getElementById('modalBackdrop');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
+        const modalConfirm = document.getElementById('modalConfirm');
+
+        // state
+        let currentUser = null;
+        let userDoc = null;
+        let siteDoc = null;
+        let siteId = null;
+        let isHacked = false;
+
+        function goToLogin() { window.location.href = 'login.html'; }
+        function goToHub() { window.location.href = 'hub.html'; }
+
+        // parse siteId
+        const params = new URLSearchParams(window.location.search);
+        siteId = params.get('siteId');
+        if (!siteId) {
+            goToHub();
+        }
+
+        // sign out
+        signOutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            localStorage.removeItem('accessToken');
+            goToLogin();
+        });
+        openHubBtn.addEventListener('click', () => goToHub());
+
+        // helper to check boolean-like fields
+        function truthyField(v) {
+            return v === true || v === 'True' || v === 'true' || v === 'TRUE' || v === 1 || v === '1';
+        }
+
+        // format timestamp safely
+        function formatDate(ts) {
+            try {
+                if (!ts) return '';
+                if (ts.toDate) return ts.toDate().toLocaleString();
+                return new Date(ts).toLocaleString();
+            } catch (e) { return String(ts); }
+        }
+
+        // popup helpers
+        function showModal(title, innerHtml, showConfirm = false, confirmText = 'Confirm', confirmHandler = null) {
+            modalTitle.textContent = title || 'Details';
+            if (typeof innerHtml === 'string') {
+                modalContent.innerHTML = innerHtml;
+            } else {
+                modalContent.innerHTML = '';
+                modalContent.appendChild(innerHtml);
+            }
+            if (showConfirm) {
+                modalConfirm.style.display = '';
+                modalConfirm.textContent = confirmText;
+                modalConfirm.onclick = () => {
+                    try { if (confirmHandler) confirmHandler(); } catch (e) { console.error(e); }
+                    closeModal();
+                };
+            } else {
+                modalConfirm.style.display = 'none';
+                modalConfirm.onclick = null;
+            }
+            modalBackdrop.style.display = 'flex';
+        }
+        function closeModal() {
+            modalBackdrop.style.display = 'none';
+            modalConfirm.onclick = null;
+        }
+        modalClose.addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', (ev) => {
+            if (ev.target === modalBackdrop) closeModal();
+        });
+
+        // safe redirect to hub if status is not allowed
+        function handleUnauthorizedSite(s) {
+            if (!s) return true;
+            if (truthyField(s.Banned) || truthyField(s.banned)) return true;
+            if (truthyField(s.Denied) || truthyField(s.denied)) return true;
+            const approved = truthyField(s.Approved) || truthyField(s.approved);
+            const pending = truthyField(s.pending) || truthyField(s.Pending);
+            if (pending && !approved) return true;
+            return false;
+        }
+
+        async function loadSiteAndRender() {
+            try {
+                const ref = doc(db, 'sites', siteId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) { goToHub(); return; }
+                const s = snap.data();
+                s.id = snap.id;
+                siteDoc = s;
+
+                if (handleUnauthorizedSite(s)) { goToHub(); return; }
+
+                // render main UI
+                siteTitle.textContent = s.name || 'Untitled';
+                siteSubtitle.textContent = s.description || '';
+                siteIdDisplay.textContent = s.id;
+                ownerDisplay.textContent = s.ownerUsername || s.ownerUid || '';
+                descDisplay.textContent = s.description || '';
+                siteMoreInfo.textContent = s.description || '';
+
+                // status pills + hacked banner
+                statusWrap.innerHTML = '';
+                const approved = truthyField(s.Approved) || truthyField(s.approved);
+                const denied = truthyField(s.Denied) || truthyField(s.denied);
+                const pending = truthyField(s.pending) || truthyField(s.Pending);
+                isHacked = truthyField(s.Hacked) || truthyField(s.hacked);
+
+                const pill = document.createElement('div');
+                pill.className = 'status-pill ' + (approved ? 'status-approved' : (denied ? 'status-denied' : 'status-pending'));
+                pill.textContent = approved ? 'Approved' : (denied ? 'Denied' : 'Pending');
+                statusWrap.appendChild(pill);
+
+                if (isHacked) {
+                    const hackP = document.createElement('div');
+                    hackP.className = 'status-hack';
+                    hackP.textContent = 'Hack';
+                    statusWrap.appendChild(hackP);
+                    uadpBanner.style.display = 'block';
+                    panelWrap.classList.add('grayed');
+                    document.getElementById('mainContainer').classList.add('grayed');
+                } else {
+                    uadpBanner.style.display = 'none';
+                    panelWrap.classList.remove('grayed');
+                    document.getElementById('mainContainer').classList.remove('grayed');
+                }
+
+                // Created field 
+                const hasCreated = !!(s.Created || s.created || s.createdAt || s.Created === true);
+                createdVal.textContent = hasCreated ? (s.createdAt && s.createdAt.toDate ? s.createdAt.toDate().toLocaleString() : (s.createdAt || 'Created')) : 'Not created';
+                siteMoreInfoDate.textContent = hasCreated ? (s.createdAt && s.createdAt.toDate ? s.createdAt.toDate().toLocaleString() : (s.createdAt || 'Created')) : 'Not created';
+
+                // Create/Open button behavior (Open navigates to view/site.html)
+                // If hacked => disabled and does nothing
+                createOpenBtn.disabled = false;
+                if (hasCreated) {
+                    createOpenBtn.textContent = 'Open';
+                    createOpenBtn.title = isHacked ? 'Disabled due to unauthorized access' : 'Open site';
+                    createOpenBtn.onclick = () => {
+                        if (isHacked) return;
+                        window.location.href = `view/site.html?siteId=${encodeURIComponent(siteId)}`;
+                    };
+                    createInfo.textContent = 'Site is created';
+                } else {
+                    createOpenBtn.textContent = 'Create';
+                    createOpenBtn.title = isHacked ? 'Disabled due to unauthorized access' : 'Mark site as created';
+                    createOpenBtn.onclick = async () => {
+                        if (isHacked) return;
+                        createOpenBtn.disabled = true;
+                        createOpenBtn.textContent = 'Creating...';
+                        try {
+                            if (!currentUser || (siteDoc.ownerUid && siteDoc.ownerUid !== currentUser.uid)) {
+                                alert('You must be the owner to mark this site as created.');
+                                createOpenBtn.disabled = false;
+                                createOpenBtn.textContent = 'Create';
+                                return;
+                            }
+                            await updateDoc(doc(db, 'sites', siteId), {
+                                Created: true,
+                                createdAt: serverTimestamp()
+                            });
+                            await loadSiteAndRender();
+                        } catch (err) {
+                            console.error('create marker failed', err);
+                            alert('Failed to create site: ' + (err.message || err));
+                            createOpenBtn.disabled = false;
+                            createOpenBtn.textContent = 'Create';
+                        }
+                    };
+                    createInfo.textContent = 'Mark as created to open the site';
+                }
+
+                // Stats -- show counts if present
+                const dbSnap = await getDocs(collection(db, 'sites', siteId, 'messages'));
+                dbNum.textContent = dbSnap.size || 0;
+
+                // Auth: count users
+                const authSnap = await getDocs(collection(db, 'sites', siteId, 'users'));
+                authNum.textContent = authSnap.size || 0;
+
+                
+                storageNum.textContent = dbSnap.size + authSnap.size || 0;
+
+                // Realtime: keep 0
+                realtimeNum.textContent = 0;
+
+
+
+
+                // enable/disable tab buttons based on hacked
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    if (isHacked) {
+                        b.classList.add('disabled');
+                        b.setAttribute('aria-disabled', 'true');
+                        b.title = 'Disabled due to unauthorized access';
+                    } else {
+                        b.classList.remove('disabled');
+                        b.removeAttribute('aria-disabled');
+                        b.title = '';
+                    }
+                });
+
+            } catch (err) {
+                console.error('load site error', err);
+                goToHub();
+            }
+        }
+
+        // Show a popup with messages (non-clickable list)
+        async function openMessagesPopup() {
+            if (isHacked) return;
+            modalTitle.textContent = 'Messages';
+            modalContent.innerHTML = '<div class="muted-small">Loading messages</div>';
+            modalConfirm.style.display = 'none'; // no confirm
+            modalBackdrop.style.display = 'flex';
+
+            try {
+                const msgsCol = collection(db, 'sites', siteId, 'messages');
+                const q = query(msgsCol, orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                const docs = [];
+                snap.forEach(s => docs.push({ id: s.id, ...s.data() }));
+
+                const wrapper = document.createElement('div');
+
+                // ✅ Add message input box for users with subscription
+                if (currentUser && userDoc && userDoc.subscription === true) {
+                    const form = document.createElement('div');
+                    form.style.marginBottom = '12px';
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.style.width = '100%';
+                    input.placeholder = 'Type a message...';
+                    input.value = `${siteDoc.name || 'Site'} we made a new change`; // pre-fill
+
+                    const sendBtn = document.createElement('button');
+                    sendBtn.textContent = 'Send';
+                    sendBtn.className = 'confirm-btn';
+                    sendBtn.style.marginTop = '6px';
+                    sendBtn.onclick = async () => {
+                        const msgText = input.value.trim();
+                        if (!msgText) return;
+                        try {
+                            // ✅ Send message as the site itself
+                            await setDoc(doc(msgsCol), {
+                                author: siteDoc.name || 'Site',         // site name
+                                authorLower: (siteDoc.name || 'Site').toLowerCase(), // lowercase
+                                text: msgText,
+                                createdAt: serverTimestamp()
+                            });
+                            input.value = '';
+                            await openMessagesPopup(); // reload messages to show new message
+                        } catch (err) {
+                            console.error('Failed to send message', err);
+                            alert('Failed to send message.');
+                        }
+                    };
+
+                    form.appendChild(input);
+                    form.appendChild(sendBtn);
+                    wrapper.appendChild(form);
+                }
+
+                if (!docs.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'muted-small';
+                    empty.textContent = 'No messages found';
+                    wrapper.appendChild(empty);
+                } else {
+                    docs.forEach(d => {
+                        const el = document.createElement('div'); el.className = 'list-item';
+                        const left = document.createElement('div');
+                        const who = document.createElement('div');
+                        // ✅ Use author field if exists, fallback to Unknown
+                        who.textContent = d.author || d.sender || 'Unknown';
+                        who.style.fontWeight = '700';
+                        const text = document.createElement('div');
+                        text.className = 'muted-small';
+                        text.textContent = (d.text || d.message || '').slice(0, 300);
+                        left.appendChild(who);
+                        left.appendChild(text);
+                        const right = document.createElement('div');
+                        right.style.textAlign = 'right';
+                        const date = document.createElement('div');
+                        date.className = 'muted-small';
+                        date.textContent = formatDate(d.createdAt);
+                        right.appendChild(date);
+                        el.appendChild(left);
+                        el.appendChild(right);
+                        wrapper.appendChild(el);
+                    });
+                }
+
+                modalContent.innerHTML = '';
+                modalContent.appendChild(wrapper);
+            } catch (err) {
+                console.error('load messages for popup failed', err);
+                modalContent.innerHTML = '<div class="muted-small">Failed to load messages.</div>';
+            }
+        }
+
+
+        // Show a popup with users (non-clickable list)
+        async function openUsersPopup(kind) {
+            if (isHacked) return;
+            modalTitle.textContent = kind === 'auth' ? 'Auth  Users' : 'Members';
+            modalContent.innerHTML = '<div class="muted-small">Loading users</div>';
+            modalConfirm.style.display = 'none';
+            modalBackdrop.style.display = 'flex';
+
+            try {
+                const usersCol = collection(db, 'sites', siteId, 'users');
+                const q = query(usersCol, orderBy('createdAt', 'desc'));
+                const snap = await getDocs(q);
+                const docs = [];
+                snap.forEach(s => docs.push({ id: s.id, ...s.data() }));
+
+                const wrapper = document.createElement('div');
+
+                if (!docs.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'muted-small';
+                    empty.textContent = 'No users found';
+                    wrapper.appendChild(empty);
+                } else {
+                    docs.forEach(d => {
+                        const el = document.createElement('div');
+                        el.className = 'list-item';
+                        const left = document.createElement('div');
+                        const name = document.createElement('div');
+                        name.textContent = d.username || d.displayName || d.email || 'Unnamed';
+                        name.style.fontWeight = '700';
+                        const small = document.createElement('div');
+                        small.className = 'muted-small';
+                        small.textContent = d.email ? d.email : (d.uid ? d.uid : '');
+                        left.appendChild(name);
+                        left.appendChild(small);
+
+                        const right = document.createElement('div');
+                        right.style.textAlign = 'right';
+                        const date = document.createElement('div');
+                        date.className = 'muted-small';
+                        date.textContent = formatDate(d.createdAt || d.joinedAt);
+                        right.appendChild(date);
+
+                        el.appendChild(left);
+                        el.appendChild(right);
+
+                        // ✅ Allow click if current user has subscription
+                        if (currentUser && userDoc && userDoc.subscription === true) {
+                            el.style.cursor = 'pointer';
+                            el.title = 'Click to view/edit user details';
+                            el.addEventListener('click', async () => {
+                                const details = { ...d }; // copy data
+                                delete details.passwordHash; // remove sensitive field
+
+                                // Build editable form
+                                const form = document.createElement('div');
+                                form.style.display = 'flex';
+                                form.style.flexDirection = 'column';
+                                form.style.gap = '6px';
+                                const inputs = {};
+
+                                for (const key in details) {
+                                    const wrapperDiv = document.createElement('div');
+                                    const label = document.createElement('strong');
+                                    label.textContent = key + ': ';
+                                    wrapperDiv.appendChild(label);
+
+                                    let input;
+                                    const val = details[key];
+                                    if (typeof val === 'boolean') {
+                                        input = document.createElement('input');
+                                        input.type = 'checkbox';
+                                        input.checked = val;
+                                    } else if (typeof val === 'number') {
+                                        input = document.createElement('input');
+                                        input.type = 'number';
+                                        input.value = val;
+                                    } else if (Array.isArray(val)) {
+                                        input = document.createElement('textarea');
+                                        input.value = JSON.stringify(val);
+                                        input.rows = 2;
+                                    } else {
+                                        input = document.createElement('input');
+                                        input.type = 'text';
+                                        input.value = val;
+                                    }
+                                    inputs[key] = input;
+                                    wrapperDiv.appendChild(input);
+                                    form.appendChild(wrapperDiv);
+                                }
+
+                                // Add save button
+                                const saveBtn = document.createElement('button');
+                                saveBtn.textContent = 'Save';
+                                saveBtn.className = 'confirm-btn';
+                                saveBtn.style.marginTop = '6px';
+                                form.appendChild(saveBtn);
+
+                                modalContent.innerHTML = '';
+                                modalContent.appendChild(form);
+                                modalConfirm.style.display = 'none';
+
+                                saveBtn.onclick = async () => {
+                                    const updatedData = {};
+                                    for (const key in inputs) {
+                                        const input = inputs[key];
+                                        if (input.type === 'checkbox') {
+                                            updatedData[key] = input.checked;
+                                        } else if (input.type === 'number') {
+                                            updatedData[key] = Number(input.value);
+                                        } else if (input.tagName.toLowerCase() === 'textarea') {
+                                            try {
+                                                updatedData[key] = JSON.parse(input.value);
+                                            } catch {
+                                                updatedData[key] = input.value;
+                                            }
+                                        } else {
+                                            updatedData[key] = input.value;
+                                        }
+                                    }
+
+                                    try {
+                                        await updateDoc(doc(db, 'sites', siteId, 'users', d.id), updatedData);
+                                        showModal('Success', `<div class="muted-small">User updated successfully.</div>`, false);
+                                        // Optionally reload the popup to see changes
+                                        openUsersPopup(kind);
+                                    } catch (err) {
+                                        console.error('Failed to update user', err);
+                                        alert('Failed to update user: ' + (err.message || err));
+                                    }
+                                };
+                            });
+                        }
+
+                        wrapper.appendChild(el);
+                    });
+                }
+
+                modalContent.innerHTML = '';
+                modalContent.appendChild(wrapper);
+
+            } catch (err) {
+                console.error('load users for popup failed', err);
+                modalContent.innerHTML = '<div class="muted-small">Failed to load users.</div>';
+            }
+        }
+
+
+        // Settings popup: editable name/desc and theme select.
+        async function openSettingsPopup() {
+            if (isHacked) return;
+            modalTitle.textContent = 'Settings';
+            modalBackdrop.style.display = 'flex';
+
+            // build form
+            const wrap = document.createElement('div');
+            const formSub = document.createElement('div');
+            formSub.className = 'muted-small';
+            formSub.style.marginBottom = '8px';
+
+            // special note: subscription users do not trigger pending on name/desc change
+            if (currentUser && userDoc && userDoc.subscription === true) {
+                formSub.textContent = 'Change name/description (subscription users: changes do NOT set site to pending). Theme changes do not set the site to pending.';
+            } else {
+                formSub.textContent = 'Change name/description (this will set the site back to pending). Theme changes do not set the site to pending.';
+            }
+            wrap.appendChild(formSub);
+
+            const nameLabel = document.createElement('label'); nameLabel.textContent = 'Site name';
+            const nameInput = document.createElement('input'); nameInput.type = 'text'; nameInput.value = siteDoc.name || '';
+            const descLabel = document.createElement('label'); descLabel.textContent = 'Description';
+            const descInput = document.createElement('textarea'); descInput.value = siteDoc.description || '';
+
+            const styleLabel = document.createElement('label'); styleLabel.textContent = 'Theme';
+            const styleSelect = document.createElement('select');
+
+            // default themes
+            const themes = ['classic', 'high-contrast', 'retro'];
+
+            // add "discord chatroom" for subscription users
+            if (currentUser && userDoc && userDoc.subscription === true) {
+                themes.push('discord chatroom');
+            }
+
+            themes.forEach(v => {
+                const o = document.createElement('option'); o.value = v; o.textContent = v; styleSelect.appendChild(o);
+            });
+
+            // try to read current style and set select
+            try {
+                const stylesDocRef = doc(db, 'sites', siteId, 'site', 'styles');
+                const sSnap = await getDoc(stylesDocRef);
+                if (sSnap.exists()) {
+                    const dd = sSnap.data();
+                    if (dd.theme) styleSelect.value = dd.theme;
+                }
+            } catch (e) { /* ignore */ }
+
+            wrap.appendChild(nameLabel); wrap.appendChild(nameInput);
+            wrap.appendChild(descLabel); wrap.appendChild(descInput);
+            wrap.appendChild(styleLabel); wrap.appendChild(styleSelect);
+
+            // action buttons inside modal content area
+            const controls = document.createElement('div'); controls.className = 'controls'; controls.style.marginTop = '12px';
+            const saveBtn = document.createElement('button'); saveBtn.className = 'confirm-btn'; saveBtn.textContent = 'Save name & description';
+            const saveStyleBtn = document.createElement('button'); saveStyleBtn.className = 'close-btn'; saveStyleBtn.textContent = 'Save theme';
+            if (isHacked) { saveBtn.disabled = true; saveStyleBtn.disabled = true; }
+            controls.appendChild(saveBtn); controls.appendChild(saveStyleBtn);
+            wrap.appendChild(controls);
+
+            modalContent.innerHTML = '';
+            modalContent.appendChild(wrap);
+            modalConfirm.style.display = 'none';
+
+            // handlers
+            saveBtn.onclick = async () => {
+                if (isHacked) return;
+                const newName = (nameInput.value || '').trim();
+                const newDesc = (descInput.value || '').trim();
+                if (!newName) { alert('Site name required'); return; }
+                try {
+                    if (!currentUser || (siteDoc.ownerUid && siteDoc.ownerUid !== currentUser.uid)) {
+                        alert('Only the owner may update this site.');
+                        return;
+                    }
+                    saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+
+                    // subscription users: do NOT set pending
+                    const updateData = {
+                        name: newName,
+                        description: newDesc
+                    };
+                    if (!currentUser || !userDoc || !userDoc.subscription) {
+                        updateData.pending = true;
+                        updateData.Approved = false;
+                        updateData.Denied = false;
+                    }
+
+                    await updateDoc(doc(db, 'sites', siteId), updateData);
+                    await loadSiteAndRender();
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = currentUser && userDoc && userDoc.subscription ? 'Save name & description' : 'Save name & description (set pending)';
+
+                    modalContent.innerHTML = `<div class="muted-small">Name & description updated.${currentUser && userDoc && userDoc.subscription ? '' : ' Site set to pending for review.'}</div>`;
+                } catch (err) {
+                    console.error('save settings failed', err);
+                    alert('Failed to save settings: ' + (err.message || err));
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = currentUser && userDoc && userDoc.subscription ? 'Save name & description' : 'Save name & description (set pending)';
+                }
+            };
+
+            saveStyleBtn.onclick = async () => {
+                if (isHacked) return;
+                const selected = styleSelect.value;
+                try {
+                    saveStyleBtn.disabled = true; saveStyleBtn.textContent = 'Saving...';
+                    const stylesDocRef = doc(db, 'sites', siteId, 'site', 'styles');
+                    await setDoc(stylesDocRef, { theme: selected, updatedAt: serverTimestamp() }, { merge: true });
+                    saveStyleBtn.disabled = false; saveStyleBtn.textContent = 'Save theme';
+                    modalContent.innerHTML = `<div class="muted-small">Theme saved as <strong>${selected}</strong>. This does not affect the dashboard and did not set the site to pending.</div>`;
+                } catch (err) {
+                    console.error('save style failed', err);
+                    alert('Failed to save style: ' + (err.message || err));
+                    saveStyleBtn.disabled = false; saveStyleBtn.textContent = 'Save theme';
+                }
+            };
+        }
+
+
+        // wire tab clicks (delegated)  tabs open popups
+        document.addEventListener('click', (ev) => {
+            const btn = ev.target.closest('.tab-btn');
+            if (!btn) return;
+            if (isHacked) return; // no interactions allowed when hacked
+            const tab = btn.dataset.tab;
+            if (!tab) return;
+            if (tab === 'overview') {
+                // no popup for overview
+                return;
+            } else if (tab === 'database') {
+                openMessagesPopup();
+            } else if (tab === 'auth') {
+                openUsersPopup('auth');
+            } else if (tab === 'members') {
+                openUsersPopup('members');
+            } else if (tab === 'settings') {
+                openSettingsPopup();
+            }
+        });
+
+        // modal close
+        modalClose.addEventListener('click', () => {
+            closeModal();
+        });
+
+        // auth listener + accessToken check (mirrors hub.html logic)
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { goToLogin(); return; }
+            const token = localStorage.getItem('accessToken');
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) { goToLogin(); return; }
+                const uData = userSnap.data();
+                if (!token || token !== uData.accessToken) { goToLogin(); return; }
+                currentUser = user;
+                userDoc = uData;
+                topUsername.textContent = uData.username || user.displayName || 'You';
+
+                // Now load the site data & render dashboard
+                await loadSiteAndRender();
+
+            } catch (err) {
+                console.error('auth check error', err);
+                goToLogin();
+            }
+        });
+
+        // defensive: if no siteId, go to hub
+        if (!siteId) goToHub();
+
+        // cleanup on unload
+        window.addEventListener('beforeunload', () => {
+            // nothing to cleanup (no persistent snapshot listeners used here)
+        });
+    </script>
+</body>
+</html>

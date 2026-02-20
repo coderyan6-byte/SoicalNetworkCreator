@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>ChatSpace — Features</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --card: #141a2e;
+            --primary: #4f7cff;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #111936, var(--bg));
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            nav h1 {
+                font-size: 1.4rem;
+                color: var(--primary);
+            }
+
+            nav .nav-links a {
+                margin-left: 25px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+
+        .hero {
+            padding: 100px 60px;
+            text-align: center;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+            .hero h2 {
+                font-size: 3rem;
+                margin-bottom: 20px;
+            }
+
+            .hero p {
+                color: var(--muted);
+                max-width: 720px;
+                margin: auto;
+                font-size: 1.1rem;
+            }
+
+        section {
+            padding: 80px 60px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            color: var(--muted);
+            max-width: 700px;
+            margin-bottom: 50px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+        }
+
+            .feature-card h3 {
+                margin-bottom: 10px;
+                font-size: 1.2rem;
+            }
+
+            .feature-card p {
+                color: var(--muted);
+                font-size: 0.95rem;
+            }
+
+        .highlight {
+            background: linear-gradient(180deg, transparent, rgba(79,124,255,0.08));
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+
+        footer {
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        @media(max-width: 900px) {
+            section, .hero {
+                padding: 60px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>ChatSpace</h1>
+        <div class="nav-links">
+            <a href="Features.html">Features</a>
+            <a href="UseCases.html">Use Cases</a>
+            <a href="Pricing.html">Pricing</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h2>Core Platform Features</h2>
+        <p>
+            ChatSpace provides the foundational tools needed to build
+            community and conversation directly into your website.
+            No external platforms. No fragmented user experience.
+        </p>
+    </div>
+
+    <section>
+        <h2 class="section-title">What ChatSpace Provides</h2>
+        <p class="section-subtitle">
+            A focused, extensible feature set designed for real-world communities.
+        </p>
+
+        <div class="feature-grid">
+            <!--  <div class="feature-card">
+           <h3> Chatrooms</h3>
+        <p>
+            Create public or private chatrooms for discussion,
+            support, or community interaction.
+        </p>
+    </div> -->
+            <!--   <div class="feature-card">
+                    <h3> Room Organization</h3>
+                    <p>
+                        Structure conversations by topic, purpose, or audience
+                        using clearly defined rooms.
+                    </p>
+                </div> -->
+
+                <div class="feature-card">
+                    <h3> Customizable UI</h3>
+                    <p>
+                        Match the chat experience to your brand with flexible
+                        layouts and themes.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3> Permissions</h3>
+                    <p>
+                        Control who can read, post, or moderate content
+                        within each space.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3> Social Interaction</h3>
+                    <p>
+                        Enable conversation engagement that feels
+                        native to your site, not bolted on.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <h3> Platform First Design</h3>
+                    <p>
+                        Built as a service that integrates into existing products,
+                        not a standalone destination.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="highlight">
+                <h2 class="section-title">Designed to Be Embedded</h2>
+                <p class="section-subtitle">
+                    ChatSpace is built to live inside your product, not compete with it.
+                    Conversations stay where your users already are.
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            © 2026 ChatSpace
+        </footer>
+
+    </body>
+    </html>

@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>ChatSpace — Pricing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --card: #141a2e;
+            --primary: #4f7cff;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --accent: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #111936, var(--bg));
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            nav h1 {
+                font-size: 1.4rem;
+                color: var(--primary);
+            }
+
+            nav .nav-links a {
+                margin-left: 25px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+
+        .hero {
+            padding: 100px 60px 60px;
+            text-align: center;
+            max-width: 1000px;
+            margin: auto;
+        }
+
+            .hero h2 {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .hero p {
+                color: var(--muted);
+                max-width: 700px;
+                margin: auto;
+                font-size: 1.1rem;
+            }
+
+        section {
+            padding: 40px 60px 100px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .pricing-card {
+            background: var(--card);
+            border-radius: 18px;
+            padding: 35px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+            .pricing-card.highlight {
+                border: 1px solid var(--primary);
+                box-shadow: 0 0 0 1px rgba(79,124,255,0.3);
+            }
+
+        .plan-name {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 20px 0 10px;
+        }
+
+            .price span {
+                font-size: 1rem;
+                color: var(--muted);
+            }
+
+        .plan-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        .features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+            .features li {
+                margin-bottom: 12px;
+                color: var(--text);
+                font-size: 0.95rem;
+            }
+
+                .features li::before {
+                    content: "✓";
+                    color: var(--accent);
+                    margin-right: 10px;
+                }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 26px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        footer {
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        @media(max-width: 900px) {
+            nav, .hero, section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>ChatSpace</h1>
+        <div class="nav-links">
+            <a href="Features.html">Features</a>
+            <a href="UseCases.html">Use Cases</a>
+            <a href="Pricing.html">Pricing</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <p>
+            Start for free. Upgrade when your community grows.
+            No hidden fees. No long-term commitments.
+        </p>
+    </div>
+
+    <section>
+        <div class="pricing-grid">
+
+            <!-- FREE PLAN -->
+            <div class="pricing-card">
+                <h3 class="plan-name">Free</h3>
+                <div class="price">$0 <span>/ forever</span></div>
+                <p class="plan-desc">
+                    Everything you need to try ChatSpace and build your first community.
+                </p>
+
+                <ul class="features">
+                    <li>Basic moderation tools</li>
+                    <li>Customizable Themes</li>
+                    <li>Community chat</li>
+                    <li>Standard support</li>
+                </ul>
+
+                <a href="hub.html" class="btn btn-secondary">Get Started</a>
+            </div>
+
+            <!-- PRO PLAN -->
+            <div class="pricing-card highlight">
+                <h3 class="plan-name">Pro</h3>
+                <div class="price">$29 <span>/ month</span></div>
+                <p class="plan-desc">
+                    Designed for growing communities and production websites.
+                </p>
+
+                <ul class="features">
+                    <li>Advanced permissions & roles</li>
+                    <li>Enhanced moderation controls</li>
+                    <li>Priority support</li>
+                </ul>
+
+                <a href="login.html?subscription" class="btn btn-primary">Upgrade to Pro</a>
+            </div>
+
+        </div>
+    </section>
+
+    <footer>
+        © 2026 ChatSpace
+    </footer>
+
+</body>
+</html>

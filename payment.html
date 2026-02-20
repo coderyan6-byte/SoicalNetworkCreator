@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Open Graph / Discord Embed -->
+    <meta property="og:title" content="Social Network Creator">
+    <meta property="og:description" content="Build and manage your own social platform easily.">
+    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+    <meta property="og:type" content="website">
+    <title>ChatSpace — Upgrade</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --bg: #0b0f1a;
+            --card: #141a2e;
+            --primary: #4f7cff;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --accent: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", system-ui, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top, #111936, var(--bg));
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            nav h1 {
+                font-size: 1.4rem;
+                color: var(--primary);
+            }
+
+            nav .nav-links a {
+                margin-left: 25px;
+                color: var(--muted);
+                font-weight: 500;
+            }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .upgrade-box {
+            background: linear-gradient(180deg, rgba(79,124,255,0.12), rgba(20,26,46,0.95));
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 50px 40px 44px;
+            max-width: 640px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+        }
+
+            .upgrade-box h2 {
+                font-size: 2.4rem;
+                margin-bottom: 14px;
+            }
+
+            .upgrade-box p {
+                color: var(--muted);
+                font-size: 1.05rem;
+                margin-bottom: 34px;
+                line-height: 1.55;
+            }
+
+        .elfsight-wrap {
+            display: flex;
+            justify-content: center;
+        }
+
+        footer {
+            padding: 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width:720px) {
+            .upgrade-box {
+                padding: 40px 24px;
+            }
+
+                .upgrade-box h2 {
+                    font-size: 1.9rem;
+                }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>ChatSpace</h1>
+        <div class="nav-links">
+            <a href="Features.html">Features</a>
+            <a href="UseCases.html">Use Cases</a>
+            <a href="Pricing.html">Pricing</a>
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+
+    <!-- FIREBASE COMPAT SDK + init (exposes window.firebase for legacy/custom code) -->
+    <script>
+        // You included config earlier — we'll use the same values
+        window._firebaseConfig = {
+            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+            authDomain: "soicalnetworkcreator.firebaseapp.com",
+            projectId: "soicalnetworkcreator",
+            storageBucket: "soicalnetworkcreator.firebasestorage.app",
+            messagingSenderId: "374390703916",
+            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+            measurementId: "G-326LYE3XL3"
+        };
+    </script>
+
+    <!-- load Elfsight first so widget appears quickly -->
+    <script src="https://elfsightcdn.com/platform.js" async></script>
+
+    <!-- Load Firebase *compat* libraries to satisfy scripts that expect a global `firebase` object.
+         The compat libs expose window.firebase and are straightforward to drop in when some code expects the old API.
+         We intentionally only load the app + auth + firestore compat pieces (no heavy analytics). -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Initialize global firebase (compat)
+        try {
+            if (window.firebase && !firebase.apps?.length) {
+                firebase.initializeApp(window._firebaseConfig);
+                console.log('Firebase (compat) initialized on page — firebase available:', !!window.firebase);
+            } else if (!window.firebase) {
+                console.warn('Firebase compat script failed to load — window.firebase missing');
+            }
+        } catch (err) {
+            console.error('Failed to initialize firebase compat:', err);
+        }
+
+        // Optional: guard for custom Elfsight scripts that try to use firebase immediately
+        // If your Elfsight custom JS did something like `firebase.auth()` this will prevent runtime throw by ensuring firebase exists.
+        // If you previously wrote custom JS inside Elfsight that performs writes, consider guarding that custom code with `if (window.firebase) {...}` as well.
+    </script>
+
+    <main>
+        <div class="upgrade-box">
+            <h2>Unlock more tools for your site today</h2>
+            <p>
+                Upgrade to Pro to enable advanced permissions, enhanced moderation,
+                Discord-style themes, and priority support when you need it most.
+            </p>
+
+            <div class="elfsight-wrap" aria-label="Subscribe">
+                <!-- Elfsight PayPal Button -->
+                <div class="elfsight-app-60206174-f3ab-44da-82b7-5480504035ef" data-elfsight-app-lazy></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        © <span id="year"></span> ChatSpace
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
+    
