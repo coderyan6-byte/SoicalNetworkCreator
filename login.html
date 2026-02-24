@@ -502,7 +502,7 @@
                             lastLogin: serverTimestamp()
                         }, { merge: true });
                         showMessage('success', 'Login successful. Redirecting...');
-                        setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                        setTimeout(() => { window.location.href = ''; }, 600);
                         return;
                     }
 
@@ -523,7 +523,7 @@
                     await setDoc(userRef, { accessToken: newToken, lastLogin: serverTimestamp() }, { merge: true });
 
                     showMessage('success', 'Login successful. Redirecting...');
-                    setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                    setTimeout(() => { window.location.href = 'hub'; }, 600);
                 }
             } catch (err) {
                 let msg = 'An error occurred.';
@@ -547,7 +547,7 @@
 
         function postLoginRedirect() {
             const params = new URLSearchParams(window.location.search);
-            return params.has('subscription') ? 'payment.html' : 'hub.html';
+            return params.has('subscription') ? 'payment' : 'hub.html';
         }
 
 
@@ -587,3 +587,4 @@
     </script>
 </body>
 </html>
+
