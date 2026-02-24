@@ -1,590 +1,596 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <!-- Open Graph / Discord Embed -->
-    <meta property="og:title" content="Social Network Creator">
-    <meta property="og:description" content="Build and manage your own social platform easily.">
-    <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
-    <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
-    <meta property="og:type" content="website">
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #141319;
-            --card: #1f1e26;
-            --muted: #9aa0ac;
-            --accent: #7b66ff;
-            --panel-grad-start: #7166ff;
-            --panel-grad-end: #2f2a56;
-            --input-bg: rgba(255,255,255,0.03);
-            --glass-border: rgba(255,255,255,0.03);
-            --radius: 0px;
-        }
+<meta charset="utf-8" />
+<!-- Open Graph / Discord Embed -->
+<meta property="og:title" content="Social Network Creator">
+<meta property="og:description" content="Build and manage your own social platform easily.">
+<meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
+<meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
+<meta property="og:type" content="website">
+<title>Login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--bg: #141319;
+--card: #1f1e26;
+--muted: #9aa0ac;
+--accent: #7b66ff;
+--panel-grad-start: #7166ff;
+--panel-grad-end: #2f2a56;
+--input-bg: rgba(255,255,255,0.03);
+--glass-border: rgba(255,255,255,0.03);
+--radius: 0px;
+}
 
-        * {
-            box-sizing: border-box;
-            font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-        }
+* {
+box-sizing: border-box;
+font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+}
 
+        html, body {
         , body {
-            height: 100%;
-            margin: 0;
-            background: linear-gradient(180deg,#0f0f15 0%, #0b0b0f 100%);
-            color: #fff;
-        }
+height: 100%;
+margin: 0;
+background: linear-gradient(180deg,#0f0f15 0%, #0b0b0f 100%);
+color: #fff;
+}
 
-        .wrap {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-        }
+.wrap {
+width: 100vw;
+height: 100vh;
+display: flex;
+}
 
-        .left {
-            flex: 1;
-            padding: 48px;
-            background: linear-gradient(180deg, var(--panel-grad-start), var(--panel-grad-end));
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            color: #fff;
-            min-width: 360px;
-        }
+.left {
+flex: 1;
+padding: 48px;
+background: linear-gradient(180deg, var(--panel-grad-start), var(--panel-grad-end));
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+position: relative;
+color: #fff;
+min-width: 360px;
+}
 
-        .hero-image {
-            position: absolute;
-            inset: 0;
-            background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder');
-            background-size: cover;
-            opacity: 0.12;
-            z-index: 0;
-        }
+.hero-image {
+position: absolute;
+inset: 0;
+background-image: url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=placeholder');
+background-size: cover;
+opacity: 0.12;
+z-index: 0;
+}
 
-        .left-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
+.left-content {
+position: relative;
+z-index: 2;
+display: flex;
+flex-direction: column;
+height: 100%;
+}
 
-        .hero-top {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+.hero-top {
+display: flex;
+align-items: center;
+gap: 12px;
+}
 
-        .amu-logo {
-            font-weight: 700;
-            letter-spacing: 1px;
-            font-size: 20px;
-        }
+.amu-logo {
+font-weight: 700;
+letter-spacing: 1px;
+font-size: 20px;
+}
 
-        .hero-center {
-            flex: 1;
-            display: flex;
-            align-items: flex-end;
-            padding-bottom: 28px;
-        }
+.hero-center {
+flex: 1;
+display: flex;
+align-items: flex-end;
+padding-bottom: 28px;
+}
 
-        .hero-text {
-            font-size: 28px;
-            line-height: 1.1;
-            font-weight: 700;
-            max-width: 90%;
-        }
+.hero-text {
+font-size: 28px;
+line-height: 1.1;
+font-weight: 700;
+max-width: 90%;
+}
 
-        .carousel-dots {
-            display: flex;
-            gap: 6px;
-            margin-top: 18px;
-            align-items: center;
-        }
+.carousel-dots {
+display: flex;
+gap: 6px;
+margin-top: 18px;
+align-items: center;
+}
 
-        .dot {
-            width: 36px;
-            height: 6px;
-            border-radius: 6px;
-            background: rgba(255,255,255,0.12);
-            opacity: 0.6
-        }
+.dot {
+width: 36px;
+height: 6px;
+border-radius: 6px;
+background: rgba(255,255,255,0.12);
+opacity: 0.6
+}
 
-            .dot.active {
-                background: #fff;
-                opacity: 1;
-                width: 48px;
-            }
+.dot.active {
+background: #fff;
+opacity: 1;
+width: 48px;
+}
 
-        .right {
-            flex: 1;
-            padding: 48px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));
-            min-width: 360px;
-        }
+.right {
+flex: 1;
+padding: 48px;
+display: flex;
+flex-direction: column;
+justify-content: flex-start;
+background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));
+min-width: 360px;
+}
 
-        h1 {
-            margin: 0;
-            font-size: 30px;
-            color: #fff;
-        }
+h1 {
+margin: 0;
+font-size: 30px;
+color: #fff;
+}
 
-        .sub {
-            color: var(--muted);
-            font-size: 13px;
-            margin: 8px 0 18px;
-        }
+.sub {
+color: var(--muted);
+font-size: 13px;
+margin: 8px 0 18px;
+}
 
-        form {
-            width: 100%;
-            max-width: 560px;
-        }
+form {
+width: 100%;
+max-width: 560px;
+}
 
-        .row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
+.row {
+display: flex;
+gap: 12px;
+margin-bottom: 12px;
+}
 
-        .field {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
-        }
+.field {
+width: 100%;
+display: flex;
+flex-direction: column;
+margin-bottom: 12px;
+}
 
-        label {
-            font-size: 12px;
-            color: var(--muted);
-            margin-bottom: 8px;
-        }
+label {
+font-size: 12px;
+color: var(--muted);
+margin-bottom: 8px;
+}
 
-        input[type="text"], input[type="email"], input[type="password"] {
-            background: var(--input-bg);
-            border: 1px solid var(--glass-border);
-            padding: 12px 14px;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 14px;
-            outline: none;
-        }
+input[type="text"], input[type="email"], input[type="password"] {
+background: var(--input-bg);
+border: 1px solid var(--glass-border);
+padding: 12px 14px;
+border-radius: 10px;
+color: #fff;
+font-size: 14px;
+outline: none;
+}
 
-        input[type="checkbox"] {
-            transform: scale(1.05);
-            margin-right: 8px;
-        }
+input[type="checkbox"] {
+transform: scale(1.05);
+margin-right: 8px;
+}
 
-        .btn {
-            background: var(--accent);
-            border: none;
-            color: #fff;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 6px 14px rgba(123,102,255,0.12);
-        }
+.btn {
+background: var(--accent);
+border: none;
+color: #fff;
+padding: 12px 14px;
+border-radius: 10px;
+font-weight: 600;
+cursor: pointer;
+width: 100%;
+box-shadow: 0 6px 14px rgba(123,102,255,0.12);
+}
 
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 18px 0 12px;
-        }
+.divider {
+display: flex;
+align-items: center;
+gap: 12px;
+margin: 18px 0 12px;
+}
 
-            .divider span {
-                flex: 1;
-                height: 1px;
-                background: rgba(255,255,255,0.04)
-            }
+.divider span {
+flex: 1;
+height: 1px;
+background: rgba(255,255,255,0.04)
+}
 
-        .muted-link {
-            color: var(--muted);
-            font-size: 13px;
-            text-decoration: underline;
-            cursor: pointer;
-        }
+.muted-link {
+color: var(--muted);
+font-size: 13px;
+text-decoration: underline;
+cursor: pointer;
+}
 
-        .error {
-            color: #ff8a8a;
-            background: rgba(255,120,120,0.06);
-            padding: 8px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 13px
-        }
+.error {
+color: #ff8a8a;
+background: rgba(255,120,120,0.06);
+padding: 8px;
+border-radius: 8px;
+margin-bottom: 10px;
+font-size: 13px
+}
 
-        .success {
-            color: #bff4c6;
-            background: rgba(90,200,120,0.06);
-            padding: 8px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 13px
-        }
+.success {
+color: #bff4c6;
+background: rgba(90,200,120,0.06);
+padding: 8px;
+border-radius: 8px;
+margin-bottom: 10px;
+font-size: 13px
+}
 
-        .actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 6px;
-        }
+.actions {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-top: 6px;
+}
 
-        .small {
-            font-size: 13px;
-            color: var(--muted)
-        }
+.small {
+font-size: 13px;
+color: var(--muted)
+}
 
-        .toggle-mode {
-            background: none;
-            border: none;
-            color: var(--accent);
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0
-        }
+.toggle-mode {
+background: none;
+border: none;
+color: var(--accent);
+font-weight: 600;
+cursor: pointer;
+padding: 0
+}
 
-        footer {
-            margin-top: auto;
-            font-size: 12px;
-            color: var(--muted);
-            text-align: center;
-            padding-bottom: 8px
-        }
+footer {
+margin-top: auto;
+font-size: 12px;
+color: var(--muted);
+text-align: center;
+padding-bottom: 8px
+}
 
-        @media (max-width:980px) {
-            .wrap {
-                flex-direction: column;
-            }
+@media (max-width:980px) {
+.wrap {
+flex-direction: column;
+}
 
-            .left, .right {
-                min-height: 260px;
-            }
+.left, .right {
+min-height: 260px;
+}
 
-            .hero-text {
-                font-size: 22px;
-            }
+.hero-text {
+font-size: 22px;
+}
 
-            form {
-                max-width: 100%;
-            }
-        }
-    </style>
+form {
+max-width: 100%;
+}
+}
+</style>
 </head>
 <body>
-    <div class="wrap" role="main">
-        <section class="left" aria-hidden="false">
-            <div class="hero-image"></div>
-            <div class="left-content">
-                <div class="hero-top">
-                    <div class="amu-logo"> </div>
-                </div>
-                <div class="hero-center">
-                    <div>
-                        <div class="hero-text">Capturing Moments,<br />Creating Memories</div>
-                        <div class="carousel-dots" aria-hidden="true">
-                            <div class="dot"></div>
-                            <div class="dot active"></div>
-                            <div class="dot"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<div class="wrap" role="main">
+<section class="left" aria-hidden="false">
+<div class="hero-image"></div>
+<div class="left-content">
+<div class="hero-top">
+<div class="amu-logo"> </div>
+</div>
+<div class="hero-center">
+<div>
+<div class="hero-text">Capturing Moments,<br />Creating Memories</div>
+<div class="carousel-dots" aria-hidden="true">
+<div class="dot"></div>
+<div class="dot active"></div>
+<div class="dot"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
 
-        <section class="right" aria-label="Authentication panel">
-            <h1 id="panelTitle">Create an account</h1>
-            <div class="sub" id="panelSub">Already have an account? <a id="toLogin" class="muted-link">Log in</a></div>
+<section class="right" aria-label="Authentication panel">
+<h1 id="panelTitle">Create an account</h1>
+<div class="sub" id="panelSub">Already have an account? <a id="toLogin" class="muted-link">Log in</a></div>
 
-            <div id="messageArea" aria-live="polite"></div>
+<div id="messageArea" aria-live="polite"></div>
 
-            <form id="authForm" autocomplete="on" novalidate>
-                <div id="nameFields" class="row">
-                    <div class="field">
-                        <label for="firstName">First name</label>
-                        <input id="firstName" name="firstName" type="text" placeholder="Fletcher" />
-                    </div>
-                    <div class="field">
-                        <label for="lastName">Last name</label>
-                        <input id="lastName" name="lastName" type="text" placeholder="Last name" />
-                    </div>
-                </div>
+<form id="authForm" autocomplete="on" novalidate>
+<div id="nameFields" class="row">
+<div class="field">
+<label for="firstName">First name</label>
+<input id="firstName" name="firstName" type="text" placeholder="Fletcher" />
+</div>
+<div class="field">
+<label for="lastName">Last name</label>
+<input id="lastName" name="lastName" type="text" placeholder="Last name" />
+</div>
+</div>
 
-                <div class="field">
-                    <label for="username">Username</label>
-                    <input id="username" name="username" type="text" placeholder="username123" required />
-                </div>
+<div class="field">
+<label for="username">Username</label>
+<input id="username" name="username" type="text" placeholder="username123" required />
+</div>
 
-                <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" placeholder="you@example.com" required />
-                </div>
+<div class="field">
+<label for="email">Email</label>
+<input id="email" name="email" type="email" placeholder="you@example.com" required />
+</div>
 
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" required />
-                </div>
+<div class="field">
+<label for="password">Password</label>
+<input id="password" name="password" type="password" placeholder="Enter your password" minlength="6" required />
+</div>
 
-                <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:14px;">
-                    <input id="agreeT" type="checkbox" />
+<div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:14px;">
+<input id="agreeT" type="checkbox" />
+                    <label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
                     <label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS." target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
-                </div>
+</div>
 
-                <button class="btn" id="primaryBtn" type="submit">Create account</button>
-                <button class="btn" id="googleBtn" type="button">Sign in with Google</button>
+<button class="btn" id="primaryBtn" type="submit">Create account</button>
 
-                <div class="actions" style="margin-top:14px">
-                    <div class="small">Have an account?</div>
-                    <button id="toggleMode" class="toggle-mode" type="button">Switch to Log in</button>
-                </div>
-            </form>
+<div class="actions" style="margin-top:14px">
+<div class="small">Have an account?</div>
+<button id="toggleMode" class="toggle-mode" type="button">Switch to Log in</button>
+</div>
+</form>
 
-        </section>
-    </div>
+</section>
+</div>
 
-    <script type="module">
-        const firebaseConfig = {
-            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
-            authDomain: "soicalnetworkcreator.firebaseapp.com",
-            projectId: "soicalnetworkcreator",
-            storageBucket: "soicalnetworkcreator.firebasestorage.app",
-            messagingSenderId: "374390703916",
-            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
-            measurementId: "G-326LYE3XL3"
-        };
+<script type="module">
+const firebaseConfig = {
+apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+authDomain: "soicalnetworkcreator.firebaseapp.com",
+projectId: "soicalnetworkcreator",
+storageBucket: "soicalnetworkcreator.firebasestorage.app",
+messagingSenderId: "374390703916",
+appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+measurementId: "G-326LYE3XL3"
+};
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            sendEmailVerification,
-            onAuthStateChanged,
-            updateProfile,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-        import {
-            getFirestore,
-            doc,
-            setDoc,
-            getDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+sendEmailVerification,
+onAuthStateChanged,
+updateProfile,
+signOut
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import {
+getFirestore,
+doc,
+setDoc,
+getDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        const authForm = document.getElementById('authForm');
-        const primaryBtn = document.getElementById('primaryBtn');
-        const toggleMode = document.getElementById('toggleMode');
-        const panelTitle = document.getElementById('panelTitle');
-        const panelSub = document.getElementById('panelSub');
-        const messageArea = document.getElementById('messageArea');
-        const nameFields = document.getElementById('nameFields');
-        const firstNameInput = document.getElementById('firstName');
-        const lastNameInput = document.getElementById('lastName');
-        const agreeT = document.getElementById('agreeT');
-        const usernameInput = document.getElementById('username');
+const authForm = document.getElementById('authForm');
+const primaryBtn = document.getElementById('primaryBtn');
+const toggleMode = document.getElementById('toggleMode');
+const panelTitle = document.getElementById('panelTitle');
+const panelSub = document.getElementById('panelSub');
+const messageArea = document.getElementById('messageArea');
+const nameFields = document.getElementById('nameFields');
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const agreeT = document.getElementById('agreeT');
+const usernameInput = document.getElementById('username');
 
-        let mode = 'signup';
+let mode = 'signup';
 
-        function setMode(m) {
-            mode = m;
-            if (mode === 'signup') {
-                panelTitle.textContent = 'Create an account';
+function setMode(m) {
+mode = m;
+if (mode === 'signup') {
+panelTitle.textContent = 'Create an account';
+                panelSub.innerHTML = 'Already have an account? <a id="toLogin" class="muted-link">Log in</a>';
                 panelSub.inner = 'Already have an account? <a id="toLogin" class="muted-link">Log in</a>';
-                primaryBtn.textContent = 'Create account';
-                toggleMode.textContent = 'Switch to Log in';
-                nameFields.style.display = 'flex';
-                agreeT.parentElement.style.display = 'flex';
-                usernameInput.required = true;
-            } else {
-                panelTitle.textContent = 'Log in';
+primaryBtn.textContent = 'Create account';
+toggleMode.textContent = 'Switch to Log in';
+nameFields.style.display = 'flex';
+agreeT.parentElement.style.display = 'flex';
+usernameInput.required = true;
+} else {
+panelTitle.textContent = 'Log in';
+                panelSub.innerHTML = 'Don\'t have an account? <a id="toLogin" class="muted-link">Create one</a>';
                 panelSub.inner = 'Don\'t have an account? <a id="toLogin" class="muted-link">Create one</a>';
-                primaryBtn.textContent = 'Log in';
-                toggleMode.textContent = 'Switch to Create account';
-                nameFields.style.display = 'none';
-                agreeT.parentElement.style.display = 'none';
-                usernameInput.required = true;
-            }
-            const newToLogin = document.getElementById('toLogin');
-            if (newToLogin) newToLogin.addEventListener('click', (e) => { e.preventDefault(); setMode(mode === 'signup' ? 'login' : 'signup'); });
-        }
+primaryBtn.textContent = 'Log in';
+toggleMode.textContent = 'Switch to Create account';
+nameFields.style.display = 'none';
+agreeT.parentElement.style.display = 'none';
+usernameInput.required = true;
+}
+const newToLogin = document.getElementById('toLogin');
+if (newToLogin) newToLogin.addEventListener('click', (e) => { e.preventDefault(); setMode(mode === 'signup' ? 'login' : 'signup'); });
+}
 
-        setMode('signup');
+setMode('signup');
 
-        toggleMode.addEventListener('click', () => {
-            setMode(mode === 'signup' ? 'login' : 'signup');
-        });
+toggleMode.addEventListener('click', () => {
+setMode(mode === 'signup' ? 'login' : 'signup');
+});
 
-        function showMessage(type, text) {
+function showMessage(type, text) {
+            messageArea.innerHTML = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + text + '</div>';
             messageArea.inner = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + text + '</div>';
-            setTimeout(() => { if (messageArea.firstChild) messageArea.firstChild.remove(); }, 7000);
-        }
+setTimeout(() => { if (messageArea.firstChild) messageArea.firstChild.remove(); }, 7000);
+}
 
-        function generateAccessToken() {
-            if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-            return 'x-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-        }
+function generateAccessToken() {
+if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+return 'x-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+}
 
-        async function createFirestoreUserIfMissing(user, extra = {}) {
-            if (!user || !user.uid) return;
-            const userRef = doc(db, "users", user.uid);
-            const snapshot = await getDoc(userRef);
-            const payload = {
-                uid: user.uid,
-                email: user.email || null,
-                displayName: user.displayName || null,
-                createdAt: serverTimestamp(),
-                ...extra
-            };
-            await setDoc(userRef, payload, { merge: true });
-        }
+async function createFirestoreUserIfMissing(user, extra = {}) {
+if (!user || !user.uid) return;
+const userRef = doc(db, "users", user.uid);
+const snapshot = await getDoc(userRef);
+const payload = {
+uid: user.uid,
+email: user.email || null,
+displayName: user.displayName || null,
+createdAt: serverTimestamp(),
+...extra
+};
+await setDoc(userRef, payload, { merge: true });
+}
 
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = (document.getElementById('email').value || '').trim();
-            const password = document.getElementById('password').value;
-            const firstName = (firstNameInput.value || '').trim();
-            const lastName = (lastNameInput.value || '').trim();
-            const username = (usernameInput.value || '').trim();
+authForm.addEventListener('submit', async (e) => {
+e.preventDefault();
+const email = (document.getElementById('email').value || '').trim();
+const password = document.getElementById('password').value;
+const firstName = (firstNameInput.value || '').trim();
+const lastName = (lastNameInput.value || '').trim();
+const username = (usernameInput.value || '').trim();
 
-            if (!email) { showMessage('error', 'Please enter your email.'); return; }
-            if (!password || password.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
-            if (!username) { showMessage('error', 'Please enter your username.'); return; }
-            if (mode === 'signup') {
-                if (!firstName) { showMessage('error', 'Please enter your first name.'); return; }
-                if (!agreeT.checked) { showMessage('error', 'You must agree to the Terms & Conditions.'); return; }
-            }
+if (!email) { showMessage('error', 'Please enter your email.'); return; }
+if (!password || password.length < 6) { showMessage('error', 'Password must be at least 6 characters.'); return; }
+if (!username) { showMessage('error', 'Please enter your username.'); return; }
+if (mode === 'signup') {
+if (!firstName) { showMessage('error', 'Please enter your first name.'); return; }
+if (!agreeT.checked) { showMessage('error', 'You must agree to the Terms & Conditions.'); return; }
+}
 
-            primaryBtn.disabled = true;
-            primaryBtn.textContent = mode === 'signup' ? 'Creating...' : 'Logging in...';
+primaryBtn.disabled = true;
+primaryBtn.textContent = mode === 'signup' ? 'Creating...' : 'Logging in...';
 
-            try {
-                if (mode === 'signup') {
-                    const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    const fullName = (firstName + (lastName ? ' ' + lastName : '')).trim();
-                    try { await updateProfile(cred.user, { displayName: fullName }); } catch (err) { }
+try {
+if (mode === 'signup') {
+const cred = await createUserWithEmailAndPassword(auth, email, password);
+const fullName = (firstName + (lastName ? ' ' + lastName : '')).trim();
+try { await updateProfile(cred.user, { displayName: fullName }); } catch (err) { }
 
-                    await sendEmailVerification(cred.user);
+await sendEmailVerification(cred.user);
 
-                    await signOut(auth);
+await signOut(auth);
 
-                    showMessage('success', 'Verification email sent. Check your inbox and verify your email before logging in.');
-                } else {
-                    const signCred = await signInWithEmailAndPassword(auth, email, password);
-                    const user = signCred.user;
-                    if (!user.emailVerified) {
-                        await signOut(auth);
-                        showMessage('error', 'Email not verified. Please check your inbox and verify your email before logging in.');
-                        return;
-                    }
+showMessage('success', 'Verification email sent. Check your inbox and verify your email before logging in.');
+} else {
+const signCred = await signInWithEmailAndPassword(auth, email, password);
+const user = signCred.user;
+if (!user.emailVerified) {
+await signOut(auth);
+showMessage('error', 'Email not verified. Please check your inbox and verify your email before logging in.');
+return;
+}
 
-                    const uid = user.uid;
-                    const userRef = doc(db, "users", uid);
-                    const snapshot = await getDoc(userRef);
+const uid = user.uid;
+const userRef = doc(db, "users", uid);
+const snapshot = await getDoc(userRef);
 
-                    if (!snapshot.exists()) {
-                        const token = generateAccessToken();
-                        localStorage.setItem('accessToken', token);
-                        await setDoc(userRef, {
-                            uid: uid,
-                            email: email,
-                            username: username,
-                            isBanned: false,
-                            accessToken: token,
-                            lastLogin: serverTimestamp()
-                        }, { merge: true });
-                        showMessage('success', 'Login successful. Redirecting...');
-                        setTimeout(() => { window.location.href = ''; }, 600);
-                        return;
-                    }
+if (!snapshot.exists()) {
+const token = generateAccessToken();
+localStorage.setItem('accessToken', token);
+await setDoc(userRef, {
+uid: uid,
+email: email,
+username: username,
+isBanned: false,
+accessToken: token,
+lastLogin: serverTimestamp()
+}, { merge: true });
+showMessage('success', 'Login successful. Redirecting...');
+setTimeout(() => { window.location.href = ''; }, 600);
+return;
+}
 
-                    const data = snapshot.data();
-                    if (data.isBanned === true) {
-                        await signOut(auth);
-                        showMessage('error', 'Your account is banned. Contact support.');
-                        return;
-                    }
-                    if (data.username && data.username !== username) {
-                        await signOut(auth);
-                        showMessage('error', 'Username does not match our records.');
-                        return;
-                    }
+const data = snapshot.data();
+if (data.isBanned === true) {
+await signOut(auth);
+showMessage('error', 'Your account is banned. Contact support.');
+return;
+}
+if (data.username && data.username !== username) {
+await signOut(auth);
+showMessage('error', 'Username does not match our records.');
+return;
+}
 
-                    const newToken = generateAccessToken();
-                    localStorage.setItem('accessToken', newToken);
-                    await setDoc(userRef, { accessToken: newToken, lastLogin: serverTimestamp() }, { merge: true });
+const newToken = generateAccessToken();
+localStorage.setItem('accessToken', newToken);
+await setDoc(userRef, { accessToken: newToken, lastLogin: serverTimestamp() }, { merge: true });
 
-                    showMessage('success', 'Login successful. Redirecting...');
-                    setTimeout(() => { window.location.href = 'hub'; }, 600);
-                }
-            } catch (err) {
-                let msg = 'An error occurred.';
-                if (err && err.code) {
-                    switch (err.code) {
-                        case 'auth/email-already-in-use': msg = 'That email is already in use.'; break;
-                        case 'auth/invalid-email': msg = 'That email is invalid.'; break;
-                        case 'auth/wrong-password': msg = 'Wrong password.'; break;
-                        case 'auth/user-not-found': msg = 'No user found with that email.'; break;
-                        default: msg = err.message || msg;
-                    }
-                } else if (err && err.message) {
-                    msg = err.message;
-                }
-                showMessage('error', msg);
-            } finally {
-                primaryBtn.disabled = false;
-                primaryBtn.textContent = mode === 'signup' ? 'Create account' : 'Log in';
-            }
-        });
+showMessage('success', 'Login successful. Redirecting...');
+setTimeout(() => { window.location.href = 'hub'; }, 600);
+}
+} catch (err) {
+let msg = 'An error occurred.';
+if (err && err.code) {
+switch (err.code) {
+case 'auth/email-already-in-use': msg = 'That email is already in use.'; break;
+case 'auth/invalid-email': msg = 'That email is invalid.'; break;
+case 'auth/wrong-password': msg = 'Wrong password.'; break;
+case 'auth/user-not-found': msg = 'No user found with that email.'; break;
+default: msg = err.message || msg;
+}
+} else if (err && err.message) {
+msg = err.message;
+}
+showMessage('error', msg);
+} finally {
+primaryBtn.disabled = false;
+primaryBtn.textContent = mode === 'signup' ? 'Create account' : 'Log in';
+}
+});
 
-        function postLoginRedirect() {
-            const params = new URLSearchParams(window.location.search);
-            return params.has('subscription') ? 'payment' : 'hub';
-        }
+function postLoginRedirect() {
+const params = new URLSearchParams(window.location.search);
+return params.has('subscription') ? 'payment' : 'hub';
+}
 
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) return;
-            if (!user.emailVerified) return;
-            try {
-                const uid = user.uid;
-                const userRef = doc(db, "users", uid);
-                const snapshot = await getDoc(userRef);
-                if (!snapshot.exists()) {
-                    const token = generateAccessToken();
-                    localStorage.setItem('accessToken', token);
-                    await setDoc(userRef, {
-                        uid: uid,
-                        email: user.email || null,
-                        displayName: user.displayName || null,
-                        username: (user.displayName || '').replace(/\s+/g, '').toLowerCase() || null,
-                        isBanned: false,
-                        accessToken: token,
-                        createdAt: serverTimestamp(),
-                        lastLogin: serverTimestamp()
-                    }, { merge: true });
-                    window.location.href = postLoginRedirect();
-                    return;
-                } else {
-                    const token = generateAccessToken();
-                    localStorage.setItem('accessToken', token);
-                    await setDoc(userRef, { accessToken: token, lastLogin: serverTimestamp() }, { merge: true });
-                    window.location.href = postLoginRedirect();
-                    return;
-                }
-            } catch (err) { }
-        });
+onAuthStateChanged(auth, async (user) => {
+if (!user) return;
+if (!user.emailVerified) return;
+try {
+const uid = user.uid;
+const userRef = doc(db, "users", uid);
+const snapshot = await getDoc(userRef);
+if (!snapshot.exists()) {
+const token = generateAccessToken();
+localStorage.setItem('accessToken', token);
+await setDoc(userRef, {
+uid: uid,
+email: user.email || null,
+displayName: user.displayName || null,
+username: (user.displayName || '').replace(/\s+/g, '').toLowerCase() || null,
+isBanned: false,
+accessToken: token,
+createdAt: serverTimestamp(),
+lastLogin: serverTimestamp()
+}, { merge: true });
+window.location.href = postLoginRedirect();
+return;
+} else {
+const token = generateAccessToken();
+localStorage.setItem('accessToken', token);
+await setDoc(userRef, { accessToken: token, lastLogin: serverTimestamp() }, { merge: true });
+window.location.href = postLoginRedirect();
+return;
+}
+} catch (err) { }
+});
 
-        document.getElementById('email').focus();
-    </script>
+document.getElementById('email').focus();
+</script>
 </body>
 </html>
+
+
