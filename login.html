@@ -547,7 +547,7 @@
 
         function postLoginRedirect() {
             const params = new URLSearchParams(window.location.search);
-            return params.has('subscription') ? 'payment' : 'hub.html';
+            return params.has('subscription') ? 'payment' : 'hub';
         }
 
 
@@ -587,4 +587,5 @@
     </script>
 </body>
 </html>
+
 
