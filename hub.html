@@ -768,7 +768,7 @@
                     openBtn.style.borderRadius = '8px';
                     openBtn.style.fontWeight = '700';
                     openBtn.addEventListener('click', () => {
-                        const url = `Dashboard.html?siteId=${encodeURIComponent(s.id)}&name=${encodeURIComponent(s.name || '')}`;
+                        const url = `Dashboard?siteId=${encodeURIComponent(s.id)}&name=${encodeURIComponent(s.name || '')}`;
                         window.open(url, '_blank');
                     });
                     card.appendChild(thumb);
@@ -826,3 +826,4 @@
     </script>
 </body>
 </html>
+
