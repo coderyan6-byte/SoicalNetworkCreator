@@ -758,7 +758,7 @@
                     createOpenBtn.title = isHacked ? 'Disabled due to unauthorized access' : 'Open site';
                     createOpenBtn.onclick = () => {
                         if (isHacked) return;
-                        window.location.href = `view/site.html?siteId=${encodeURIComponent(siteId)}`;
+                        window.location.href = `view/site?siteId=${encodeURIComponent(siteId)}`;
                     };
                     createInfo.textContent = 'Site is created';
                 } else {
@@ -1250,3 +1250,4 @@
     </script>
 </body>
 </html>
+
