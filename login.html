@@ -29,8 +29,7 @@ box-sizing: border-box;
 font-family: Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
 }
 
-        html, body {
-        , body {
+html, body {
 height: 100%;
 margin: 0;
 background: linear-gradient(180deg,#0f0f15 0%, #0b0b0f 100%);
@@ -334,8 +333,7 @@ max-width: 100%;
 
 <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:14px;">
 <input id="agreeT" type="checkbox" />
-                    <label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
-                    <label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS." target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
+<label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
 </div>
 
 <button class="btn" id="primaryBtn" type="submit">Create account</button>
@@ -400,8 +398,7 @@ function setMode(m) {
 mode = m;
 if (mode === 'signup') {
 panelTitle.textContent = 'Create an account';
-                panelSub.innerHTML = 'Already have an account? <a id="toLogin" class="muted-link">Log in</a>';
-                panelSub.inner = 'Already have an account? <a id="toLogin" class="muted-link">Log in</a>';
+panelSub.innerHTML = 'Already have an account? <a id="toLogin" class="muted-link">Log in</a>';
 primaryBtn.textContent = 'Create account';
 toggleMode.textContent = 'Switch to Log in';
 nameFields.style.display = 'flex';
@@ -409,8 +406,7 @@ agreeT.parentElement.style.display = 'flex';
 usernameInput.required = true;
 } else {
 panelTitle.textContent = 'Log in';
-                panelSub.innerHTML = 'Don\'t have an account? <a id="toLogin" class="muted-link">Create one</a>';
-                panelSub.inner = 'Don\'t have an account? <a id="toLogin" class="muted-link">Create one</a>';
+panelSub.innerHTML = 'Don\'t have an account? <a id="toLogin" class="muted-link">Create one</a>';
 primaryBtn.textContent = 'Log in';
 toggleMode.textContent = 'Switch to Create account';
 nameFields.style.display = 'none';
@@ -428,8 +424,7 @@ setMode(mode === 'signup' ? 'login' : 'signup');
 });
 
 function showMessage(type, text) {
-            messageArea.innerHTML = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + text + '</div>';
-            messageArea.inner = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + text + '</div>';
+messageArea.innerHTML = '<div class="' + (type === 'error' ? 'error' : 'success') + '">' + text + '</div>';
 setTimeout(() => { if (messageArea.firstChild) messageArea.firstChild.remove(); }, 7000);
 }
 
@@ -507,7 +502,8 @@ accessToken: token,
 lastLogin: serverTimestamp()
 }, { merge: true });
 showMessage('success', 'Login successful. Redirecting...');
-setTimeout(() => { window.location.href = ''; }, 600);
+                        setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                        setTimeout(() => { window.location.href = ''; }, 600);
 return;
 }
 
@@ -528,7 +524,8 @@ localStorage.setItem('accessToken', newToken);
 await setDoc(userRef, { accessToken: newToken, lastLogin: serverTimestamp() }, { merge: true });
 
 showMessage('success', 'Login successful. Redirecting...');
-setTimeout(() => { window.location.href = 'hub'; }, 600);
+                    setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                    setTimeout(() => { window.location.href = 'hub'; }, 600);
 }
 } catch (err) {
 let msg = 'An error occurred.';
@@ -552,7 +549,8 @@ primaryBtn.textContent = mode === 'signup' ? 'Create account' : 'Log in';
 
 function postLoginRedirect() {
 const params = new URLSearchParams(window.location.search);
-return params.has('subscription') ? 'payment' : 'hub';
+            return params.has('subscription') ? 'payment.html' : 'hub.html';
+            return params.has('subscription') ? 'payment' : 'hub.html';
 }
 
 
@@ -592,5 +590,3 @@ document.getElementById('email').focus();
 </script>
 </body>
 </html>
-
-
