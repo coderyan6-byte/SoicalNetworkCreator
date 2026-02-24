@@ -333,7 +333,7 @@ max-width: 100%;
 
 <div style="display:flex;align-items:center;gap:8px;margin-top:6px;margin-bottom:14px;">
 <input id="agreeT" type="checkbox" />
-<label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS.html" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
+<label for="agreeT" style="margin:0;color:var(--muted);font-size:13px;">I agree to the <a href="TOS" target="_blank" style="color:var(--muted);text-decoration:underline;">Terms & Conditions</a></label>
 </div>
 
 <button class="btn" id="primaryBtn" type="submit">Create account</button>
@@ -502,7 +502,7 @@ accessToken: token,
 lastLogin: serverTimestamp()
 }, { merge: true });
 showMessage('success', 'Login successful. Redirecting...');
-                        setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                        setTimeout(() => { window.location.href = 'hub'; }, 600);
                         setTimeout(() => { window.location.href = ''; }, 600);
 return;
 }
@@ -524,7 +524,7 @@ localStorage.setItem('accessToken', newToken);
 await setDoc(userRef, { accessToken: newToken, lastLogin: serverTimestamp() }, { merge: true });
 
 showMessage('success', 'Login successful. Redirecting...');
-                    setTimeout(() => { window.location.href = 'hub.html'; }, 600);
+                    setTimeout(() => { window.location.href = 'hub'; }, 600);
                     setTimeout(() => { window.location.href = 'hub'; }, 600);
 }
 } catch (err) {
@@ -549,8 +549,8 @@ primaryBtn.textContent = mode === 'signup' ? 'Create account' : 'Log in';
 
 function postLoginRedirect() {
 const params = new URLSearchParams(window.location.search);
-            return params.has('subscription') ? 'payment.html' : 'hub.html';
-            return params.has('subscription') ? 'payment' : 'hub.html';
+            return params.has('subscription') ? 'payment' : 'hub';
+            return params.has('subscription') ? 'payment' : 'hub';
 }
 
 
@@ -590,3 +590,4 @@ document.getElementById('email').focus();
 </script>
 </body>
 </html>
+
