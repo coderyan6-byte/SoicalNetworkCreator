@@ -459,24 +459,7 @@
             </svg>
 
             <script>
-                function shouldShowAnnouncementBar() {
-                    try {
-                        if (!window.Static.SQUARESPACE_CONTEXT.showAnnouncementBar) {
-                            return false;
-                        }
-                        var localDataStr = localStorage.getItem('squarespace-announcement-bar');
-                        if (localDataStr && JSON.parse(localDataStr).closed) {
-                            return false;
-                        }
-                        return true;
-                    } catch (e) {
-                        console.error(e);
-                        return true;
-                    }
-                }
-                if (shouldShowAnnouncementBar()) {
-                    document.body.classList.add('announcement-bar-reserved-space');
-                }
+                
                 //# sourceURL=reserveSpaceForAnnouncementBar.js
             </script>
 
@@ -598,7 +581,7 @@
 
 
                                         <div class="header-nav-item header-nav-item--collection">
-                                            <a href="/features"
+                                            <a href="Features"
                                                data-animation-role="header-element">
                                                 Features
                                             </a>
@@ -610,9 +593,9 @@
 
 
                                         <div class="header-nav-item header-nav-item--collection">
-                                            <a href="/case-studies"
+                                            <a href="UseCases"
                                                data-animation-role="header-element">
-                                                Case Studies
+                                                UseCases
                                             </a>
                                         </div>
 
@@ -1967,9 +1950,7 @@
                                         <div class="sqs-block html-block sqs-block-html" data-blend-mode="NORMAL" data-block-type="2" data-border-radii="&#123;&quot;topLeft&quot;:&#123;&quot;unit&quot;:&quot;px&quot;,&quot;value&quot;:0.0&#125;,&quot;topRight&quot;:&#123;&quot;unit&quot;:&quot;px&quot;,&quot;value&quot;:0.0&#125;,&quot;bottomLeft&quot;:&#123;&quot;unit&quot;:&quot;px&quot;,&quot;value&quot;:0.0&#125;,&quot;bottomRight&quot;:&#123;&quot;unit&quot;:&quot;px&quot;,&quot;value&quot;:0.0&#125;&#125;" data-sqsp-block="text" id="block-ff0e0e3183c66abe8c74">
                                             <div class="sqs-block-content">
 
-                                                <div class="sqs-html-content" data-sqsp-text-block-content>
-                                                    <div class="sqsrte-scaled-text-container"><span class="sqsrte-scaled-text"><p class="sqsrte-large" style="white-space:pre-wrap;"><span class="sqsrte-text-color--darkAccent">The Only Intranet Built  Inside Google Workspace</span></p></span></div>
-                                                </div>
+                                                
 
 
 
