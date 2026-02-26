@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,77 +8,225 @@
     <meta property="og:image" content="https://socialnetworkcreator.duckdns.org/preview.png">
     <meta property="og:url" content="https://socialnetworkcreator.duckdns.org/">
     <meta property="og:type" content="website">
-    <title>SNC</title>
+    <title>Use Cases — Social Network Creator (SNC)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #0b0f1a;
-            --card: #141a2e;
+            --bg: #ffffff;
+            --card: #fbfdff;
             --primary: #4f7cff;
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --border: #1f2937;
+            --text: #253046;
+            --muted: #6b7280;
+            --glass: rgba(15,23,42,0.04);
+            --accent: #22c55e;
+            --rounded: 14px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
-            padding: 0;
-            font-family: "Inter", system-ui, sans-serif;
+            padding: 0
+        }
+
+        html, body {
+            height: 100%
         }
 
         body {
-            background: radial-gradient(circle at top, #111936, var(--bg));
+            font-family: "Inter", system-ui, -apple-system, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg,#f7fbff,#ffffff);
             color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             line-height: 1.6;
         }
 
-        a {
-            text-decoration: none;
-            color: inherit;
+        /* scroll progress bar (dopamine micro-feedback) */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(90deg,var(--primary), #6a8bff);
+            z-index: 2000;
+            transition: width 120ms linear;
+            box-shadow: 0 3px 8px rgba(79,124,255,0.12);
         }
 
-        nav {
+        /* Sticky desktop topbar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1400;
             display: flex;
-            justify-content: space-between;
+            gap: 20px;
             align-items: center;
-            padding: 20px 60px;
-            border-bottom: 1px solid var(--border);
+            padding: 16px 48px;
+            justify-content: flex-start;
+            background: rgba(255,255,255,0.7);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            transition: box-shadow .22s, transform .18s;
         }
 
-            nav h1 {
-                font-size: 1.4rem;
-                color: var(--primary);
+            .topbar.scrolled {
+                box-shadow: 0 8px 28px rgba(15,23,42,0.06)
             }
 
-            nav .nav-links a {
-                margin-left: 25px;
+        .brand {
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.05rem;
+            margin-right: 10px
+        }
+
+        .toplinks {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-left: 6px
+        }
+
+            .toplinks a {
                 color: var(--muted);
-                font-weight: 500;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 0.95rem
             }
 
+                .toplinks a:hover {
+                    color: var(--text)
+                }
+
+        /* compact header for mobile (only hamburger) */
+        .compact-header {
+            display: none;
+            position: fixed;
+            top: 14px;
+            right: 18px;
+            z-index: 1500
+        }
+
+        .nav-toggle {
+            background: transparent;
+            border: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+            .nav-toggle:focus {
+                outline: 3px solid rgba(79,124,255,0.14)
+            }
+
+        /* Mobile animated sidebar */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 340px;
+            height: 100vh;
+            background: linear-gradient(180deg,#ffffff,#fbfdff);
+            box-shadow: -12px 0 40px rgba(15,23,42,0.12);
+            transform: translateX(100%) scale(.98);
+            opacity: 0;
+            transition: transform .36s cubic-bezier(.2,.9,.3,1), opacity .28s;
+            z-index: 1550;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .mobile-menu.open {
+                transform: translateX(0) scale(1);
+                opacity: 1
+            }
+
+        .mobile-links {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 10px
+        }
+
+            .mobile-links a {
+                font-weight: 700;
+                color: var(--text);
+                text-decoration: none;
+                font-size: 1.04rem;
+                opacity: 0;
+                transform: translateX(8px)
+            }
+
+        .mobile-menu.open .mobile-links a {
+            opacity: 1;
+            transform: translateX(0);
+            transition: transform .34s cubic-bezier(.2,.9,.3,1), opacity .26s
+        }
+
+        .mobile-links a:nth-child(1) {
+            transition-delay: 70ms
+        }
+
+        .mobile-links a:nth-child(2) {
+            transition-delay: 130ms
+        }
+
+        .mobile-links a:nth-child(3) {
+            transition-delay: 190ms
+        }
+
+        .mobile-links a:nth-child(4) {
+            transition-delay: 250ms
+        }
+
+        .mobile-cta {
+            margin-top: 18px;
+            opacity: 0;
+            transform: translateY(8px)
+        }
+
+        .mobile-menu.open .mobile-cta {
+            opacity: 1;
+            transform: translateY(0);
+            transition: transform .32s .28s, opacity .28s .28s
+        }
+
+        /* HERO */
         .hero {
-            padding: 90px 60px 50px;
-            text-align: center;
             max-width: 1000px;
-            margin: auto;
+            margin: 28px auto 0;
+            padding: 28px 60px 8px;
+            text-align: center;
         }
 
             .hero h2 {
                 font-size: 2.8rem;
-                margin-bottom: 15px;
+                margin-bottom: 12px;
             }
 
             .hero p {
                 color: var(--muted);
                 max-width: 720px;
-                margin: auto;
+                margin: 0 auto;
                 font-size: 1.05rem;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity .45s, transform .45s
             }
 
         section {
-            padding: 60px;
+            padding: 40px 60px 80px;
             max-width: 1200px;
             margin: auto;
         }
@@ -93,58 +241,123 @@
             background: var(--card);
             border-radius: 16px;
             padding: 28px;
-            border: 1px solid var(--border);
+            border: 1px solid var(--glass);
+            transition: transform .22s ease, box-shadow .22s ease;
         }
+
+            .usecase-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 40px rgba(15,23,42,0.06)
+            }
 
             .usecase-card h3 {
                 margin-bottom: 10px;
-                font-size: 1.25rem;
+                font-size: 1.25rem
             }
 
             .usecase-card p {
                 color: var(--muted);
-                font-size: 0.95rem;
+                font-size: 0.95rem
             }
 
         footer {
             padding: 40px;
             text-align: center;
-            border-top: 1px solid var(--border);
             color: var(--muted);
+            border-top: 1px solid rgba(15,23,42,0.04)
         }
 
-        @media(max-width: 900px) {
-            nav, .hero, section {
-                padding-left: 20px;
-                padding-right: 20px;
+        /* small sparkle style used by JS */
+        .spark {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: screen;
+            z-index: 2000
+        }
+
+        /* responsive */
+        @media (max-width:900px) {
+            .topbar {
+                display: none
+            }
+            /* remove topbar on mobile */
+            .compact-header {
+                display: flex
+            }
+
+            .hero {
+                padding: 22px 20px 12px
+            }
+
+            section {
+                padding: 28px 20px 60px
+            }
+
+            .usecase-grid {
+                gap: 18px
             }
         }
     </style>
 </head>
 <body>
 
-    <nav>
-        <h1>Social Network Creator</h1>
-        <div class="nav-links">
-            <a href="Features.html">Features</a>
-            <a href="UseCases.html">Use Cases</a>
-            <a href="Pricing.html">Pricing</a>
-            <a href="login.html">Login</a>
-        </div>
-    </nav>
+    <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
-    <div class="hero">
-        <h2>Common Use Cases</h2>
-        <p>
+    <!-- Sticky desktop topbar -->
+    <header class="topbar" id="topbar" role="banner" aria-hidden="false">
+        <div class="brand">Social Network Creator (SNC)</div>
+        <nav class="toplinks" aria-label="Main navigation">
+            <a href="Features">Features</a>
+            <a href="UseCases">UseCases</a>
+            <a href="Pricing">Pricing</a>
+            <a href="login">Login</a>
+        </nav>
+    </header>
+
+    <!-- Compact mobile header (only hamburger) -->
+    <div class="compact-header" id="compactHeader" aria-hidden="true">
+        <button class="nav-toggle" id="navToggle" aria-label="Open menu">
+            <svg width="22" height="14" viewBox="0 0 22 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect y="1" width="22" height="2" rx="1" fill="#374151" />
+                <rect y="6" width="22" height="2" rx="1" fill="#374151" />
+                <rect y="11" width="22" height="2" rx="1" fill="#374151" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Animated mobile sidebar -->
+    <aside class="mobile-menu" id="mobileMenu" aria-hidden="true" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Social Network Creator (SNC)</strong>
+            <button id="mobileClose" aria-label="Close menu" style="background:none;border:0;cursor:pointer;font-size:18px">✕</button>
+        </div>
+
+        <nav class="mobile-links" aria-label="Mobile navigation">
+            <a href="Features">Features</a>
+            <a href="UseCases">UseCases</a>
+            <a href="Pricing">Pricing</a>
+            <a href="login">Login</a>
+        </nav>
+
+        <a class="mobile-cta" href="/login" style="margin-top:18px;background:linear-gradient(90deg,var(--primary), #6a8bff);color:white;padding:12px 14px;border-radius:10px;text-align:center;text-decoration:none;font-weight:700">Log in</a>
+    </aside>
+
+    <!-- HERO -->
+    <main class="hero" role="main" aria-labelledby="usecasesHeading">
+        <h2 id="usecasesHeading" class="reveal">Common Use Cases</h2>
+        <p class="reveal">
             Examples of how ChatSpace can be embedded into different
             products and websites to support conversation and community.
         </p>
-    </div>
+    </main>
 
-    <section>
+    <!-- USE CASES -->
+    <section aria-labelledby="gridHeading">
         <div class="usecase-grid">
-
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Company Communities</h3>
                 <p>
                     Create discussion spaces for customers or internal teams
@@ -152,7 +365,7 @@
                 </p>
             </div>
 
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Customer Support</h3>
                 <p>
                     Provide structured chatrooms for announcements, FAQs,
@@ -160,7 +373,7 @@
                 </p>
             </div>
 
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Events & Launches</h3>
                 <p>
                     Host temporary chat spaces alongside live streams,
@@ -168,7 +381,7 @@
                 </p>
             </div>
 
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Creator Communities</h3>
                 <p>
                     Embed community discussion directly into creator platforms,
@@ -176,7 +389,7 @@
                 </p>
             </div>
 
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Education & Learning</h3>
                 <p>
                     Enable discussion spaces for courses, classrooms,
@@ -184,21 +397,143 @@
                 </p>
             </div>
 
-            <div class="usecase-card">
+            <div class="usecase-card reveal">
                 <h3> Product Feedback</h3>
                 <p>
                     Gather structured user feedback and discussion
                     directly inside early-stage or beta products.
                 </p>
             </div>
-
         </div>
     </section>
 
     <footer>
-        © 2026 SNC
+        © 2026 Social Network Creator (SNC)
     </footer>
 
+    <script>
+        // Elements
+        const topbar = document.getElementById('topbar');
+        const compactHeader = document.getElementById('compactHeader');
+        const navToggle = document.getElementById('navToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileClose = document.getElementById('mobileClose');
+        const scrollProgress = document.getElementById('scrollProgress');
+
+        // Responsive initial setup: show compact header on small screens and hide topbar
+        function updateLayout() {
+            if (window.innerWidth <= 900) {
+                compactHeader.style.display = 'flex';
+                compactHeader.setAttribute('aria-hidden', 'false');
+                topbar.style.display = 'none';
+                topbar.setAttribute('aria-hidden', 'true');
+            } else {
+                compactHeader.style.display = 'none';
+                compactHeader.setAttribute('aria-hidden', 'true');
+                topbar.style.display = 'flex';
+                topbar.setAttribute('aria-hidden', 'false');
+            }
+        }
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
+
+        // Mobile menu open/close with animation & staggered links
+        function openMobileMenu() {
+            mobileMenu.style.display = 'flex';
+            requestAnimationFrame(() => mobileMenu.classList.add('open'));
+            mobileMenu.setAttribute('aria-hidden', 'false');
+            topbar.style.display = 'none'; // ensure topbar hidden on mobile
+        }
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('open');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+            setTimeout(() => mobileMenu.style.display = 'none', 380);
+        }
+
+        navToggle?.addEventListener('click', (e) => { e.stopPropagation(); openMobileMenu(); });
+        mobileClose?.addEventListener('click', closeMobileMenu);
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 900 && mobileMenu.classList.contains('open')) {
+                const inside = mobileMenu.contains(e.target) || navToggle.contains(e.target);
+                if (!inside) closeMobileMenu();
+            }
+        });
+
+        // Keyboard accessibility for mobile
+        navToggle?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMobileMenu(); } });
+        mobileClose?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') closeMobileMenu(); });
+
+        // Scroll progress bar + topbar shadow
+        function onScroll() {
+            const docH = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = (window.scrollY / (docH || 1)) * 100;
+            scrollProgress.style.width = Math.min(100, Math.max(0, pct)) + '%';
+            if (window.scrollY > 8) topbar.classList.add('scrolled'); else topbar.classList.remove('scrolled');
+        }
+        document.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+
+        // Reveal animations + sparkles for dopamine hits
+        const revealables = document.querySelectorAll('.reveal');
+        const io = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    el.style.transition = 'opacity .46s ease, transform .46s cubic-bezier(.2,.9,.3,1)';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0) translateZ(0)';
+                    // create small sparks
+                    createSparks(el);
+                    obs.unobserve(el);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        revealables.forEach(n => {
+            n.style.opacity = '0';
+            n.style.transform = 'translateY(12px)';
+            io.observe(n);
+        });
+
+        function createSparks(targetEl) {
+            try {
+                const rect = targetEl.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2 + window.scrollX;
+                const cy = rect.top + rect.height / 2 + window.scrollY;
+                for (let i = 0; i < 6; i++) {
+                    const s = document.createElement('div');
+                    s.className = 'spark';
+                    s.style.left = cx + 'px';
+                    s.style.top = cy + 'px';
+                    s.style.background = (Math.random() > 0.6) ? 'var(--primary)' : 'var(--accent)';
+                    s.style.opacity = '0.95';
+                    s.style.transform = 'translate(-50%,-50%) scale(0.6)';
+                    document.body.appendChild(s);
+
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 22 + Math.random() * 36;
+                    const tx = Math.cos(angle) * dist + 'px';
+                    const ty = Math.sin(angle) * dist + 'px';
+
+                    s.animate([
+                        { transform: 'translate(-50%,-50%) scale(0.6)', opacity: 1 },
+                        { transform: `translate(calc(-50% + ${tx}), calc(-50% + ${ty})) scale(1.05)`, opacity: 1 },
+                        { transform: `translate(calc(-50% + ${tx}), calc(-50% + ${ty})) scale(0.2)`, opacity: 0 }
+                    ], { duration: 650, easing: 'cubic-bezier(.2,.9,.3,1)' });
+
+                    setTimeout(() => s.remove(), 720);
+                }
+            } catch (e) { /* silent */ }
+        }
+
+        // Defensive: ensure topbar visible on desktop after resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                topbar.style.display = 'flex';
+                topbar.setAttribute('aria-hidden', 'false');
+            }
+        });
+    </script>
 </body>
 </html>
-
