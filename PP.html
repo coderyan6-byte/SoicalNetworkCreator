@@ -2,76 +2,150 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ChatSpace � Privacy Policy</title>
+    <title>Socialnetworkcreator — Privacy Policy</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         :root {
-            --bg: #0b0f1a;
-            --card: #141a2e;
-            --primary: #4f7cff;
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --border: #1f2937;
+            --bg: #ffffff;
+            --card: #ffffff;
+            --primary: #0b5fff;
+            --text: #0b1220;
+            --muted: #6b7280;
+            --border: #e6e9ee;
+            --shadow: 0 6px 20px rgba(11,18,32,0.06);
+            --radius: 12px;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: "Inter", system-ui, sans-serif;
+            font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         }
 
-        body {
-            background: radial-gradient(circle at top, #111936, var(--bg));
+        html, body {
+            height: 100%;
+            background: var(--bg);
             color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             line-height: 1.6;
         }
 
         a {
+            color: var(--primary);
             text-decoration: none;
-            color: inherit;
         }
+
+            a:hover {
+                text-decoration: underline;
+            }
 
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 60px;
+            padding: 18px 36px;
             border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.6));
+            position: sticky;
+            top: 0;
+            backdrop-filter: blur(6px);
+            z-index: 40;
         }
 
             nav h1 {
-                font-size: 1.4rem;
-                color: var(--primary);
+                font-size: 1.125rem;
+                color: var(--text);
+                letter-spacing: 0.2px;
+                font-weight: 700;
             }
 
             nav .nav-links a {
-                margin-left: 25px;
+                margin-left: 20px;
                 color: var(--muted);
-                font-weight: 500;
+                font-weight: 600;
+                font-size: 0.95rem;
             }
 
-        section {
-            padding: 80px 60px;
-            max-width: 1200px;
-            margin: auto;
+        .container {
+            max-width: 1100px;
+            margin: 36px auto;
+            padding: 28px;
+        }
+
+        section.card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 36px;
         }
 
         .section-title {
-            font-size: 2rem;
-            margin-bottom: 12px;
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 700;
         }
 
         .section-subtitle {
             color: var(--muted);
-            max-width: 700px;
-            margin-bottom: 50px;
+            max-width: 780px;
+            margin-bottom: 20px;
+            font-size: 0.98rem;
+        }
+
+        p {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        h3 {
+            margin-top: 16px;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 1.05rem;
+        }
+
+        h4 {
+            margin-top: 10px;
+            margin-bottom: 8px;
+            color: var(--text);
+            font-size: 0.98rem;
+        }
+
+        ul {
+            margin-left: 18px;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .muted-note {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-top: 22px;
+        }
+
+        footer.contact {
+            margin-top: 22px;
+            font-size: 0.95rem;
+            color: var(--muted);
         }
 
         @media(max-width: 900px) {
-            section {
-                padding: 60px 20px;
+            .container {
+                padding: 18px;
+            }
+
+            nav {
+                padding: 14px 18px;
             }
         }
     </style>
@@ -79,7 +153,7 @@
 <body>
 
     <nav>
-        <h1>ChatSpace</h1>
+        <h1>Socialnetworkcreator</h1>
         <div class="nav-links">
             <a href="Features.html">Features</a>
             <a href="UseCases.html">Use Cases</a>
@@ -88,52 +162,92 @@
         </div>
     </nav>
 
-    <section>
-        <h2 class="section-title">Privacy Policy</h2>
-        <p class="section-subtitle">Effective as of February 2 2026</p>
+    <div class="container">
+        <section class="card" aria-labelledby="ppTitle">
+            <h2 id="ppTitle" class="section-title">Privacy Policy</h2>
+            <p class="section-subtitle">Effective as of February 27, 2026</p>
 
-        <p>ChatSpace is committed to maintaining robust privacy protections for its users This Privacy Policy helps you understand how we collect use and safeguard the information you provide and assists you in making informed decisions when using our Service</p>
+            <p>Socialnetworkcreator is committed to maintaining robust privacy protections for its users. This Privacy Policy explains in clear terms the categories of information we collect, why we collect it, how we use it, when we share it, and how you can exercise your rights.</p>
 
-        <p>For purposes of this Agreement Site refers to our website Service refers to ChatSpace services accessed via the Site in which users can communicate share messages and collaborate The terms we us and our refer to ChatSpace You refers to you as a user of our website or our Service By accessing our website or our Service you accept our Privacy Policy and Terms of Use at <a href="TOS.html">Terms of Use</a> and you consent to our collection storage use and disclosure of your Personal Information as described in this Privacy Policy</p>
+            <p>For purposes of this Policy, “Site” refers to our website and “Service” refers to Socialnetworkcreator services provided through the Site that enable users to communicate, share messages, and collaborate. The terms “we,” “us,” and “our” refer to Socialnetworkcreator. “You” refers to a user of the Site or Service. By accessing our Site or using the Service you accept this Privacy Policy and our Terms of Use.</p>
 
-        <h3>I. Information We Collect</h3>
+            <h3>I. Information We Collect</h3>
 
-        <p>We collect Non-Personal Information and Personal Information Non-Personal Information includes information that cannot be used to personally identify you such as anonymous usage data general demographic information referring and exit pages platform types preferences you submit and preferences generated based on your data Personal Information includes your email and any other information you submit during registration</p>
+            <!-- REPLACED / EXPANDED COLLECTION SECTION (long, explicit) -->
+            <p>We collect several types of information to operate our Service reliably and safely. The categories below describe the data we gather when you use our Site and the Service. This section replaces and expands any shorter list previously provided so you have a comprehensive picture of what we collect.</p>
 
-        <h4>1. Information collected via Technology</h4>
-        <p>To activate the Service you do not need to submit any Personal Information other than your email address We track information provided to us by your browser or our software application such as the referring URL the type of browser the device used the time and date of access and other non-identifying information Cookies are used to collect Non-Personal Information about user preferences on both an individual and aggregate basis We may use persistent and session cookies Persistent cookies remain until deleted Session cookies expire when the browser closes</p>
+            <h4>1. Information You Provide Directly</h4>
+            <p>When you register for an account or update your account settings, we collect information you provide directly to us. This includes your full name or display name, email address, username, chosen password (stored securely as described in our security section), profile photo or avatar, profile biography, and any other information that you voluntarily add to your profile.</p>
+            <p>We also collect identity documents and identifiers in cases where identity verification is required. For example, if you use features that require age verification, KYC (know-your-customer) checks for payments, or identity verification for moderators or owners, we may collect a government-issued ID (such as a passport, driver’s license, or national ID). We collect these documents only when necessary, and only with your explicit consent at the time of collection.</p>
+            <p>We collect payment information if you make purchases or subscribe to paid features. Payment data is processed by our third-party payment processors; we may store transaction references and billing contact information but do not store full card numbers on our servers unless you explicitly opt into a saved-payment feature that is protected by strong encryption and the permissions you grant.</p>
+            <p>If you contact support or otherwise communicate with us (for example by email, chat, or support ticket), we collect the content of your messages and any attachments you provide. We keep these records to provide support and to maintain a history for quality and safety purposes.</p>
 
-        <h4>2. Information you provide by registering for an account</h4>
-        <p>To become a subscriber you create a personal profile with your email user name and password By registering you authorize us to collect store and use your email and other information according to this Privacy Policy</p>
+            <h4>2. Information Collected Automatically</h4>
+            <p>When you interact with the Site or Service we automatically collect information about your device and your use. This includes your IP address, device identifiers, browser type and version, operating system, screen resolution, language settings, the pages or features you interact with, timestamps, and log data about actions you take on the Site.</p>
+            <p>We use cookies, local storage, and similar technologies to remember preferences, enable authentication, and analyze usage. Cookies may be session-based or persistent. Cookies help us detect repeat visits, prevent fraud, and provide a smoother experience (for example by keeping you logged in when you choose that option).</p>
+            <p>We may collect location data if you enable location-based features. Location data can be precise (GPS-level) only if you grant explicit permission; otherwise we infer location from IP address at a city or region level for analytics and compliance purposes.</p>
 
-        <h4>3. Children�s Privacy</h4>
-        <p>The Site and Service are not directed to anyone under 13 We do not knowingly collect information from anyone under 13 If we learn personal information has been collected from a child under 13 without parental consent we will delete it immediately Contact us if you believe we have collected such information</p>
+            <h4>3. Information from Third Parties and Public Sources</h4>
+            <p>We may enrich or verify information about you using third-party services. This can include public profile data from identity providers (when you sign in with Google or other providers), social profile information you agree to share, or records from fraud prevention services. We receive only the information required to provide the requested feature and we use it under the controls described in this policy.</p>
+            <p>We may also collect information that others share about you. For example, if another user includes your contact details when inviting you to the Service, we will process that information to send the invitation and may retain limited metadata for audit and abuse prevention.</p>
 
-        <h3>II. How We Use and Share Information</h3>
+            <h4>4. Sensitive and Special Categories</h4>
+            <p>We do not generally collect sensitive personal data (such as health, biometric, or religious data) unless you submit it voluntarily as part of your content or where a feature explicitly requires it and you consent. If you provide such information, we treat it in accordance with your consent and applicable law and we will inform you before collection.</p>
 
-        <h4>Personal Information</h4>
-        <p>We do not sell trade or rent Personal Information without consent We may share Personal Information with vendors providing services such as email communications Vendors use your information only under our direction and in accordance with this Privacy Policy Personal Information is used to communicate respond to questions provide support and inform users about offers We may share Personal Information to comply with legal requirements enforce Terms of Service address fraud security or technical concerns or protect the rights property or safety of users or the public</p>
+            <h4>5. How We Use Identifying Information</h4>
+            <p>We use identifying information like your email address and any ID documents you voluntarily provide to create and secure your account, verify your identity when needed, prevent abuse on the platform, comply with legal obligations (such as payment and KYC rules), and to enable features that require identity verification (for example, moderator verification or certain marketplace features).</p>
+            <p>We use email addresses for account creation, login and password reset flows, sending transactional messages (receipts, security notices), and for marketing messages only when you opt into those communications. You may unsubscribe from marketing emails at any time; administrative messages are not optional and will be sent to your registered email address.</p>
 
-        <h4>Non-Personal Information</h4>
-        <p>Non-Personal Information is used to improve the Service customize the experience track trends and analyze use patterns We may disclose Non-Personal Information to partners advertisers and other third parties In business transactions such as mergers acquisitions or sales of assets Personal Information may be transferred and processed according to this Privacy Policy Changes to our information practices will be posted on the Site</p>
+            <h4>6. Why We Collect These Items</h4>
+            <p>Collecting email and identity documents allows us to reduce fraud, protect our community, and comply with applicable laws. Collecting device and usage data helps us improve performance, detect malicious activity, measure feature adoption, and make product decisions. Payment and billing information is collected to process transactions and to prevent payment fraud.</p>
 
-        <h3>III. How We Protect Information</h3>
-        <p>We implement security measures to protect your information Your account is protected by a password and we urge you not to share it and to log out after each use We also use encryption firewalls and secure technologies but we cannot guarantee complete security By using our Service you accept these risks</p>
+            <h4>7. Retention and Minimization</h4>
+            <p>We retain personal information for as long as necessary to provide the Service and for legitimate business purposes, including preventing fraud, complying with legal obligations, and resolving disputes. We apply data minimization principles: we request only information necessary for the purpose and do not keep extraneous details beyond reasonable retention periods unless required for legal reasons.</p>
 
-        <h3>IV. Your Rights Regarding Your Personal Information</h3>
-        <p>You can prevent us from contacting you for marketing You can unsubscribe from promotional emails or opt out in the Settings section of the Site Administrative emails such as updates to this Privacy Policy may still be sent</p>
+            <h4>8. Your Choices About Collection</h4>
+            <p>You can choose not to provide optional information, but some features may not work without certain data. You can control cookies and local storage via your browser settings, and you can delete or update profile information from your account settings. For identity documents, you must provide them only when the feature requires verification; you can refuse, but that may prevent use of the verified features.</p>
 
-        <h3>V. Links to Other Websites</h3>
-        <p>We may provide links to other websites We are not responsible for their privacy practices This Privacy Policy applies only to information collected through the Site and Service Accessing other sites via links will be subject to their own privacy policies We encourage users to read other websites privacy statements</p>
+            <h4>9. Example Data Elements We Collect (concise list)</h4>
+            <ul>
+                <li>Contact: email address, phone number when provided.</li>
+                <li>Identifiers: username, account ID, device identifiers, IP address.</li>
+                <li>Identity verification data: government-issued ID, identity photos, verification metadata (only with consent).</li>
+                <li>Profile: display name, avatar, bio, profile links.</li>
+                <li>Usage: logs, timestamps, features used, messages you post or upload.</li>
+                <li>Payment: billing name, billing address, transaction IDs (payment processors hold card data).</li>
+                <li>Support: messages, attachments, diagnostic logs you provide to support.</li>
+            </ul>
 
-        <h3>VI. Changes to Our Privacy Policy</h3>
-        <p>We may change this policy and Terms of Service at any time We will notify users by email or posting on the Site Significant changes take effect 30 days after notification Non-material changes take effect immediately Check the Site periodically for updates</p>
+            <p>These items are collected and processed in order to operate the Service, enhance safety, and comply with legal and contractual obligations. If you have questions about a specific field we collect, contact us and we will explain how it is used and how long we retain it.</p>
 
-        <h3>VII. Contact Us</h3>
-        <p>If you have questions about this Privacy Policy or Site practices contact us at contact@solarnyx.com</p>
+            <!-- END REPLACED COLLECTION SECTION -->
 
-        <p>Last Updated February 2 2026</p>
-    </section>
+            <h3>II. How We Use and Share Information</h3>
+
+            <h4>Personal Information</h4>
+            <p>We do not sell trade or rent Personal Information without consent We may share Personal Information with vendors providing services such as email communications Vendors use your information only under our direction and in accordance with this Privacy Policy Personal Information is used to communicate respond to questions provide support and inform users about offers We may share Personal Information to comply with legal requirements enforce Terms of Service address fraud security or technical concerns or protect the rights property or safety of users or the public</p>
+
+            <h4>Non-Personal Information</h4>
+            <p>Non-Personal Information is used to improve the Service customize the experience track trends and analyze use patterns We may disclose Non-Personal Information to partners advertisers and other third parties In business transactions such as mergers acquisitions or sales of assets Personal Information may be transferred and processed according to this Privacy Policy Changes to our information practices will be posted on the Site</p>
+
+            <h3>III. How We Protect Information</h3>
+            <p>We implement security measures to protect your information Your account is protected by a password and we urge you not to share it and to log out after each use We also use encryption firewalls and secure technologies but we cannot guarantee complete security By using our Service you accept these risks</p>
+
+            <h3>IV. Your Rights Regarding Your Personal Information</h3>
+            <p>You can prevent us from contacting you for marketing You can unsubscribe from promotional emails or opt out in the Settings section of the Site Administrative emails such as updates to this Privacy Policy may still be sent</p>
+
+            <h3>V. Links to Other Websites</h3>
+            <p>We may provide links to other websites We are not responsible for their privacy practices This Privacy Policy applies only to information collected through the Site and Service Accessing other sites via links will be subject to their own privacy policies We encourage users to read other websites privacy statements</p>
+
+            <h3>VI. Changes to Our Privacy Policy</h3>
+            <p>We may change this policy and Terms of Service at any time We will notify users by email or posting on the Site Significant changes take effect 30 days after notification Non-material changes take effect immediately Check the Site periodically for updates</p>
+
+            <h3>VII. Contact Us</h3>
+            <p>If you have questions about this Privacy Policy or Site practices contact us at <a href="http://socialnetworkcreator.duckdns.org" target="_blank" rel="noopener">http://socialnetworkcreator.duckdns.org</a></p>
+
+            <p style="margin-top:14px;color:var(--muted);font-size:0.95rem;">Last Updated February 27, 2026</p>
+        </section>
+    </div>
 
 </body>
 </html>
