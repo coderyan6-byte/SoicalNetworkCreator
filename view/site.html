@@ -869,6 +869,17 @@
     </div>
 
     <script type="module">
+        /* Full <script> with a targeted fix so channels a user shouldn't see are not shown
+           on initial page load. Changes:
+           - Introduced `themeIsDiscord` global and make `canViewChannel` use it so permission
+             logic doesn't depend solely on the DOM class which may be set asynchronously.
+           - During init we now try to read the saved theme from style/site docs and call
+             applyTheme() *before* rendering channels/messages so Discord-mode channel hiding
+             applies immediately.
+           - When site doc updates include a theme, we apply it and update themeIsDiscord.
+           No other behavior changed.
+        */
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, collection, doc, getDoc, setDoc, addDoc, onSnapshot, deleteDoc, updateDoc, arrayUnion, arrayRemove, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -887,7 +898,6 @@
         const debugBanner = document.getElementById('debugBanner');
         function showDebug(msg, level = 'info') { if (!debugBanner) return; debugBanner.style.display = 'block'; debugBanner.className = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'info'; debugBanner.textContent = msg; }
         function hideDebug() { if (!debugBanner) return; debugBanner.style.display = 'none'; debugBanner.textContent = ''; debugBanner.className = ''; }
-        console.log('Firebase initialized', { db: !!db });
 
         const params = new URLSearchParams(location.search);
         const siteId = params.get("siteId");
@@ -918,7 +928,7 @@
                 if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
                 document.getElementById('siteTitle').textContent = s.name || 'ChatSpace';
-                document.getElementById('MetaTAGName').content = s.name || 'ChatSpace'; 
+                document.getElementById('MetaTAGName').content = s.name || 'ChatSpace';
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
                 siteOwnerUsernameLower = owner ? String(owner).toLowerCase() : null;
@@ -937,8 +947,28 @@
         const usersRef = siteId ? collection(db, 'sites', siteId, 'users') : collection(db, 'users');
         const chatsRoot = (usernameLower) => siteId ? collection(doc(db, 'sites', siteId, 'chats', usernameLower), 'messages') : collection(doc(db, 'chats', usernameLower), 'messages');
 
+        const AVAILABLE_RANK_PERMISSIONS = [
+            'viewHidden',
+            'send',
+            'mention',
+            'bypassSlowMode',
+            'ban',
+            'mute',
+            'deletePost',
+            'pin',
+            'editMessages',
+            'admin',
+            'assignRanks',
+            'editChannels',
+            'createChannels',
+            'manageSlowMode'
+        ];
+
+        let themeIsDiscord = document.body.classList.contains('theme-discord'); // keep a stable flag used by permission checks
+
         const themeSelect = document.getElementById('themeSelect');
         function applyTheme(theme) {
+            // remove classes and reset vars
             document.body.classList.remove('theme-elegant', 'theme-compact', 'retro', 'theme-win95', 'theme-highcontrast', 'theme-discord');
             document.documentElement.style.setProperty('--bg', '#ffffff');
             document.documentElement.style.setProperty('--text', '#111');
@@ -954,21 +984,29 @@
                 retro: () => { document.body.classList.add('retro'); document.documentElement.style.setProperty('--bg', '#000'); document.documentElement.style.setProperty('--text', '#0f0'); document.documentElement.style.setProperty('--accent', '#0f0'); },
                 win95: () => { document.body.classList.add('theme-win95'); },
                 'high-contrast': () => { document.body.classList.add('theme-highcontrast'); },
-                "discord chatroom": () => { document.body.classList.add('theme-discord'); }
+                "discord chatroom": () => { document.body.classList.add('theme-discord'); },
+                discord: () => { document.body.classList.add('theme-discord'); }
             };
-            if (map[theme]) map[theme]();
+            try {
+                const key = (theme || '').toString().toLowerCase();
+                if (map[key]) map[key]();
+                // set our flag reliably (either DOM class or theme name containing 'discord')
+                themeIsDiscord = document.body.classList.contains('theme-discord') || (typeof theme === 'string' && theme.toLowerCase().includes('discord'));
+            } catch (e) {
+                console.warn('applyTheme failed', e);
+                themeIsDiscord = document.body.classList.contains('theme-discord');
+            }
 
-            const isDiscord = document.body.classList.contains('theme-discord');
+            // show/hide items that depend on discord mode
             const settingsBtn = document.getElementById('settingsBtn');
-            if (settingsBtn) settingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
-
+            if (settingsBtn) settingsBtn.style.display = themeIsDiscord ? 'inline-block' : 'none';
             const styleCard = document.getElementById('styleControlsCard');
             const adminUsersCard = document.getElementById('adminUsersCard');
             const myProfileCard = document.getElementById('myProfileCard');
             const leftComposeCard = document.getElementById('leftComposeCard');
             const midComposerWrapper = document.getElementById('midComposerWrapper');
 
-            if (isDiscord) {
+            if (themeIsDiscord) {
                 if (styleCard) styleCard.style.display = 'none';
                 if (adminUsersCard) adminUsersCard.style.display = 'none';
                 if (myProfileCard) myProfileCard.style.display = 'none';
@@ -984,26 +1022,82 @@
 
             const feedSettingsBtn = document.getElementById('feedSettingsBtn');
             const composerSettingsBtn = document.getElementById('composerSettingsBtn');
-            if (feedSettingsBtn) feedSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
-            if (composerSettingsBtn) composerSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+            if (feedSettingsBtn) feedSettingsBtn.style.display = themeIsDiscord ? 'inline-block' : 'none';
+            if (composerSettingsBtn) composerSettingsBtn.style.display = themeIsDiscord ? 'inline-block' : 'none';
 
             const channelsPanel = document.getElementById('channelsPanel');
-            if (channelsPanel) channelsPanel.style.display = isDiscord ? 'block' : 'none';
+            if (channelsPanel) channelsPanel.style.display = themeIsDiscord ? 'block' : 'none';
         }
 
-        if (styleDocRef) {
-            try {
-                onSnapshot(styleDocRef, (snap) => {
-                    if (!snap.exists()) return;
-                    const data = snap.data();
-                    const t = data.theme || 'classic';
-                    const themeSelectLocal = document.getElementById('themeSelect');
-                    if (themeSelectLocal) themeSelectLocal.value = t;
-                    applyTheme(t);
-                }, (err) => { console.error('styles onSnapshot error', err); });
-            } catch (e) { console.warn('styleDocRef subscription failed', e); }
+        let currentUser = JSON.parse(localStorage.getItem('tf_user') || 'null');
+        let currentUserDocUnsub = null;
+        let usersUnsub = null;
+        let activeProfileChatUnsub = null;
+
+        let siteChannels = [];
+        let activeChannel = null;
+        let siteRanks = [];
+        let messagesUnsub = null;
+        const lastPostTimestamps = {};
+
+        function isOwner(user) { if (!user) return false; return siteOwnerUsernameLower && user.usernameLower === siteOwnerUsernameLower; }
+        function isAdmin(user) {
+            if (!user) return false;
+            if (user.isAdmin) return true;
+            if (isOwner(user)) return true;
+            if (user.rank) {
+                const r = siteRanks.find(x => (x.name || '').toLowerCase() === (user.rank || '').toLowerCase());
+                if (r && r.permissions && r.permissions.admin) return true;
+            }
+            return false;
+        }
+        function hasRankPermission(user, perm) {
+            if (!user) return false;
+            if (user.isAdmin || isOwner(user)) return true;
+            if (!user.rank) return false;
+            const r = siteRanks.find(x => (x.name || '').toLowerCase() === (user.rank || '').toLowerCase());
+            if (!r || !r.permissions) return false;
+            return !!r.permissions[perm];
+        }
+        function canViewChannel(user, channelObj) {
+            // Use themeIsDiscord (set early) instead of relying solely on DOM class.
+            const isDiscord = !!themeIsDiscord;
+            if (!isDiscord) return true;
+            if (!channelObj) return true;
+
+            const hidden = !!channelObj.hidden;
+            if (!hidden) return true;
+
+            if (isOwner(user) || isAdmin(user)) return true;
+
+            if (user && user.rank) {
+                const userRankName = (user.rank || '').toString().trim().toLowerCase();
+                if (userRankName) {
+                    const rank = siteRanks.find(x => (x.name || '').toString().trim().toLowerCase() === userRankName);
+                    if (rank && rank.permissions && rank.permissions.viewHidden) return true;
+                }
+            }
+
+            if (Array.isArray(channelObj.allowedRanks) && channelObj.allowedRanks.length) {
+                if (!user || !user.rank) return false;
+                const allowed = channelObj.allowedRanks.map(x => (x || '').toString().trim().toLowerCase()).filter(x => x);
+                const myRank = (user.rank || '').toString().trim().toLowerCase();
+                return allowed.includes(myRank);
+            }
+
+            return false;
+        }
+        function canSendInChannel(user, channelObj) {
+            const isDiscord = !!themeIsDiscord;
+            if (!isDiscord) return true;
+            if (!channelObj) return true;
+            if (!channelObj.locked) return true;
+            if (isOwner(user) || isAdmin(user)) return true;
+            if (hasRankPermission(user, 'send')) return true;
+            return false;
         }
 
+        /* DOM refs */
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const registerBtn = document.getElementById('registerBtn');
@@ -1080,74 +1174,40 @@
 
         const activeChannelLabel = document.getElementById('activeChannelLabel');
 
-        let currentUser = JSON.parse(localStorage.getItem('tf_user') || 'null');
-        let currentUserDocUnsub = null;
-        let usersUnsub = null;
-        let activeProfileChatUnsub = null;
+        /* --- helpers popup/overlay/banned --- */
+        function showOverlay() { if (overlay) overlay.style.display = 'block'; }
+        function hideOverlay() { if (overlay) overlay.style.display = 'none'; }
 
-        let siteChannels = [];
-        let activeChannel = null;
-        let siteRanks = [];
-        let messagesUnsub = null;
-        const lastPostTimestamps = {};
+        function showPopupLogin() {
+            if (overlay) overlay.style.display = 'block';
+            if (popupLogin) { popupLogin.style.display = 'block'; }
+            try { if (popupUser && typeof popupUser.focus === 'function') popupUser.focus(); } catch (e) { }
+        }
+        function hidePopupLogin() {
+            if (popupLogin) popupLogin.style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
+            if (popupMsg) popupMsg.textContent = '';
+            if (popupUser) popupUser.value = '';
+            if (popupPass) popupPass.value = '';
+        }
 
-        function isOwner(user) { if (!user) return false; return siteOwnerUsernameLower && user.usernameLower === siteOwnerUsernameLower; }
-        function isAdmin(user) {
-            if (!user) return false;
-            if (user.isAdmin) return true;
-            if (isOwner(user)) return true;
-            if (user.rank) {
-                const r = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
-                if (r && r.permissions && r.permissions.admin) return true;
-            }
-            return false;
+        function showBannedPopup(reason) {
+            if (bannedReasonEl) bannedReasonEl.textContent = reason || 'Your account has been banned by an administrator.';
+            if (overlay) overlay.style.display = 'block';
+            if (bannedPopup) bannedPopup.style.display = 'block';
         }
-        function hasRankPermission(user, perm) {
-            if (!user) return false;
-            if (user.isAdmin || isOwner(user)) return true;
-            if (!user.rank) return false;
-            const r = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
-            if (!r || !r.permissions) return false;
-            return !!r.permissions[perm];
+        function hideBannedPopup() {
+            if (bannedPopup) bannedPopup.style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
         }
-        function canViewChannel(user, channelObj) {
-            const isDiscord = document.body.classList.contains('theme-discord');
-            if (!isDiscord) return true;
-            if (!channelObj) return true;
-            if (!channelObj.hidden) return true;
-            if (isOwner(user) || isAdmin(user)) return true;
-            if (user && user.rank) {
-                const rank = siteRanks.find(x => x.name.toLowerCase() === (user.rank || '').toLowerCase());
-                if (rank && rank.permissions && rank.permissions.viewHidden) return true;
-            }
-            if (Array.isArray(channelObj.allowedRanks) && channelObj.allowedRanks.length && user && user.rank) {
-                return channelObj.allowedRanks.map(x => (x || '').toLowerCase()).includes((user.rank || '').toLowerCase());
-            }
-            return false;
-        }
-        function canSendInChannel(user, channelObj) {
-            const isDiscord = document.body.classList.contains('theme-discord');
-            if (!isDiscord) return true;
-            if (!channelObj) return true;
-            if (!channelObj.locked) return true;
-            if (isOwner(user) || isAdmin(user)) return true;
-            if (hasRankPermission(user, 'send')) return true;
-            return false;
-        }
-        function showOverlay() { overlay.style.display = 'block'; }
-        function hideOverlay() { overlay.style.display = 'none'; }
-        function showPopupLogin() { showOverlay(); popupLogin.style.display = 'block'; popupUser.focus(); }
-        function hidePopupLogin() { hideOverlay(); popupLogin.style.display = 'none'; popupMsg.textContent = ''; popupUser.value = ''; popupPass.value = ''; }
-        function showBannedPopup(reason) { bannedReasonEl.textContent = reason || 'Your account has been banned by an administrator.'; showOverlay(); bannedPopup.style.display = 'block'; }
-        function hideBannedPopup() { bannedPopup.style.display = 'none'; hideOverlay(); }
-        async function hashText(txt) { const enc = new TextEncoder(); const hash = await crypto.subtle.digest('SHA-256', enc.encode(txt)); return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join(''); }
 
+        /* Attach current user listener */
         async function attachCurrentUserListener() {
             if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; }
             if (!currentUser || !currentUser.usernameLower) return;
             const uref = siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower);
             currentUserDocUnsub = onSnapshot(uref, (snap) => {
-                if (!snap.exists()) { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); return; }
+                if (!snap.exists()) { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); renderChannelsUI(); return; }
                 const d = snap.data();
                 const prevBanned = !!currentUser?.banned;
                 currentUser = {
@@ -1165,15 +1225,30 @@
                 };
                 localStorage.setItem('tf_user', JSON.stringify(currentUser));
                 updateLoginUI();
+
+                // re-render channels to reflect permission changes immediately
+                renderChannelsUI();
+
+                // if active channel is now inaccessible, switch to All
+                if (activeChannel) {
+                    const chObj = (siteChannels || []).find(c => (c.name || '').toLowerCase() === (activeChannel || '').toLowerCase());
+                    if (chObj && !canViewChannel(currentUser, chObj)) {
+                        activeChannel = null;
+                        updateChannelActiveStates();
+                        subscribeMessages(null);
+                    }
+                }
+
                 if (currentUser.banned && !prevBanned) showBannedPopup('Your account has been banned by an administrator. Posting disabled.');
                 if (!currentUser.banned) hideBannedPopup();
-                myBioEl.value = currentUser.bio || '';
-                settingsProfileBio.value = currentUser.bio || '';
+                try { if (myBioEl) myBioEl.value = currentUser.bio || ''; } catch (e) { }
+                try { if (settingsProfileBio) settingsProfileBio.value = currentUser.bio || ''; } catch (e) { }
             }, (err) => { console.error('attachCurrentUserListener error', err); });
         }
 
+        /* updateLoginUI */
         function updateLoginUI() {
-            const isDiscord = document.body.classList.contains('theme-discord');
+            const isDiscord = !!themeIsDiscord;
             const styleCard = document.getElementById('styleControlsCard');
 
             if (currentUser) {
@@ -1181,7 +1256,6 @@
                 let banBadge = (currentUser.banned) ? '<span class="badge-banned">BANNED</span>' : '';
                 loginState.innerHTML = `<div>Signed as <strong>${currentUser.username}</strong> ${badges} ${banBadge}</div>`;
 
-                // show/hide side panels depending on theme and permissions
                 if (isDiscord) {
                     if (styleCard) styleCard.style.display = 'none';
                     if (adminUsersCard) adminUsersCard.style.display = 'none';
@@ -1201,10 +1275,11 @@
             }
 
             if (settingsAdminArea) { settingsAdminArea.style.display = (currentUser && isAdmin(currentUser)) ? 'block' : 'none'; }
-            if (settingsChannelsArea) { const canEditChannels = currentUser && isAdmin(currentUser) && document.body.classList.contains('theme-discord'); settingsChannelsArea.style.display = canEditChannels ? 'block' : 'none'; }
-            if (settingsRanksArea) { settingsRanksArea.style.display = (currentUser && isOwner(currentUser) && document.body.classList.contains('theme-discord')) ? 'block' : 'none'; }
+            if (settingsChannelsArea) { const canEditChannels = currentUser && isAdmin(currentUser) && themeIsDiscord; settingsChannelsArea.style.display = canEditChannels ? 'block' : 'none'; }
+            if (settingsRanksArea) { settingsRanksArea.style.display = (currentUser && isOwner(currentUser) && themeIsDiscord) ? 'block' : 'none'; }
         }
 
+        /* Registration/login */
         registerBtn.onclick = async () => {
             accountMsg.textContent = '';
             const username = usernameInput.value.trim();
@@ -1216,7 +1291,7 @@
             if (snap.exists()) { accountMsg.textContent = 'Username taken'; return; }
             await setDoc(docRef, {
                 username,
-                passwordHash: await hashText(password),
+                passwordHash: password,
                 createdAt: Date.now(),
                 isAdmin: false,
                 rank: null,
@@ -1244,7 +1319,7 @@
             const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', lower) : doc(db, 'users', lower));
             if (!snap.exists()) { accountMsg.textContent = 'No such user'; return; }
             const data = snap.data();
-            if (await hashText(password) !== data.passwordHash) { accountMsg.textContent = 'Wrong password'; return; }
+            if (password !== data.passwordHash) { accountMsg.textContent = 'Wrong password'; return; }
             currentUser = {
                 username: data.username,
                 usernameLower: lower,
@@ -1265,23 +1340,24 @@
             if (currentUser.banned) showBannedPopup('Your account is banned. Contact an administrator.');
         };
 
-        logoutBtn.onclick = () => { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; } };
+        logoutBtn.onclick = () => { currentUser = null; localStorage.removeItem('tf_user'); updateLoginUI(); renderChannelsUI(); if (currentUserDocUnsub) { currentUserDocUnsub(); currentUserDocUnsub = null; } };
 
-        saveThemeBtn.onclick = async () => {
+        /* Message posting and subscriptions */
+        saveThemeBtn && (saveThemeBtn.onclick = async () => {
             if (!currentUser || !isAdmin(currentUser)) { styleMsg.style.color = ''; styleMsg.textContent = 'Not authorized'; return; }
             if (!styleDocRef) { styleMsg.textContent = 'No site selected'; return; }
             await setDoc(styleDocRef, { theme: themeSelect.value }, { merge: true });
             styleMsg.style.color = 'green'; styleMsg.textContent = 'Theme saved';
-        };
-        resetThemeBtn.onclick = async () => {
+        });
+        resetThemeBtn && (resetThemeBtn.onclick = async () => {
             if (!currentUser || !isAdmin(currentUser)) { styleMsg.style.color = ''; styleMsg.textContent = 'Not authorized'; return; }
             if (!styleDocRef) { styleMsg.textContent = 'No site selected'; return; }
             await setDoc(styleDocRef, { theme: 'classic' }, { merge: true });
             styleMsg.style.color = 'green'; styleMsg.textContent = 'Reset to Classic';
-        };
+        });
 
-        popupClose.onclick = hidePopupLogin;
-        popupLoginBtn.onclick = async () => {
+        popupClose && (popupClose.onclick = () => { hidePopupLogin(); });
+        popupLoginBtn && (popupLoginBtn.onclick = async () => {
             popupMsg.textContent = '';
             const u = popupUser.value.trim(), p = popupPass.value;
             if (!u || !p) { popupMsg.textContent = 'Enter both.'; return; }
@@ -1289,15 +1365,16 @@
             const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', lower) : doc(db, 'users', lower));
             if (!snap.exists()) { popupMsg.textContent = 'No such user'; return; }
             const data = snap.data();
-            if (await hashText(p) !== data.passwordHash) { popupMsg.textContent = 'Wrong password'; return; }
+            if (p !== data.passwordHash) { popupMsg.textContent = 'Wrong password'; return; }
             if (data.banned) { popupMsg.textContent = 'Banned account.'; return; }
             currentUser = { username: data.username, usernameLower: lower, isAdmin: !!data.isAdmin, rank: data.rank || null, banned: !!data.banned, mutedUntil: data.mutedUntil || 0, bio: data.bio || '', followers: Array.isArray(data.followers) ? data.followers : [], followersCount: data.followersCount || 0, following: Array.isArray(data.following) ? data.following : [], chatEnabled: !!data.chatEnabled };
             localStorage.setItem('tf_user', JSON.stringify(currentUser));
             updateLoginUI();
             hidePopupLogin();
             await attachCurrentUserListener();
-        };
+        });
 
+        /* Posting helpers */
         async function postMessage(text) {
             if (!currentUser) { showPopupLogin(); return; }
             const snap = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower));
@@ -1308,10 +1385,10 @@
             if (d.mutedUntil && d.mutedUntil > now) { const minutes = Math.ceil((d.mutedUntil - now) / 60000); accountMsg.textContent = `You are muted for ${minutes} more minute(s).`; return; }
             if (!text || !text.trim()) return;
 
-            const isDiscord = document.body.classList.contains('theme-discord');
+            const isDiscord = !!themeIsDiscord;
             const docData = { author: d.username, authorLower: (d.username || '').toLowerCase(), text: text.trim(), createdAt: Date.now() };
             if (isDiscord && activeChannel) {
-                const channelObj = (siteChannels || []).find(c => c.name.toLowerCase() === (activeChannel || '').toLowerCase());
+                const channelObj = (siteChannels || []).find(c => (c.name || '').toLowerCase() === (activeChannel || '').toLowerCase());
                 if (!canViewChannel(currentUser, channelObj)) { accountMsg.textContent = 'You cannot view this channel.'; return; }
                 if (!canSendInChannel(currentUser, channelObj)) { accountMsg.textContent = 'Channel is locked. You cannot send messages.'; return; }
                 if (channelObj && channelObj.slowMode && channelObj.slowMode > 0) {
@@ -1335,6 +1412,7 @@
         messageText && (messageText.oninput = () => charsLeft.textContent = messageText.value.length + ' chars');
         leftMessageText && (leftMessageText.oninput = () => leftCharsLeft.textContent = leftMessageText.value.length + ' chars');
 
+        /* Messaging subscription */
         function unsubscribeMessages() { if (messagesUnsub) { try { messagesUnsub(); } catch (e) { } messagesUnsub = null; } }
 
         async function subscribeMessages(channel) {
@@ -1356,8 +1434,8 @@
                     if (channel) {
                         if (!m.channel || (m.channel || '').toLowerCase() !== (channel || '').toLowerCase()) continue;
                     }
-                    if (m.channel && document.body.classList.contains('theme-discord')) {
-                        const chObj = (siteChannels || []).find(c => c.name.toLowerCase() === (m.channel || '').toLowerCase());
+                    if (m.channel && themeIsDiscord) {
+                        const chObj = (siteChannels || []).find(c => (c.name || '').toLowerCase() === (m.channel || '').toLowerCase());
                         if (chObj && !canViewChannel(currentUser, chObj)) continue;
                     }
                     const div = document.createElement('div'); div.className = 'post';
@@ -1384,7 +1462,6 @@
                     const content = document.createElement('div'); content.innerText = m.text || ''; content.style.marginTop = '6px';
                     const actions = document.createElement('div'); actions.style.marginTop = '8px';
 
-                    // admin / rank-based message actions
                     {
                         const canBan = hasRankPermission(currentUser, 'ban');
                         const canMute = hasRankPermission(currentUser, 'mute');
@@ -1405,7 +1482,7 @@
                         }
                         if (canMute) {
                             const muteBtn = document.createElement('button'); muteBtn.className = 'small-action'; muteBtn.textContent = 'Mute 1h';
-                            muteBtn.onclick = async () => { if (!al) return; const res = await loadUserDoc(al); if (!res.exists) { alert('User doc not found'); return; } const currentlyMutedUntil = res.data.mutedUntil || 0; if (currentlyMutedUntil > Date.now()) { await updateDoc(res.ref, { mutedUntil: 0 }); } else { await updateDoc(res.ref, { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
+                            muteBtn.onclick = async () => { if (!al) return; const res = await loadUserDoc(al); if (!res.exists()) { alert('User doc not found'); return; } const currentlyMutedUntil = res.data.mutedUntil || 0; if (currentlyMutedUntil > Date.now()) { await updateDoc(res.ref, { mutedUntil: 0 }); } else { await updateDoc(res.ref, { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
                             actions.appendChild(muteBtn);
                         }
                         if (canDelete) {
@@ -1424,6 +1501,7 @@
             }, (err) => { console.error('messages onSnapshot error', err); showDebug('Failed to listen for messages (permission or network error). Check console.', 'error'); });
         }
 
+        /* Load channels & ranks once */
         async function loadSiteChannelsOnce() {
             try {
                 const s = await getDoc(siteDocRef);
@@ -1444,6 +1522,7 @@
             renderChannelsUI();
         }
 
+        /* Keep theme in sync if site doc changes */
         if (siteDocRef) {
             try {
                 onSnapshot(siteDocRef, (snap) => {
@@ -1459,10 +1538,17 @@
                     }
                     if (Array.isArray(d.ranks)) { siteRanks = d.ranks.slice(); renderSettingsRanksList(); }
                     if (typeof d.description === 'string') { document.getElementById('siteSubtitle').textContent = d.description; }
+                    // If site document has a theme field, apply it immediately (keeps themeIsDiscord accurate)
+                    if (typeof d.theme === 'string') {
+                        try { applyTheme(d.theme); } catch (e) { console.warn('applyTheme from site doc failed', e); }
+                        // re-render channels since theme affects visibility
+                        renderChannelsUI();
+                    }
                 }, (err) => { console.error('siteDocRef onSnapshot error', err); });
             } catch (e) { console.warn('siteDocRef subscription failed', e); }
         }
 
+        /* Render channels UI */
         function renderChannelsUI() {
             if (!channelsListEl) return;
             channelsListEl.innerHTML = '';
@@ -1472,6 +1558,7 @@
             allBtn.onclick = () => { activeChannel = null; updateChannelActiveStates(); subscribeMessages(null); };
             channelsListEl.appendChild(allBtn);
             (siteChannels || []).forEach(ch => {
+                // Only show channel if user can view it (keeps All always visible)
                 if (!canViewChannel(currentUser, ch)) return;
                 const el = document.createElement('div');
                 el.className = 'channel' + (activeChannel === ch.name ? ' active' : '');
@@ -1479,6 +1566,19 @@
                 el.onclick = () => { activeChannel = ch.name; updateChannelActiveStates(); subscribeMessages(ch.name); };
                 channelsListEl.appendChild(el);
             });
+
+            // ensure active channel is still available; if not, switch to All
+            if (activeChannel) {
+                const visible = Array.from(channelsListEl.children).some(child => {
+                    const text = (child.textContent || '').replace('#', '').trim().split(' ')[0];
+                    return text && text.toLowerCase() === (activeChannel || '').toLowerCase();
+                });
+                if (!visible) {
+                    activeChannel = null;
+                    updateChannelActiveStates();
+                    subscribeMessages(null);
+                }
+            }
         }
 
         function updateChannelActiveStates() {
@@ -1486,20 +1586,40 @@
             Array.from(channelsListEl.children).forEach(child => {
                 const text = child.textContent || '';
                 const name = text.replace('#', '').trim().split(' ')[0];
+                // keep '# All' visible always
+                if (!name) return;
+                if (name.toLowerCase() !== 'all') {
+                    const chObj = (siteChannels || []).find(c => (c.name || '').toLowerCase() === name.toLowerCase());
+                    if (chObj && !canViewChannel(currentUser, chObj)) {
+                        child.style.display = 'none';
+                        if (activeChannel && activeChannel.toLowerCase() === name.toLowerCase()) {
+                            activeChannel = null;
+                            subscribeMessages(null);
+                        }
+                        return;
+                    } else {
+                        child.style.display = '';
+                    }
+                } else {
+                    child.style.display = '';
+                }
+
                 if ((!activeChannel && name.toLowerCase() === 'all') || (activeChannel && name.toLowerCase() === activeChannel.toLowerCase())) child.classList.add('active'); else child.classList.remove('active');
             });
             if (feedEl) feedEl.scrollTop = 0;
         }
 
+        /* Settings channels renderer */
         function renderSettingsChannelsList() {
             if (!settingsChannelsList) return;
             settingsChannelsList.innerHTML = '';
             (siteChannels || []).forEach(ch => {
                 const row = document.createElement('div'); row.className = 'channel-row';
                 const left = document.createElement('div'); left.style.display = 'flex'; left.style.flexDirection = 'column';
-                left.innerHTML = `<div style="font-weight:700"># ${ch.name}</div>`;
-                const controls = document.createElement('div'); controls.style.display = 'flex'; controls.style.gap = '8px'; controls.style.alignItems = 'center';
+                left.innerHTML = `<div style="font-weight:700">${ch.name}</div><div style="font-size:0.85rem;color:#bfc3c8">Locked: ${ch.locked ? 'yes' : 'no'} • Hidden: ${ch.hidden ? 'yes' : 'no'}</div>`;
+                const controls = document.createElement('div'); controls.style.display = 'flex'; controls.style.gap = '8px'; controls.style.marginTop = '6px';
                 const lockedLbl = document.createElement('label'); lockedLbl.style.fontSize = '0.85rem'; lockedLbl.style.color = '#bfc3c8';
+                lockedLbl.style.marginRight = '8px';
                 const lockedCb = document.createElement('input'); lockedCb.type = 'checkbox'; lockedCb.checked = !!ch.locked; lockedCb.style.marginRight = '6px';
                 lockedLbl.appendChild(lockedCb); lockedLbl.appendChild(document.createTextNode('Locked')); controls.appendChild(lockedLbl);
                 const hiddenLbl = document.createElement('label'); hiddenLbl.style.fontSize = '0.85rem'; hiddenLbl.style.color = '#bfc3c8';
@@ -1531,77 +1651,165 @@
             });
         }
 
-        addChannelBtn && (addChannelBtn.onclick = async () => {
-            const name = (newChannelName.value || '').trim();
-            if (!name) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Enter a channel name'; return; }
-            const sanitized = name.toLowerCase().replace(/[^a-z0-9\-_]/g, '');
-            if (!sanitized) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Invalid name'; return; }
-            if (!currentUser || !isAdmin(currentUser)) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Not authorized'; return; }
-            if ((siteChannels || []).some(c => c.name === sanitized)) { settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Channel exists'; return; }
-            siteChannels.push({ name: sanitized, locked: false, hidden: false, slowMode: 0, allowedRanks: [] });
-            try { await updateDoc(siteDocRef, { channels: siteChannels }); newChannelName.value = ''; settingsChannelsMsg.style.color = 'green'; settingsChannelsMsg.textContent = 'Channel added'; setTimeout(() => settingsChannelsMsg.textContent = '', 2500); } catch (e) { console.error('add channel error', e); settingsChannelsMsg.style.color = 'red'; settingsChannelsMsg.textContent = 'Failed to add'; }
-        });
-
+        /* Ranks UI (kept) */
         function renderSettingsRanksList() {
             if (!settingsRanksList) return;
             settingsRanksList.innerHTML = '';
-            (siteRanks || []).forEach(r => {
-                const row = document.createElement('div'); row.className = 'channel-row';
+            (siteRanks || []).forEach((r, idx) => {
+                const row = document.createElement('div'); row.className = 'channel-row'; row.style.display = 'flex'; row.style.flexDirection = 'column'; row.style.gap = '8px';
+                const top = document.createElement('div'); top.style.display = 'flex'; top.style.justifyContent = 'space-between'; top.style.alignItems = 'center';
                 const left = document.createElement('div'); left.style.display = 'flex'; left.style.flexDirection = 'column';
-                left.innerHTML = `<div style="font-weight:700">${r.name}</div>`;
-                const controls = document.createElement('div'); controls.style.display = 'flex'; controls.style.gap = '8px'; controls.style.alignItems = 'center';
-                const viewHiddenCb = document.createElement('input'); viewHiddenCb.type = 'checkbox'; viewHiddenCb.checked = !!(r.permissions && r.permissions.viewHidden); const vlbl = document.createElement('label'); vlbl.style.color = '#bfc3c8'; vlbl.appendChild(viewHiddenCb); vlbl.appendChild(document.createTextNode('Can view hidden')); controls.appendChild(vlbl);
-                const sendCb = document.createElement('input'); sendCb.type = 'checkbox'; sendCb.checked = !!(r.permissions && r.permissions.send); const slbl = document.createElement('label'); slbl.style.color = '#bfc3c8'; slbl.appendChild(sendCb); slbl.appendChild(document.createTextNode('Can send in locked')); controls.appendChild(slbl);
-                const adminCb = document.createElement('input'); adminCb.type = 'checkbox'; adminCb.checked = !!(r.permissions && r.permissions.admin); const albl = document.createElement('label'); albl.style.color = '#bfc3c8'; albl.appendChild(adminCb); albl.appendChild(document.createTextNode('Admin perms')); controls.appendChild(albl);
-                const banCb = document.createElement('input'); banCb.type = 'checkbox'; banCb.checked = !!(r.permissions && r.permissions.ban); const banLbl = document.createElement('label'); banLbl.style.color = '#bfc3c8'; banLbl.appendChild(banCb); banLbl.appendChild(document.createTextNode('Can ban')); controls.appendChild(banLbl);
-                const muteCb = document.createElement('input'); muteCb.type = 'checkbox'; muteCb.checked = !!(r.permissions && r.permissions.mute); const muteLbl = document.createElement('label'); muteLbl.style.color = '#bfc3c8'; muteLbl.appendChild(muteCb); muteLbl.appendChild(document.createTextNode('Can mute')); controls.appendChild(muteLbl);
-                const delCb = document.createElement('input'); delCb.type = 'checkbox'; delCb.checked = !!(r.permissions && r.permissions.deletePost); const delLbl = document.createElement('label'); delLbl.style.color = '#bfc3c8'; delLbl.appendChild(delCb); delLbl.appendChild(document.createTextNode('Can delete posts')); controls.appendChild(delLbl);
-                left.appendChild(controls);
-                const right = document.createElement('div');
+                const nameLabel = document.createElement('div'); nameLabel.style.fontWeight = '700'; nameLabel.textContent = r.name || '';
+                left.appendChild(nameLabel);
+                const descInput = document.createElement('input'); descInput.type = 'text'; descInput.placeholder = 'Description (optional)'; descInput.value = r.description || ''; descInput.style.width = '60%';
+                left.appendChild(descInput);
+                top.appendChild(left);
+
+                const right = document.createElement('div'); right.style.display = 'flex'; right.style.gap = '8px'; right.style.alignItems = 'center';
                 const saveBtn = document.createElement('button'); saveBtn.className = 'small-btn'; saveBtn.textContent = 'Save';
-                saveBtn.onclick = async () => {
-                    if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.textContent = 'Not authorized'; return; }
-                    r.permissions = { viewHidden: !!viewHiddenCb.checked, send: !!sendCb.checked, admin: !!adminCb.checked, ban: !!banCb.checked, mute: !!muteCb.checked, deletePost: !!delCb.checked };
-                    try { await updateDoc(siteDocRef, { ranks: siteRanks }); settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Saved'; setTimeout(() => { settingsRanksMsg.textContent = ''; }, 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Save failed'; }
-                };
                 const delBtn = document.createElement('button'); delBtn.className = 'small-btn danger-action'; delBtn.textContent = 'Delete';
-                delBtn.onclick = async () => {
-                    if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.textContent = 'Not authorized'; return; }
-                    if (!confirm(`Delete rank "${r.name}"? Users assigned that rank will lose it.`)) return;
-                    siteRanks = siteRanks.filter(x => x.name !== r.name);
-                    try { await updateDoc(siteDocRef, { ranks: siteRanks }); settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Deleted'; setTimeout(() => settingsRanksMsg.textContent = '', 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Delete failed'; }
-                };
                 right.appendChild(saveBtn); right.appendChild(delBtn);
-                row.appendChild(left); row.appendChild(right);
+                top.appendChild(right);
+
+                row.appendChild(top);
+
+                const permsWrap = document.createElement('div'); permsWrap.style.display = 'flex'; permsWrap.style.flexWrap = 'wrap'; permsWrap.style.gap = '8px';
+                const currentPerms = (r.permissions && typeof r.permissions === 'object') ? r.permissions : {};
+                AVAILABLE_RANK_PERMISSIONS.forEach(permKey => {
+                    const permLabel = document.createElement('label');
+                    permLabel.style.display = 'flex';
+                    permLabel.style.alignItems = 'center';
+                    permLabel.style.gap = '6px';
+                    permLabel.style.fontSize = '0.85rem';
+                    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!currentPerms[permKey];
+                    const pretty = permKey.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
+                    const span = document.createElement('span'); span.textContent = pretty;
+                    permLabel.appendChild(cb); permLabel.appendChild(span);
+                    permsWrap.appendChild(permLabel);
+                    permLabel._cb = cb;
+                    permLabel._key = permKey;
+                });
+                row.appendChild(permsWrap);
+
+                saveBtn.onclick = async () => {
+                    if (!currentUser || !isOwner(currentUser) && !isAdmin(currentUser)) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Not authorized to edit ranks'; return; }
+                    const newPerms = {};
+                    Array.from(permsWrap.children).forEach(lbl => {
+                        if (lbl._key) newPerms[lbl._key] = !!lbl._cb.checked;
+                    });
+                    siteRanks[idx] = siteRanks[idx] || {};
+                    siteRanks[idx].name = siteRanks[idx].name || '';
+                    siteRanks[idx].description = descInput.value || '';
+                    siteRanks[idx].permissions = newPerms;
+                    try {
+                        await updateDoc(siteDocRef, { ranks: siteRanks });
+                        settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Saved';
+                        setTimeout(() => { settingsRanksMsg.textContent = ''; }, 2000);
+                        renderSettingsRanksList();
+                    } catch (e) {
+                        console.error('save rank error', e);
+                        settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Save failed';
+                    }
+                };
+
+                delBtn.onclick = async () => {
+                    if (!currentUser || !isOwner(currentUser)) { alert('Only server owner can delete ranks'); return; }
+                    if (!confirm(`Delete rank "${r.name}"? This will remove the rank from all users who have it.`)) return;
+                    try {
+                        siteRanks = (siteRanks || []).filter((_, i) => i !== idx);
+                        await updateDoc(siteDocRef, { ranks: siteRanks });
+                        settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Deleted';
+                        setTimeout(() => { settingsRanksMsg.textContent = ''; }, 2000);
+                        renderSettingsRanksList();
+                    } catch (e) {
+                        console.error('delete rank failed', e);
+                        settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Delete failed';
+                    }
+                };
+
                 settingsRanksList.appendChild(row);
             });
         }
 
+        /* Add new rank */
         addRankBtn && (addRankBtn.onclick = async () => {
             const name = (newRankName.value || '').trim();
             if (!name) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Enter a rank name'; return; }
             if (!currentUser || !isOwner(currentUser)) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Not authorized'; return; }
-            if ((siteRanks || []).some(r => r.name.toLowerCase() === name.toLowerCase())) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Rank exists'; return; }
-            siteRanks.push({ name, permissions: { viewHidden: false, send: false, admin: false, ban: false, mute: false, deletePost: false } });
-            try { await updateDoc(siteDocRef, { ranks: siteRanks }); newRankName.value = ''; settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Added'; setTimeout(() => settingsRanksMsg.textContent = '', 2000); } catch (e) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Add failed'; }
+            if ((siteRanks || []).some(r => (r.name || '').toLowerCase() === name.toLowerCase())) { settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Rank exists'; return; }
+            const permsObj = {};
+            AVAILABLE_RANK_PERMISSIONS.forEach(k => permsObj[k] = false);
+            siteRanks.push({ name, description: '', permissions: permsObj });
+            try { await updateDoc(siteDocRef, { ranks: siteRanks }); newRankName.value = ''; settingsRanksMsg.style.color = 'green'; settingsRanksMsg.textContent = 'Rank added'; setTimeout(() => settingsRanksMsg.textContent = '', 2500); } catch (e) { console.error('add rank error', e); settingsRanksMsg.style.color = 'red'; settingsRanksMsg.textContent = 'Failed to add'; }
         });
 
-        settingsSaveProfile && (settingsSaveProfile.onclick = async () => {
-            if (!currentUser) { settingsProfileMsg.style.color = 'red'; settingsProfileMsg.textContent = 'Login first'; return; }
-            try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { bio: settingsProfileBio.value }); settingsProfileMsg.style.color = 'green'; settingsProfileMsg.textContent = 'Saved'; setTimeout(() => settingsProfileMsg.textContent = '', 2000); } catch (e) { console.error('save profile error', e); settingsProfileMsg.style.color = 'red'; settingsProfileMsg.textContent = 'Save failed'; }
-        });
+        /* Admin controls rendering */
+        function renderSettingsAdminControls() {
+            if (!settingsAdminControls) return;
+            settingsAdminControls.innerHTML = '';
+            const keys = Object.keys(usersCache || {}).sort();
+            keys.forEach(k => {
+                const u = usersCache[k];
+                const row = document.createElement('div'); row.className = 'user-row';
+                const left = document.createElement('div'); left.innerHTML = `<div><strong>${u.username || k}</strong> <span class="user-tiny">(${k})</span></div>`;
+                const badges = document.createElement('div');
+                if (u.banned) { const b = document.createElement('span'); b.className = 'badge-banned'; b.textContent = 'BANNED'; badges.appendChild(b); }
+                if (u.isAdmin) { const a = document.createElement('span'); a.className = 'admin-badge'; a.style.marginLeft = '6px'; a.textContent = 'ADMIN'; badges.appendChild(a); }
+                if (u.mutedUntil && u.mutedUntil > Date.now()) { const m = document.createElement('span'); m.className = 'badge-muted'; m.textContent = 'MUTED'; badges.appendChild(m); }
+                if (u.rank) { const r = document.createElement('span'); r.className = 'admin-badge'; r.style.background = '#2f9f5f'; r.style.marginLeft = '6px'; r.textContent = u.rank; badges.appendChild(r); }
+                left.appendChild(badges);
 
+                const right = document.createElement('div'); right.className = 'controls-row';
+
+                const banBtn = document.createElement('button'); banBtn.className = 'small-action danger-action'; banBtn.textContent = u.banned ? 'Unban' : 'Ban';
+                banBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { banned: !u.banned }); };
+                right.appendChild(banBtn);
+
+                const adminBtn = document.createElement('button'); adminBtn.className = 'small-action positive-action'; adminBtn.textContent = u.isAdmin ? 'Remove Admin' : 'Make Admin';
+                adminBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { isAdmin: !u.isAdmin }); };
+                right.appendChild(adminBtn);
+
+                const muteBtn = document.createElement('button'); muteBtn.className = 'small-action'; muteBtn.textContent = (u.mutedUntil && u.mutedUntil > Date.now()) ? 'Unmute' : 'Mute 1h';
+                muteBtn.onclick = async () => { if (u.mutedUntil && u.mutedUntil > Date.now()) { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: 0 }); } else { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
+                right.appendChild(muteBtn);
+
+                const viewBtn = document.createElement('button'); viewBtn.className = 'small-action'; viewBtn.textContent = 'View'; viewBtn.onclick = () => openProfile(k);
+                right.appendChild(viewBtn);
+
+                if (currentUser && isOwner(currentUser)) {
+                    const rankSelect = document.createElement('select');
+                    rankSelect.style.marginLeft = '8px';
+                    const noneOpt = document.createElement('option'); noneOpt.value = ''; noneOpt.textContent = '— none —';
+                    rankSelect.appendChild(noneOpt);
+                    (siteRanks || []).forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r.name || '';
+                        opt.textContent = r.name || '';
+                        rankSelect.appendChild(opt);
+                    });
+                    rankSelect.value = u.rank || '';
+                    right.appendChild(rankSelect);
+
+                    const assignBtn = document.createElement('button'); assignBtn.className = 'small-action'; assignBtn.textContent = 'Save Rank';
+                    assignBtn.onclick = async () => {
+                        if (!currentUser || !isOwner(currentUser)) { alert('Only server owner can assign ranks.'); return; }
+                        try {
+                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { rank: rankSelect.value || null });
+                            await refreshUsersCache();
+                        } catch (e) {
+                            console.error('assign rank error', e);
+                            alert('Failed to assign rank (see console).');
+                        }
+                    };
+                    right.appendChild(assignBtn);
+                }
+
+                row.appendChild(left); row.appendChild(right); settingsAdminControls.appendChild(row);
+            });
+        }
+
+        /* Users cache + lists */
         let usersCache = {};
-        if (usersUnsub) usersUnsub();
-        usersUnsub = onSnapshot(usersRef, (snap) => {
-            usersCache = {};
-            snap.forEach(s => { usersCache[s.id] = s.data(); });
-            renderUsersList();
-            renderRecentUsers();
-            renderSettingsAdminControls();
-        }, (err) => { console.error('users onSnapshot error', err); showDebug('Failed to load users (permission or network error). See console.', 'error'); });
-
-        // SIDE admin panel list — NO rank selector here (ranks only in Settings → Admin)
         function renderUsersList() {
             if (!isAdmin(currentUser)) { usersList.innerHTML = '<div class="muted">Admins only</div>'; return; }
             const search = (userSearch.value || '').toLowerCase();
@@ -1621,26 +1829,17 @@
 
                 const right = document.createElement('div'); right.className = 'controls-row';
 
-                // Ban button
                 const banBtn = document.createElement('button'); banBtn.className = 'small-action danger-action'; banBtn.textContent = u.banned ? 'Unban' : 'Ban';
                 banBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { banned: !u.banned }); };
                 right.appendChild(banBtn);
 
-                // Admin toggle (legacy)
                 const adminBtn = document.createElement('button'); adminBtn.className = 'small-action positive-action'; adminBtn.textContent = u.isAdmin ? 'Remove Admin' : 'Make Admin';
                 adminBtn.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { isAdmin: !u.isAdmin }); };
                 right.appendChild(adminBtn);
 
-                // Mute toggle
                 const muteBtn = document.createElement('button'); muteBtn.className = 'small-action'; muteBtn.textContent = (u.mutedUntil && u.mutedUntil > Date.now()) ? 'Unmute' : 'Mute 1h';
                 muteBtn.onclick = async () => { if (u.mutedUntil && u.mutedUntil > Date.now()) { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: 0 }); } else { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: Date.now() + (60 * 60 * 1000) }); } };
                 right.appendChild(muteBtn);
-
-                // Followers controls
-                const followersInput = document.createElement('input'); followersInput.type = 'number'; followersInput.min = '0'; followersInput.placeholder = 'Followers count'; followersInput.value = (typeof u.followersCount === 'number') ? u.followersCount : (Array.isArray(u.followers) ? u.followers.length : 0); followersInput.style.width = '90px';
-                const setFollowersBtn = document.createElement('button'); setFollowersBtn.className = 'small-action'; setFollowersBtn.textContent = 'Set';
-                setFollowersBtn.onclick = async () => { const val = parseInt(followersInput.value || '0', 10); if (isNaN(val) || val < 0) { alert('Invalid number'); return; } await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { followersCount: val }); };
-                right.appendChild(followersInput); right.appendChild(setFollowersBtn);
 
                 const viewBtn = document.createElement('button'); viewBtn.className = 'small-action'; viewBtn.textContent = 'View'; viewBtn.onclick = () => openProfile(k);
                 right.appendChild(viewBtn);
@@ -1652,99 +1851,38 @@
 
         function renderRecentUsers() {
             recentUsersList.innerHTML = '';
-            const keys = Object.keys(usersCache).sort((a, b) => { const ta = usersCache[a].createdAt || 0; const tb = usersCache[b].createdAt || 0; return tb - ta; }).slice(0, 30);
-            keys.forEach(k => { const u = usersCache[k]; const el = document.createElement('div'); el.style.padding = '6px 0'; el.style.borderBottom = '1px solid rgba(0,0,0,0.04)'; el.innerHTML = `<strong style="font-size:0.95rem">${u.username}</strong> <span class="user-tiny"> • ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : ''}</span>`; el.style.cursor = 'pointer'; el.onclick = () => openProfile(k); recentUsersList.appendChild(el); });
-        }
-
-        // SETTINGS popup admin controls (owner-only rank assignment present here)
-        function renderSettingsAdminControls() {
-            if (!settingsAdminControls) return;
-            settingsAdminControls.innerHTML = '';
-
-            if (!isAdmin(currentUser)) {
-                settingsAdminControls.innerHTML = '<div class="muted">Admins only</div>';
-                return;
-            }
-
-            const keys = Object.keys(usersCache).sort();
+            const keys = Object.keys(usersCache).sort((a, b) => { const ta = usersCache[a].createdAt || 0; const tb = usersCache[b].createdAt || 0; return tb - ta; }).slice(0, 20);
             keys.forEach(k => {
                 const u = usersCache[k];
-
-                const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.justifyContent = 'space-between';
-                row.style.gap = '8px';
-                row.style.marginBottom = '8px';
-                row.style.alignItems = 'center';
-
-                const left = document.createElement('div');
-                left.style.fontWeight = '700';
-                left.textContent = u.username || k;
-
-                const right = document.createElement('div');
-                right.style.display = 'flex';
-                right.style.gap = '8px';
-                right.style.alignItems = 'center';
-
-                const banBtn = document.createElement('button');
-                banBtn.className = 'small-btn';
-                banBtn.textContent = u.banned ? 'Unban' : 'Ban';
-                banBtn.onclick = async () => {
-                    try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { banned: !u.banned }); } catch (e) { console.error('ban toggle failed', e); alert('Ban toggle failed (see console).'); }
-                };
-                right.appendChild(banBtn);
-
-                if (currentUser && isOwner(currentUser)) {
-                    const rankSelect = document.createElement('select');
-                    rankSelect.style.minWidth = '160px';
-                    const noneOpt = document.createElement('option'); noneOpt.value = ''; noneOpt.textContent = '(no rank)'; rankSelect.appendChild(noneOpt);
-                    (siteRanks || []).forEach(rk => { const opt = document.createElement('option'); opt.value = rk.name; opt.textContent = rk.name; rankSelect.appendChild(opt); });
-                    rankSelect.value = u.rank || '';
-                    rankSelect.onchange = async () => {
-                        try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { rank: rankSelect.value || null }); usersCache[k] = usersCache[k] || {}; usersCache[k].rank = rankSelect.value || null; renderUsersList(); renderSettingsAdminControls(); } catch (e) { console.error('assign rank failed', e); alert('Failed to assign rank (see console).'); }
-                    };
-                    right.appendChild(rankSelect);
-                } else {
-                    const canToggleAdmin = hasRankPermission(currentUser, 'admin') || isOwner(currentUser) || currentUser?.isAdmin;
-                    if (canToggleAdmin) {
-                        const adminBtn = document.createElement('button');
-                        adminBtn.className = 'small-btn';
-                        adminBtn.textContent = u.isAdmin ? 'Remove Admin' : 'Make Admin';
-                        adminBtn.onclick = async () => {
-                            try { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { isAdmin: !u.isAdmin }); } catch (e) { console.error('toggle admin failed', e); alert('Toggle admin failed (see console).'); }
-                        };
-                        right.appendChild(adminBtn);
-                    }
-                }
-
-                const muteBtn = document.createElement('button');
-                muteBtn.className = 'small-btn';
-                muteBtn.textContent = (u.mutedUntil && u.mutedUntil > Date.now()) ? 'Unmute' : 'Mute 1h';
-                muteBtn.onclick = async () => {
-                    try {
-                        if (u.mutedUntil && u.mutedUntil > Date.now()) {
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: 0 });
-                        } else {
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', k) : doc(db, 'users', k), { mutedUntil: Date.now() + (60 * 60 * 1000) });
-                        }
-                    } catch (e) { console.error('mute toggle failed', e); alert('Mute toggle failed (see console).'); }
-                };
-                right.appendChild(muteBtn);
-
-                const viewBtn = document.createElement('button');
-                viewBtn.className = 'small-btn';
-                viewBtn.textContent = 'View';
-                viewBtn.onclick = () => openProfile(k);
-                right.appendChild(viewBtn);
-
-                row.appendChild(left);
-                row.appendChild(right);
-                settingsAdminControls.appendChild(row);
+                const el = document.createElement('div'); el.className = 'user-row';
+                el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <button class="linklike" onclick="openProfile('${k}')" style="background:none;border:0;padding:0;margin:0;font-weight:700;cursor:pointer">${u.username}</button>
+                  <div class="user-tiny">${k}</div>
+                </div>
+              </div>`;
+                recentUsersList.appendChild(el);
             });
         }
 
-        bannedClose.onclick = () => { hideBannedPopup(); };
+        async function refreshUsersCache() {
+            usersCache = {};
+            try {
+                const snap = await getDocs(usersRef);
+                snap.forEach(s => { const d = s.data(); usersCache[s.id] = d; });
+                renderUsersList();
+                renderRecentUsers();
+                renderSettingsAdminControls();
+            } catch (e) { console.error('refreshUsersCache error', e); }
+        }
+        refreshUsersCache();
+        if (usersUnsub) usersUnsub();
 
+        function openProfileLocal(usernameLower) { openProfile(usernameLower); }
+
+        bannedClose && (bannedClose.onclick = () => { hideBannedPopup(); });
+
+        /* Profile viewer (kept) */
         async function openProfile(usernameLower) {
             if (!usernameLower) return;
             if (activeProfileChatUnsub) { activeProfileChatUnsub(); activeProfileChatUnsub = null; }
@@ -1760,73 +1898,92 @@
             profileViewer.innerHTML = '';
             const header = document.createElement('div'); header.className = 'profile-header';
             header.innerHTML = `<div class="avatar" aria-hidden="true"></div>
-                <div>
-                  <div style="display:flex;align-items:center;gap:8px">
-                    <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
-                    ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                  </div>
-                  <div class="followers-row">
-                    <div><strong id="followersCount">${followersCount}</strong> followers</div>
-                    <div>${followingArr.length} following</div>
-                    <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</div>
-                  </div>
-                </div>`;
+                    <div>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
+                        ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                      </div>
+                      <div class="followers-row">
+                        <div><strong id="followersCount">${followersCount}</strong> followers</div>
+                        <div>${followingArr.length} following</div>
+                        <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'unknown'}</div>
+                      </div>
+                    </div>`;
             profileViewer.appendChild(header);
-            const bio = document.createElement('div'); bio.className = 'profile-bio'; bio.textContent = u.bio || 'No bio yet.'; profileViewer.appendChild(bio);
-            const controls = document.createElement('div'); controls.style.marginTop = '8px';
-            if (isOwner) {
-                if (!chatEnabled && followersCount >= 100) {
-                    const enableBtn = document.createElement('button'); enableBtn.className = 'small-btn'; enableBtn.textContent = 'Enable Chatroom (permanent)';
-                    enableBtn.onclick = async () => { if (!confirm('Enable chatroom permanently for your profile?')) return; await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { chatEnabled: true }); await openProfile(usernameLower); };
-                    controls.appendChild(enableBtn);
-                }
-                if (chatEnabled) { const enabledNote = document.createElement('div'); enabledNote.style.marginTop = '8px'; enabledNote.className = 'muted'; enabledNote.textContent = 'Chatroom is enabled for this profile.'; controls.appendChild(enabledNote); }
-                const editBioBtn = document.createElement('button'); editBioBtn.className = 'small-btn'; editBioBtn.textContent = 'Edit Bio';
-                editBioBtn.onclick = () => {
-                    const ta = document.createElement('textarea'); ta.value = u.bio || ''; ta.rows = 4;
-                    const save = document.createElement('button'); save.className = 'small-btn'; save.textContent = 'Save';
-                    const cancel = document.createElement('button'); cancel.className = 'small-btn'; cancel.textContent = 'Cancel';
-                    controls.innerHTML = ''; controls.appendChild(ta); controls.appendChild(save); controls.appendChild(cancel);
-                    save.onclick = async () => { await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { bio: ta.value }); openProfile(usernameLower); };
-                    cancel.onclick = () => openProfile(usernameLower);
-                };
-                controls.appendChild(editBioBtn);
-            } else {
-                if (currentUser) {
-                    const followBtn = document.createElement('button'); followBtn.className = 'follow-btn'; followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
-                    followBtn.onclick = async () => {
-                        if (!currentUser) { alert('Login first'); return; }
-                        if (isFollowing) {
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followers: arrayRemove(currentUser.usernameLower) });
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { following: arrayRemove(usernameLower) });
-                        } else {
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followers: arrayUnion(currentUser.usernameLower) });
-                            await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower), { following: arrayUnion(usernameLower) });
-                        }
-                    };
-                    controls.appendChild(followBtn);
-                } else {
-                    const loginPrompt = document.createElement('button'); loginPrompt.className = 'small-btn'; loginPrompt.textContent = 'Log in to follow'; loginPrompt.onclick = showPopupLogin;
-                    controls.appendChild(loginPrompt);
-                }
-            }
-            if (currentUser && isAdmin(currentUser)) {
-                const adminControls = document.createElement('div'); adminControls.style.marginTop = '10px';
-                const numInput = document.createElement('input'); numInput.type = 'number'; numInput.min = '0'; numInput.placeholder = 'Set followers count'; numInput.value = followersCount;
-                const setBtn = document.createElement('button'); setBtn.className = 'small-btn'; setBtn.textContent = 'Set Followers (admin)';
-                setBtn.onclick = async () => { const val = parseInt(numInput.value || '0', 10); if (isNaN(val) || val < 0) { alert('Invalid number'); return; } await updateDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower), { followersCount: val }); await openProfile(usernameLower); };
-                adminControls.appendChild(numInput); adminControls.appendChild(setBtn); controls.appendChild(adminControls);
-            }
-            profileViewer.appendChild(controls);
 
-            const section = document.createElement('div'); section.style.marginTop = '12px';
-            const title = document.createElement('div'); title.className = 'profile-section-title'; const leftTitle = document.createElement('strong'); leftTitle.textContent = chatEnabled ? 'Chat' : 'User posts'; title.appendChild(leftTitle); section.appendChild(title);
+            const followControls = document.createElement('div');
+            followControls.style.marginTop = '8px';
+            followControls.style.display = 'flex';
+            followControls.style.gap = '8px';
+
+            if (currentUser && currentUser.usernameLower !== usernameLower) {
+                const followBtn = document.createElement('button');
+                followBtn.className = 'small-btn';
+                const initiallyFollowing = Array.isArray(currentUser.following) && currentUser.following.includes(usernameLower);
+                followBtn.textContent = initiallyFollowing ? 'Unfollow' : 'Follow';
+
+                followBtn.onclick = async () => {
+                    if (!currentUser) { showPopupLogin(); return; }
+                    followBtn.disabled = true;
+                    try {
+                        const targetRef = siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower);
+                        const meRef = siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower);
+
+                        if (followBtn.textContent === 'Follow') {
+                            await updateDoc(targetRef, { followers: arrayUnion(currentUser.usernameLower) });
+                            try {
+                                const tSnap = await getDoc(targetRef);
+                                const prev = (tSnap.exists() && typeof tSnap.data().followersCount === 'number') ? tSnap.data().followersCount : (Array.isArray(tSnap.data().followers) ? tSnap.data().followers.length - 1 : 0);
+                                await updateDoc(targetRef, { followersCount: (prev + 1) });
+                            } catch (e) { /* nonfatal */ }
+                            await updateDoc(meRef, { following: arrayUnion(usernameLower) });
+                            currentUser.following = Array.isArray(currentUser.following) ? Array.from(new Set(currentUser.following.concat([usernameLower]))) : [usernameLower];
+                            localStorage.setItem('tf_user', JSON.stringify(currentUser));
+                            followBtn.textContent = 'Unfollow';
+                        } else {
+                            await updateDoc(targetRef, { followers: arrayRemove(currentUser.usernameLower) });
+                            try {
+                                const tSnap = await getDoc(targetRef);
+                                const prev = (tSnap.exists() && typeof tSnap.data().followersCount === 'number') ? tSnap.data().followersCount : (Array.isArray(tSnap.data().followers) ? tSnap.data().followers.length + 1 : 1);
+                                await updateDoc(targetRef, { followersCount: Math.max(0, prev - 1) });
+                            } catch (e) { /* nonfatal */ }
+                            await updateDoc(meRef, { following: arrayRemove(usernameLower) });
+                            currentUser.following = (currentUser.following || []).filter(x => x !== usernameLower);
+                            localStorage.setItem('tf_user', JSON.stringify(currentUser));
+                            followBtn.textContent = 'Follow';
+                        }
+
+                        try {
+                            const tSnap2 = await getDoc(siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower));
+                            const newCount = tSnap2.exists() ? (tSnap2.data().followersCount || (Array.isArray(tSnap2.data().followers) ? tSnap2.data().followers.length : 0)) : 0;
+                            const fEl = document.getElementById('followersCount');
+                            if (fEl) fEl.textContent = newCount;
+                        } catch (e) { /* ignore */ }
+
+                        try { await refreshUsersCache(); } catch (e) { /* ignore */ }
+
+                    } catch (err) {
+                        console.error('Follow/unfollow error', err);
+                        alert('Failed to follow/unfollow — see console.');
+                    } finally {
+                        followBtn.disabled = false;
+                    }
+                };
+
+                followControls.appendChild(followBtn);
+            }
+
+            profileViewer.appendChild(followControls);
+
+            const bio = document.createElement('div'); bio.className = 'profile-bio'; bio.textContent = u.bio || '';
+            profileViewer.appendChild(bio);
 
             if (chatEnabled) {
-                const chatWrap = document.createElement('div'); chatWrap.style.marginTop = '8px';
-                const chatBox = document.createElement('div'); chatBox.style.maxHeight = '300px'; chatBox.style.overflow = 'auto'; chatBox.style.border = '1px solid rgba(0,0,0,0.08)'; chatBox.style.padding = '8px'; chatBox.id = 'profileChatBox';
-                chatWrap.appendChild(chatBox);
-                const chatInput = document.createElement('textarea'); chatInput.rows = 3; chatInput.placeholder = 'Write a chat message...';
+                const section = document.createElement('div'); section.style.marginTop = '12px';
+                section.innerHTML = `<div style="font-weight:700;margin-bottom:8px">Chat</div>`;
+                const chatWrap = document.createElement('div');
+                const chatBox = document.createElement('div'); chatBox.style.maxHeight = '200px'; chatBox.style.overflow = 'auto'; chatBox.style.padding = '6px'; chatWrap.appendChild(chatBox);
+                const chatInput = document.createElement('textarea'); chatInput.rows = 3; chatInput.placeholder = 'Write a chat message.';
                 const sendBtn = document.createElement('button'); sendBtn.className = 'small-btn'; sendBtn.textContent = 'Send';
                 const sendRow = document.createElement('div'); sendRow.style.display = 'flex'; sendRow.style.gap = '8px'; sendRow.style.marginTop = '8px';
                 sendRow.appendChild(sendBtn); sendRow.appendChild(document.createElement('div'));
@@ -1847,6 +2004,8 @@
                 }, (err) => { console.error('profile chat onSnapshot error', err); });
                 sendBtn.onclick = async () => { const txt = chatInput.value.trim(); if (!txt) return; if (!currentUser) { alert('Login to send chat messages'); return; } await addDoc(chatMessagesCol, { author: currentUser.username, authorLower: currentUser.usernameLower, text: txt, createdAt: Date.now() }); chatInput.value = ''; };
             } else {
+                const section = document.createElement('div');
+                section.style.marginTop = '8px';
                 const postsWrap = document.createElement('div'); postsWrap.style.marginTop = '8px';
                 const postsList = document.createElement('div'); postsList.style.maxHeight = '300px'; postsList.style.overflow = 'auto'; postsList.style.padding = '6px';
                 postsWrap.appendChild(postsList); section.appendChild(postsWrap); profileViewer.appendChild(section);
@@ -1860,73 +2019,155 @@
                     userPosts.forEach(d => {
                         const p = document.createElement('div'); p.style.marginBottom = '8px';
                         const meta = document.createElement('div'); meta.style.fontSize = '0.85rem'; meta.style.color = 'var(--muted)'; meta.textContent = d.createdAt ? new Date(d.createdAt).toLocaleString() : '';
-                        const c = document.createElement('div'); c.textContent = d.text;
-                        p.appendChild(meta); p.appendChild(c); postsList.appendChild(p);
+                        const txt = document.createElement('div'); txt.textContent = d.text;
+                        p.appendChild(meta); p.appendChild(txt); postsList.appendChild(p);
                     });
-                } catch (e) { console.error('fetch user posts error', e); }
+                } catch (e) { console.error('load user posts error', e); }
             }
-
-            const userDocRef = siteId ? doc(db, 'sites', siteId, 'users', usernameLower) : doc(db, 'users', usernameLower);
-            const unsubLive = onSnapshot(userDocRef, (s) => { if (!s.exists()) return; const d = s.data(); const arr = Array.isArray(d.followers) ? d.followers : []; const count = typeof d.followersCount === 'number' ? d.followersCount : arr.length; const fcEl = document.getElementById('followersCount'); if (fcEl) fcEl.textContent = count; });
-            profileViewer.dataset.currentProfile = usernameLower;
-            profileViewer.dataset.unsubscribeId = Math.random().toString(36).slice(2);
-            const uid = profileViewer.dataset.unsubscribeId;
-            if (!window._profileUnsubs) window._profileUnsubs = {};
-            window._profileUnsubs[uid] = unsubLive;
         }
 
-        settingsBtn.onclick = async () => {
-            if (!settingsPopup) return;
-            if (!document.body.classList.contains('theme-discord')) return;
-            settingsDescription.value = document.getElementById('siteSubtitle').textContent || '';
-            settingsThemeSelect.value = themeSelect ? themeSelect.value : 'classic';
-            settingsProfileBio.value = (currentUser && currentUser.bio) ? currentUser.bio : '';
-            renderSettingsChannelsList();
-            renderSettingsRanksList();
-            renderSettingsAdminControls();
-            showOverlay();
-            settingsPopup.style.display = 'block';
-            settingsPopup.setAttribute('aria-hidden', 'false');
+        /* Compatibility shims */
+        window.initDiscordExtras = window.initDiscordExtras || function () { /* no-op */ };
+        window.openProfile = window.openProfile || function (usernameLower) {
+            try { if (typeof openProfile === 'function') return openProfile(usernameLower); } catch (e) { }
         };
 
-        feedSettingsBtn && (feedSettingsBtn.onclick = () => settingsBtn.onclick());
-        composerSettingsBtn && (composerSettingsBtn.onclick = () => settingsBtn.onclick());
-
-        settingsCancel.onclick = () => { settingsPopup.style.display = 'none'; settingsPopup.setAttribute('aria-hidden', 'true'); hideOverlay(); settingsMsg.textContent = ''; settingsChannelsMsg.textContent = ''; settingsProfileMsg.textContent = ''; };
-
-        settingsSaveDesc.onclick = async () => {
-            if (!siteDocRef) { settingsMsg.textContent = 'No site selected'; return; }
-            if (!currentUser || !isAdmin(currentUser)) { settingsMsg.textContent = 'Not authorized'; return; }
-            try { await updateDoc(siteDocRef, { description: settingsDescription.value }); document.getElementById('siteSubtitle').textContent = settingsDescription.value; settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Description saved'; setTimeout(() => settingsMsg.textContent = '', 2500); } catch (e) { console.error('save desc error', e); settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Failed to save'; }
-        };
-
-        settingsSaveTheme.onclick = async () => {
-            if (!currentUser || !isAdmin(currentUser)) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Not authorized'; return; }
-            if (!styleDocRef) { settingsMsg.textContent = 'No site selected'; return; }
-            try { await setDoc(styleDocRef, { theme: settingsThemeSelect.value }, { merge: true }); settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Theme saved'; setTimeout(() => settingsMsg.textContent = '', 2500); } catch (e) { console.error('save theme error', e); settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Save failed'; }
-        };
-
-        function initDiscordExtras() {
-            renderChannelsUI();
-            renderSettingsChannelsList();
-            renderSettingsAdminControls();
-            const isDiscord = document.body.classList.contains('theme-discord');
-            const feedSettingsBtn = document.getElementById('feedSettingsBtn');
-            const composerSettingsBtn = document.getElementById('composerSettingsBtn');
-            if (feedSettingsBtn) feedSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
-            if (composerSettingsBtn) composerSettingsBtn.style.display = isDiscord ? 'inline-block' : 'none';
+        /* Settings UI handlers */
+        if (settingsBtn) {
+            settingsBtn.onclick = async () => {
+                settingsMsg.textContent = '';
+                try {
+                    if (siteDocRef) {
+                        const s = await getDoc(siteDocRef);
+                        const data = s.exists() ? s.data() : {};
+                        if (settingsDescription) settingsDescription.value = data.description || '';
+                        const themeVal = (data.theme) || (document.getElementById('themeSelect')?.value);
+                        if (settingsThemeSelect && themeVal) settingsThemeSelect.value = themeVal;
+                    }
+                    if (settingsPopup) settingsPopup.style.display = 'block';
+                    if (overlay) overlay.style.display = 'block';
+                } catch (e) {
+                    console.error('open settings error', e);
+                    if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Failed to open settings (see console)'; }
+                }
+            };
         }
 
+        if (feedSettingsBtn) {
+            feedSettingsBtn.onclick = () => { if (settingsBtn && typeof settingsBtn.onclick === 'function') settingsBtn.onclick(); else { if (settingsPopup) settingsPopup.style.display = 'block'; if (overlay) overlay.style.display = 'block'; } };
+        }
+        if (composerSettingsBtn) {
+            composerSettingsBtn.onclick = () => { if (settingsBtn && typeof settingsBtn.onclick === 'function') settingsBtn.onclick(); else { if (settingsPopup) settingsPopup.style.display = 'block'; if (overlay) overlay.style.display = 'block'; } };
+        }
+
+        if (settingsCancel) {
+            settingsCancel.onclick = () => {
+                if (settingsPopup) settingsPopup.style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
+                if (settingsMsg) { settingsMsg.textContent = ''; settingsMsg.style.color = ''; }
+            };
+        }
+
+        if (settingsSaveDesc) {
+            settingsSaveDesc.onclick = async () => {
+                if (!currentUser || !isAdmin(currentUser)) { if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Not authorized'; } return; }
+                if (!siteDocRef) { if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'No site selected'; } return; }
+                try {
+                    await updateDoc(siteDocRef, { description: (settingsDescription?.value || '') });
+                    if (settingsMsg) { settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Description saved'; setTimeout(() => { settingsMsg.textContent = ''; }, 2000); }
+                    const subtitleEl = document.getElementById('siteSubtitle');
+                    if (subtitleEl) subtitleEl.textContent = settingsDescription.value || '';
+                } catch (e) {
+                    console.error('save description error', e);
+                    if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Save failed'; }
+                }
+            };
+        }
+
+        if (settingsSaveTheme) {
+            settingsSaveTheme.onclick = async () => {
+                if (!currentUser || !isAdmin(currentUser)) { if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Not authorized'; } return; }
+                const chosen = settingsThemeSelect?.value || (themeSelect?.value || 'classic');
+                try {
+                    if (styleDocRef) {
+                        await setDoc(styleDocRef, { theme: chosen }, { merge: true });
+                    }
+                    if (siteDocRef) {
+                        try { await updateDoc(siteDocRef, { theme: chosen }); } catch (e) { }
+                    }
+                    applyTheme(chosen);
+                    renderChannelsUI(); // re-render because theme affects channel visibility
+                    if (settingsMsg) { settingsMsg.style.color = 'green'; settingsMsg.textContent = 'Theme saved'; setTimeout(() => { settingsMsg.textContent = ''; }, 2000); }
+                } catch (e) {
+                    console.error('save theme error', e);
+                    if (settingsMsg) { settingsMsg.style.color = 'red'; settingsMsg.textContent = 'Failed to save theme'; }
+                }
+            };
+        }
+
+        if (settingsSaveProfile) {
+            settingsSaveProfile.onclick = async () => {
+                if (!currentUser) { settingsProfileMsg.textContent = 'Login to save profile'; settingsProfileMsg.style.color = 'red'; return; }
+                try {
+                    const ref = siteId ? doc(db, 'sites', siteId, 'users', currentUser.usernameLower) : doc(db, 'users', currentUser.usernameLower);
+                    await updateDoc(ref, { bio: (settingsProfileBio?.value || '') });
+                    settingsProfileMsg.style.color = 'green'; settingsProfileMsg.textContent = 'Saved';
+                    if (currentUser) { currentUser.bio = settingsProfileBio.value || ''; localStorage.setItem('tf_user', JSON.stringify(currentUser)); myBioEl.value = settingsProfileBio.value || ''; }
+                    setTimeout(() => { settingsProfileMsg.textContent = ''; }, 2000);
+                } catch (e) {
+                    console.error('save profile bio error', e);
+                    settingsProfileMsg.style.color = 'red'; settingsProfileMsg.textContent = 'Save failed';
+                }
+            };
+        }
+
+        /* Helper wiring */
+        (function ensureSettingsButtons() {
+            if (feedSettingsBtn) feedSettingsBtn.onclick = feedSettingsBtn.onclick || (() => { if (settingsBtn && typeof settingsBtn.onclick === 'function') settingsBtn.onclick(); else if (settingsPopup) { settingsPopup.style.display = 'block'; overlay.style.display = 'block'; } });
+            if (composerSettingsBtn) composerSettingsBtn.onclick = composerSettingsBtn.onclick || (() => { if (settingsBtn && typeof settingsBtn.onclick === 'function') settingsBtn.onclick(); else if (settingsPopup) { settingsPopup.style.display = 'block'; overlay.style.display = 'block'; } });
+        })();
+
+        /* Init: attempt to apply saved theme BEFORE rendering channels/messages */
         (async function init() {
+            try {
+                // Try to read a saved theme from styles or site doc so themeIsDiscord is set early.
+                let applied = false;
+                try {
+                    if (styleDocRef) {
+                        const s = await getDoc(styleDocRef);
+                        if (s.exists() && s.data() && typeof s.data().theme === 'string') { applyTheme(s.data().theme); applied = true; }
+                    }
+                } catch (e) { /* ignore style read failure */ }
+                try {
+                    if (!applied && siteDocRef) {
+                        const s2 = await getDoc(siteDocRef);
+                        if (s2.exists() && s2.data() && typeof s2.data().theme === 'string') { applyTheme(s2.data().theme); applied = true; }
+                    }
+                } catch (e) { /* ignore */ }
+            } catch (e) { console.warn('init theme prefetch failed', e); }
+
+            // now load channels/ranks and start listeners (themeIsDiscord is already set)
             await loadSiteMeta();
             await loadSiteChannelsOnce();
             subscribeMessages(null);
-            if (currentUser && currentUser.usernameLower) { await attachCurrentUserListener(); if (currentUser.banned) showBannedPopup('Your account is currently banned. Posting is disabled.'); }
+            if (currentUser && currentUser.usernameLower) { await attachCurrentUserListener(); if (currentUser.banned) showBannedPopup('Your account is currently banned. Posting disabled.'); }
             updateLoginUI();
-            initDiscordExtras();
-            const observer = new MutationObserver(() => { initDiscordExtras(); updateLoginUI(); });
+            try { if (typeof initDiscordExtras === 'function') initDiscordExtras(); } catch (e) { /* ignore */ }
+            const observer = new MutationObserver(() => { try { if (typeof initDiscordExtras === 'function') initDiscordExtras(); } catch (e) { } updateLoginUI(); });
             observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-            try { if (styleDocRef) { const s = await getDoc(styleDocRef); if (s.exists()) { const t = s.data().theme || 'classic'; applyTheme(t); } } } catch (e) { }
+
+            // Ensure saved theme (styleDocRef) is also applied if it changes
+            if (styleDocRef) {
+                try {
+                    onSnapshot(styleDocRef, (snap) => {
+                        if (!snap.exists()) return;
+                        const d = snap.data();
+                        if (d && d.theme && typeof d.theme === 'string') {
+                            try { applyTheme(d.theme); renderChannelsUI(); } catch (e) { console.warn('applyTheme from styleDoc failed', e); }
+                        }
+                    }, (err) => { console.warn('styleDocRef snapshot failed', err); });
+                } catch (e) { }
+            }
         })();
 
         window.addEventListener('beforeunload', () => {
