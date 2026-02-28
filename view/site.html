@@ -1856,11 +1856,11 @@
                 const u = usersCache[k];
                 const el = document.createElement('div'); el.className = 'user-row';
                 el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between">
-                <div>
-                  <button class="linklike" onclick="openProfile('${k}')" style="background:none;border:0;padding:0;margin:0;font-weight:700;cursor:pointer">${u.username}</button>
-                  <div class="user-tiny">${k}</div>
-                </div>
-              </div>`;
+                    <div>
+                      <button class="linklike" onclick="openProfile('${k}')" style="background:none;border:0;padding:0;margin:0;font-weight:700;cursor:pointer">${u.username}</button>
+                      <div class="user-tiny">${k}</div>
+                    </div>
+                  </div>`;
                 recentUsersList.appendChild(el);
             });
         }
@@ -1898,17 +1898,17 @@
             profileViewer.innerHTML = '';
             const header = document.createElement('div'); header.className = 'profile-header';
             header.innerHTML = `<div class="avatar" aria-hidden="true"></div>
-                    <div>
-                      <div style="display:flex;align-items:center;gap:8px">
-                        <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
-                        ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                      </div>
-                      <div class="followers-row">
-                        <div><strong id="followersCount">${followersCount}</strong> followers</div>
-                        <div>${followingArr.length} following</div>
-                        <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'unknown'}</div>
-                      </div>
-                    </div>`;
+                        <div>
+                          <div style="display:flex;align-items:center;gap:8px">
+                            <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
+                            ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                          </div>
+                          <div class="followers-row">
+                            <div><strong id="followersCount">${followersCount}</strong> followers</div>
+                            <div>${followingArr.length} following</div>
+                            <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'unknown'}</div>
+                          </div>
+                        </div>`;
             profileViewer.appendChild(header);
 
             const followControls = document.createElement('div');
@@ -2177,6 +2177,131 @@
             if (messagesUnsub) messagesUnsub();
             if (window._profileUnsubs) { Object.values(window._profileUnsubs).forEach(fn => { try { fn(); } catch (e) { } }); }
         });
+    </script>
+
+    <script>
+        /*
+         Minimal, safe hotfix for side-profile editor.
+         Place this AFTER your main module script. It intentionally:
+         - Shows the side profile card for non-discord themes
+         - Connects the side Save Bio button (#saveBioBtn) to the existing settings save handler
+           by triggering a click on #settingsSaveProfile (which the main module already wires).
+         - Connects the side View Profile button (#viewMyProfileBtn) to openProfile(currentUser).
+         Nothing else is changed.
+        */
+
+        (function () {
+            function startPatch() {
+                try {
+                    const myProfileCard = document.getElementById('myProfileCard');
+                    const myBioEl = document.getElementById('myBio');
+                    const saveBioBtn = document.getElementById('saveBioBtn');
+                    const settingsSaveProfileBtn = document.getElementById('settingsSaveProfile'); // the main-module handler target
+                    const viewProfileBtn = document.getElementById('viewMyProfileBtn');
+
+                    // determine discord-mode: prefer global flag if present, otherwise check body class
+                    const isDiscord = (typeof themeIsDiscord !== 'undefined') ? !!themeIsDiscord : document.body.classList.contains('theme-discord');
+
+                    // 1) show profile card / bio area for non-discord themes
+                    if (myProfileCard) myProfileCard.style.display = isDiscord ? 'none' : 'block';
+                    if (myBioEl) {
+                        const parent = myBioEl.closest('div');
+                        if (parent) parent.style.display = isDiscord ? 'none' : 'block';
+                    }
+
+                    // 2) ensure bio field is populated from currentUser (or localStorage fallback)
+                    try {
+                        if (myBioEl) {
+                            if (typeof currentUser !== 'undefined' && currentUser && currentUser.bio) {
+                                myBioEl.value = currentUser.bio;
+                            } else {
+                                const stored = (function () { try { return JSON.parse(localStorage.getItem('tf_user') || 'null'); } catch (e) { return null; } })();
+                                if (stored && stored.bio) myBioEl.value = stored.bio;
+                            }
+                        }
+                    } catch (e) { console.warn('bio populate failed', e); }
+
+                    // 3) Wire side Save button to reuse settingsSaveProfile's handler
+                    if (saveBioBtn) {
+                        // Avoid double-binding
+                        if (!saveBioBtn._sideSavePatched) {
+                            saveBioBtn._sideSavePatched = true;
+
+                            saveBioBtn.addEventListener('click', function (ev) {
+                                ev.preventDefault();
+
+                                // If settingsSaveProfile exists (main module attached its handler to it),
+                                // trigger a click on that element so the exact same save logic (and Firestore calls)
+                                // runs inside the module scope where updateDoc/doc are available.
+                                if (settingsSaveProfileBtn && typeof settingsSaveProfileBtn.click === 'function') {
+                                    // copy the current textarea value into the settingsProfileBio field (if present)
+                                    try {
+                                        const settingsProfileBio = document.getElementById('settingsProfileBio');
+                                        if (settingsProfileBio && myBioEl) settingsProfileBio.value = myBioEl.value;
+                                    } catch (e) { /* ignore */ }
+
+                                    settingsSaveProfileBtn.click();
+                                    return;
+                                }
+
+                                // If the settingsSaveProfile element is not found (fallback):
+                                // attempt a local-only update to currentUser & localStorage (no Firestore)
+                                try {
+                                    if (typeof currentUser !== 'undefined' && currentUser) {
+                                        currentUser.bio = (myBioEl && myBioEl.value) ? myBioEl.value : '';
+                                        localStorage.setItem('tf_user', JSON.stringify(currentUser));
+                                        // update any visible profile-bio in the UI
+                                        const displayBio = document.querySelector('#profileViewer .profile-bio') || document.querySelector('.profile-bio');
+                                        if (displayBio) displayBio.textContent = currentUser.bio;
+                                        const feedback = document.getElementById('saveBioMsg') || document.getElementById('settingsProfileMsg');
+                                        if (feedback) { feedback.style.color = 'green'; feedback.textContent = 'Saved (local)'; setTimeout(() => { feedback.textContent = ''; }, 1800); }
+                                        return;
+                                    } else {
+                                        // not signed in — attempt to show login prompt if available
+                                        try { if (typeof showPopupLogin === 'function') showPopupLogin(); } catch (e) { }
+                                        const feedback = document.getElementById('saveBioMsg') || document.getElementById('settingsProfileMsg');
+                                        if (feedback) { feedback.style.color = 'red'; feedback.textContent = 'Login to save profile'; setTimeout(() => { feedback.textContent = ''; }, 1800); }
+                                    }
+                                } catch (e) {
+                                    console.error('side Save Bio fallback failed', e);
+                                    const feedback = document.getElementById('saveBioMsg') || document.getElementById('settingsProfileMsg');
+                                    if (feedback) { feedback.style.color = 'red'; feedback.textContent = 'Save failed'; setTimeout(() => { feedback.textContent = ''; }, 1800); }
+                                }
+                            }, { passive: false });
+                        }
+                    }
+
+                    // 4) Wire the side "View Profile" button to open the profile of the signed-in user
+                    if (viewProfileBtn && !viewProfileBtn._viewPatched) {
+                        viewProfileBtn._viewPatched = true;
+                        viewProfileBtn.addEventListener('click', function (ev) {
+                            ev.preventDefault();
+                            try {
+                                const usernameLower = (typeof currentUser !== 'undefined' && currentUser && currentUser.usernameLower) ? currentUser.usernameLower : (function () { try { const s = JSON.parse(localStorage.getItem('tf_user') || 'null'); return s && s.usernameLower ? s.usernameLower : null; } catch (e) { return null; } })();
+                                if (usernameLower) {
+                                    if (typeof openProfile === 'function') { openProfile(usernameLower); return; }
+                                    // fallback: call global openProfile wrapper if present
+                                    if (window.openProfile) { window.openProfile(usernameLower); return; }
+                                    alert('Unable to open profile: openProfile() not available.');
+                                } else {
+                                    try { if (typeof showPopupLogin === 'function') showPopupLogin(); } catch (e) { }
+                                }
+                            } catch (e) { console.error('viewProfile click failed', e); }
+                        }, { passive: false });
+                    }
+
+                } catch (err) {
+                    console.error('profile editor patch failed', err);
+                }
+            }
+
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                // slight delay to let the module's handlers attach first
+                setTimeout(startPatch, 50);
+            } else {
+                document.addEventListener('DOMContentLoaded', () => setTimeout(startPatch, 50));
+            }
+        })();
     </script>
 </body>
 </html>
