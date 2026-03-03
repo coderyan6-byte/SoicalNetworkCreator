@@ -652,7 +652,7 @@
         <header>
             <div style="display:flex;align-items:center;gap:12px">
                 <h1 id="site">Max Socials</h1>
-                <div class="muted" id="siteSubtitle">A place to talk • hangout • and have funs with friends</div>
+                <div class="muted" id="siteSub">A place to talk • hangout • and have funs with friends</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
                 <div class="login-state card" id="loginState">Not signed in</div>
@@ -750,7 +750,7 @@
                     <textarea id="messageText" placeholder="Write a text message. Use #hashtags"></textarea>
                     <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
                         <button id="postBtn" class="small-btn">Post</button>
-                        <button id="composerSettingsBtn" class="small-btn" title="Settings" style="display:none">⚙</button>
+                        <button id="composerSettingsBtn" class="small-btn" ="Settings" style="display:none">⚙</button>
                         <div style="flex:1"></div>
                         <div class="muted" id="charsLeft">0</div>
                     </div>
@@ -918,7 +918,7 @@
         }
 
         function killSite() {
-            document.documentElement.innerHTML = `<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Site not found</title><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-family:system-ui, sans-serif;}h1{font-size:1.5rem;opacity:0.9;}</style></head><body><h1>Sorry this site does not exist</h1></body>`;
+            document.documentElement.innerHTML = `<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><>Site not found</><style>html,body{margin:0;height:100%;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-family:system-ui, sans-serif;}h1{font-size:1.5rem;opacity:0.9;}</style></head><body><h1>Sorry this site does not exist</h1></body>`;
             throw new Error("Site invalid — execution halted");
         }
 
@@ -926,10 +926,9 @@
             try {
                 if (!siteDocRef) { showDebug('Missing siteId in URL. Provide ?siteId=...', 'warn'); return; }
                 const snap = await getDoc(siteDocRef);
-                if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
+                if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSub').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
                 document.getElementById('siteTitle').textContent = s.name || 'SNC';
-                document.getElementById('TabNameSpotLocation').textContent = s.name || 'SNC';
                 document.getElementById('MetaTAGName').content = s.name || 'SNC';
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
@@ -2307,6 +2306,7 @@
     </script>
 </body>
 </html>
+
 
 
 
