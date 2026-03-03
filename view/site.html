@@ -10,7 +10,8 @@
     <meta property="og:type" content="website">
 
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Loading</title>
+    <title id="TabNameSpotLocation">Loading</title>
+    <!-- <title>Loading</title> -->
     <style>
         :root {
             --bg: #ffffff;
@@ -928,6 +929,7 @@
                 if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
                 document.getElementById('siteTitle').textContent = s.name || 'SNC';
+                document.getElementById('TabNameSpotLocation').content = s.name || 'SNC';
                 document.getElementById('MetaTAGName').content = s.name || 'SNC';
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
@@ -2305,4 +2307,5 @@
     </script>
 </body>
 </html>
+
 
