@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
 
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title id="TabNameSpotLocation">Loading</title>
+    <title id="TabNameSpotLocation">SNC</title>
     <!-- <title>Loading</title> -->
     <style>
         :root {
@@ -620,7 +620,7 @@
             border-top: 1px dashed rgba(0,0,0,0.06)
         }
 
-        .profile-section-title {
+        .profile-section- {
             display: flex;
             align-items: center;
             justify-content: space-between
@@ -651,7 +651,7 @@
         <div id="debugBanner" role="status" aria-live="polite"></div>
         <header>
             <div style="display:flex;align-items:center;gap:12px">
-                <h1 id="siteTitle">Max Socials</h1>
+                <h1 id="site">Max Socials</h1>
                 <div class="muted" id="siteSubtitle">A place to talk • hangout • and have funs with friends</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
@@ -929,7 +929,7 @@
                 if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
                 document.getElementById('siteTitle').textContent = s.name || 'SNC';
-                document.getElementById('TabNameSpotLocation').content = s.name || 'SNC';
+                document.getElementById('TabNameSpotLocation').textContent = s.name || 'SNC';
                 document.getElementById('MetaTAGName').content = s.name || 'SNC';
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
@@ -2307,5 +2307,6 @@
     </script>
 </body>
 </html>
+
 
 
