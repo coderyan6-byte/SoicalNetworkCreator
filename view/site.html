@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
 
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Chatspace</title>
+    <title>Loading</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -927,8 +927,8 @@
                 const snap = await getDoc(siteDocRef);
                 if (!snap.exists()) { showDebug('Site document not found for provided siteId. Check the ID and project.', 'error'); document.getElementById('siteSubtitle').textContent = 'Site not found (invalid siteId)'; return; }
                 const s = snap.data();
-                document.getElementById('siteTitle').textContent = s.name || 'ChatSpace';
-                document.getElementById('MetaTAGName').content = s.name || 'ChatSpace';
+                document.getElementById('siteTitle').textContent = s.name || 'SNC';
+                document.getElementById('MetaTAGName').content = s.name || 'SNC';
                 document.getElementById('siteSubtitle').textContent = s.description || 'A place to talk • hangout • and have funs with friends';
                 const owner = s.ownerUsername || s.owner || s.ownerUid || null;
                 siteOwnerUsernameLower = owner ? String(owner).toLowerCase() : null;
@@ -2305,3 +2305,4 @@
     </script>
 </body>
 </html>
+
