@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
 
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>SNC</title>
+    <title>Chatspace</title>
     <style>
         :root {
             --bg: #ffffff;
@@ -1856,11 +1856,11 @@
                 const u = usersCache[k];
                 const el = document.createElement('div'); el.className = 'user-row';
                 el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between">
-                    <div>
-                      <button class="linklike" onclick="openProfile('${k}')" style="background:none;border:0;padding:0;margin:0;font-weight:700;cursor:pointer">${u.username}</button>
-                      <div class="user-tiny">${k}</div>
-                    </div>
-                  </div>`;
+                            <div>
+                              <button class="linklike" onclick="openProfile('${k}')" style="background:none;border:0;padding:0;margin:0;font-weight:700;cursor:pointer">${u.username}</button>
+                              <div class="user-tiny">${k}</div>
+                            </div>
+                          </div>`;
                 recentUsersList.appendChild(el);
             });
         }
@@ -1898,17 +1898,17 @@
             profileViewer.innerHTML = '';
             const header = document.createElement('div'); header.className = 'profile-header';
             header.innerHTML = `<div class="avatar" aria-hidden="true"></div>
-                        <div>
-                          <div style="display:flex;align-items:center;gap:8px">
-                            <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
-                            ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
-                          </div>
-                          <div class="followers-row">
-                            <div><strong id="followersCount">${followersCount}</strong> followers</div>
-                            <div>${followingArr.length} following</div>
-                            <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'unknown'}</div>
-                          </div>
-                        </div>`;
+                                <div>
+                                  <div style="display:flex;align-items:center;gap:8px">
+                                    <div style="font-size:1.05rem;font-weight:700">${u.username}</div>
+                                    ${u.isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
+                                  </div>
+                                  <div class="followers-row">
+                                    <div><strong id="followersCount">${followersCount}</strong> followers</div>
+                                    <div>${followingArr.length} following</div>
+                                    <div>Joined: ${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'unknown'}</div>
+                                  </div>
+                                </div>`;
             profileViewer.appendChild(header);
 
             const followControls = document.createElement('div');
@@ -2300,6 +2300,753 @@
                 setTimeout(startPatch, 50);
             } else {
                 document.addEventListener('DOMContentLoaded', () => setTimeout(startPatch, 50));
+            }
+        })();
+    </script>
+
+    <script type="module">
+        /*
+          Customize-only script (drag & drop images, polls via /poll command).
+          - ONLY owners (site owner recorded in site doc or currentUser.isOwner) can open/save settings.
+          - Drag & drop only (no upload buttons).
+          - Images are saved as message metadata (images: [{name,type,size,dataURL}]) and will be shown in the feed.
+          - Poll messages are saved with a `poll` field and NOT as plain text (message.text will be cleared when a poll is created).
+          - Save button only writes `customSettings` (no theme fields).
+          - Best-effort feed augmentation with retries to ensure images/polls render even if main renderer is async.
+        */
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+        import {
+            getFirestore, collection, doc, addDoc, updateDoc, onSnapshot, getDoc, query, orderBy, limit
+        } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+        /* ---------- Firebase config (project's config reused) ---------- */
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgh-wbqBUC99FTzYvGWvIb3hXj-Kw_7nQ",
+            authDomain: "soicalnetworkcreator.firebaseapp.com",
+            projectId: "soicalnetworkcreator",
+            storageBucket: "soicalnetworkcreator.firebasestorage.app",
+            messagingSenderId: "374390703916",
+            appId: "1:374390703916:web:3e2441d390e60d53da0e89",
+            measurementId: "G-326LYE3XL3"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        /* ---------- DOM shortcuts ---------- */
+        const params = new URLSearchParams(location.search);
+        const siteId = params.get("siteId") || null;
+        const messagesRef = siteId ? collection(db, 'sites', siteId, 'messages') : collection(db, 'messages');
+        const siteDocRef = siteId ? doc(db, 'sites', siteId) : null;
+
+        const postBtn = document.getElementById('postBtn');
+        const leftPostBtn = document.getElementById('leftPostBtn');
+        const feedEl = document.getElementById('feed');
+
+        function getCurrentUser() {
+            try { return JSON.parse(localStorage.getItem('tf_user') || 'null'); } catch (e) { return null; }
+        }
+        function showLoginPopup() {
+            const overlay = document.getElementById('overlay');
+            const popupLogin = document.getElementById('popupLogin');
+            if (overlay) overlay.style.display = 'block';
+            if (popupLogin) popupLogin.style.display = 'block';
+        }
+
+        /* ---------- Settings persistence ---------- */
+        const LOCAL_KEY = 'chat_custom_settings_owner_v3';
+        async function loadCustomSettings() {
+            const defaults = {
+                allowImages: false,
+                enablePolls: false,
+                pollAccess: 'everyone',
+                pollFollowerQuota: 0
+            };
+            if (siteDocRef) {
+                try {
+                    const snap = await getDoc(siteDocRef);
+                    if (snap.exists()) {
+                        const d = snap.data();
+                        if (d && d.customSettings) return Object.assign({}, defaults, d.customSettings);
+                    }
+                } catch (e) {
+                    console.warn('Could not read site settings; falling back to localStorage', e);
+                }
+            }
+            try {
+                const raw = localStorage.getItem(LOCAL_KEY);
+                if (raw) return Object.assign({}, defaults, JSON.parse(raw));
+            } catch (e) { /* ignore */ }
+            return defaults;
+        }
+
+        /* Only write to customSettings (no theme fields). Only owner may save. */
+        async function saveCustomSettings(settings) {
+            const currentUser = getCurrentUser();
+            const ownerAllowed = await checkIsOwner(currentUser);
+            if (!ownerAllowed) {
+                throw new Error('Only the site owner can save customization settings.');
+            }
+            // try site doc first
+            if (siteDocRef) {
+                try {
+                    await updateDoc(siteDocRef, { customSettings: settings });
+                    localStorage.setItem(LOCAL_KEY, JSON.stringify(settings));
+                    return { savedToSite: true };
+                } catch (e) {
+                    console.warn('Failed to save to site doc, saving locally', e);
+                }
+            }
+            localStorage.setItem(LOCAL_KEY, JSON.stringify(settings));
+            return { savedToSite: false };
+        }
+
+        /* ---------- Owner check ---------- */
+        /*
+          Determines whether `currentUser` is the site's owner.
+          - If site doc exists and includes any of ownerUid/ownerId/ownerUsername/owner, match against currentUser.uid or username.
+          - If site doc doesn't exist or owner fields missing, requires currentUser.isOwner === true to allow editing.
+        */
+        async function checkIsOwner(currentUser) {
+            if (!currentUser) return false;
+            if (!siteDocRef) {
+                // no site context - require an explicit flag
+                return !!currentUser.isOwner;
+            }
+            try {
+                const snap = await getDoc(siteDocRef);
+                if (!snap.exists()) {
+                    return !!currentUser.isOwner;
+                }
+                const data = snap.data() || {};
+                // check various owner fields
+                const ownerUid = data.ownerUid || data.ownerId || data.owner?.uid || data.ownerUidString;
+                const ownerUsername = (data.ownerUsername || data.owner?.username || data.owner) || null;
+                if (ownerUid && currentUser.uid) {
+                    if (String(ownerUid) === String(currentUser.uid)) return true;
+                }
+                if (ownerUsername && currentUser.username) {
+                    if (String(ownerUsername).toLowerCase() === String(currentUser.username).toLowerCase()) return true;
+                }
+                // fallback to explicit isOwner flag on currentUser
+                return !!currentUser.isOwner;
+            } catch (e) {
+                console.warn('Owner check failed, denying by default', e);
+                return false;
+            }
+        }
+
+        /* ---------- In-memory attachments (per composer) ---------- */
+        const attachmentsStore = { messageText: [], leftMessageText: [] };
+
+        /* ---------- UI: inject Customize button & owner-only behavior ---------- */
+        function injectCustomizeUI() {
+            // Create button next to existing settings button if possible
+            const settingsBtn = document.getElementById('settingsBtn');
+            const customizeBtn = document.createElement('button');
+            customizeBtn.id = 'customizeBtn';
+            customizeBtn.className = 'small-btn';
+            customizeBtn.textContent = 'Customize';
+            customizeBtn.title = 'Message settings (images & polls) — owner only';
+            customizeBtn.style.marginLeft = '8px';
+            if (settingsBtn && settingsBtn.parentNode) settingsBtn.parentNode.insertBefore(customizeBtn, settingsBtn.nextSibling);
+            else {
+                const header = document.querySelector('header') || document.body;
+                header.appendChild(customizeBtn);
+            }
+
+            // Modal (owner-only)
+            const modal = document.createElement('div');
+            modal.id = 'customizeModal';
+            Object.assign(modal.style, {
+                position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%,-50%)',
+                zIndex: 9999, background: '#fff', padding: '16px', borderRadius: '10px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.25)', width: '420px', maxHeight: '80vh', overflow: 'auto', display: 'none'
+            });
+            modal.innerHTML = `
+            <h3 style="margin:0 0 8px 0">Customize (owner only)</h3>
+            <div style="font-size:0.95rem">
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="cs_allowImages"> Allow drag & drop image attachments (into message boxes)
+              </label>
+              <div id="cs_imageNote" style="margin-left:26px;margin-top:6px;font-size:0.86rem;color:#555;display:none">
+                Drag images directly into message boxes. Images become message metadata (base64).
+              </div>
+
+              <hr style="margin:12px 0">
+
+              <label style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="cs_enablePolls"> Enable polls (use /poll)
+              </label>
+
+              <div id="cs_pollControls" style="margin-left:26px;margin-top:8px;display:none">
+                <label style="display:block;margin-bottom:8px">
+                  Who can create polls?
+                  <select id="cs_pollAccess" style="width:100%;margin-top:6px">
+                    <option value="everyone">Everyone has access</option>
+                    <option value="quota">Only users who meet follower quota</option>
+                  </select>
+                </label>
+                <div id="cs_pollQuotaRow" style="display:none">
+                  <label>Followers required to create polls
+                    <input id="cs_pollQuota" type="number" min="0" step="1" style="width:100%;margin-top:6px" />
+                  </label>
+                </div>
+                <div style="margin-top:8px;font-size:0.85rem;color:#555">
+                  Create a poll by typing: <code>/poll Question | Option A | Option B</code> in either message box.
+                </div>
+              </div>
+
+              <div id="cs_saveMsg" style="margin-top:10px;color:green;font-weight:600"></div>
+
+              <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+                <button id="cs_cancel" class="small-btn">Cancel</button>
+                <button id="cs_save" class="small-btn">Save</button>
+              </div>
+            </div>
+          `;
+            document.body.appendChild(modal);
+
+            // overlay
+            let overlay = document.getElementById('customizeOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'customizeOverlay';
+                Object.assign(overlay.style, { position: 'fixed', left: 0, top: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.35)', zIndex: 9998, display: 'none' });
+                document.body.appendChild(overlay);
+            }
+
+            // wire up but only allow owner to open/save
+            customizeBtn.addEventListener('click', async () => {
+                const currentUser = getCurrentUser();
+                const allowed = await checkIsOwner(currentUser);
+                if (!allowed) {
+                    // hide or disable button for non-owner — give polite message
+                    alert('Only the site owner can edit these customization settings.');
+                    return;
+                }
+                openModalPopulate();
+            });
+
+            // control refs
+            const cs_allowImages = modal.querySelector('#cs_allowImages');
+            const cs_imageNote = modal.querySelector('#cs_imageNote');
+            const cs_enablePolls = modal.querySelector('#cs_enablePolls');
+            const cs_pollControls = modal.querySelector('#cs_pollControls');
+            const cs_pollAccess = modal.querySelector('#cs_pollAccess');
+            const cs_pollQuotaRow = modal.querySelector('#cs_pollQuotaRow');
+            const cs_pollQuota = modal.querySelector('#cs_pollQuota');
+            const cs_save = modal.querySelector('#cs_save');
+            const cs_cancel = modal.querySelector('#cs_cancel');
+            const cs_saveMsg = modal.querySelector('#cs_saveMsg');
+
+            cs_allowImages.addEventListener('change', () => {
+                cs_imageNote.style.display = cs_allowImages.checked ? 'block' : 'none';
+            });
+            cs_enablePolls.addEventListener('change', () => {
+                cs_pollControls.style.display = cs_enablePolls.checked ? 'block' : 'none';
+                cs_pollQuotaRow.style.display = (cs_enablePolls.checked && cs_pollAccess.value === 'quota') ? 'block' : 'none';
+            });
+            cs_pollAccess.addEventListener('change', () => {
+                cs_pollQuotaRow.style.display = (cs_enablePolls.checked && cs_pollAccess.value === 'quota') ? 'block' : 'none';
+            });
+
+            async function openModalPopulate() {
+                const settings = await loadCustomSettings();
+                cs_allowImages.checked = !!settings.allowImages;
+                cs_imageNote.style.display = cs_allowImages.checked ? 'block' : 'none';
+                cs_enablePolls.checked = !!settings.enablePolls;
+                cs_pollControls.style.display = cs_enablePolls.checked ? 'block' : 'none';
+                cs_pollAccess.value = settings.pollAccess || 'everyone';
+                cs_pollQuota.value = Number(settings.pollFollowerQuota || 0);
+                cs_pollQuotaRow.style.display = (cs_enablePolls.checked && cs_pollAccess.value === 'quota') ? 'block' : 'none';
+                cs_saveMsg.textContent = '';
+                modal.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+            function closeModal() {
+                modal.style.display = 'none';
+                overlay.style.display = 'none';
+            }
+
+            cs_cancel.addEventListener('click', () => closeModal());
+
+            cs_save.addEventListener('click', async () => {
+                const currentUser = getCurrentUser();
+                const allowed = await checkIsOwner(currentUser);
+                if (!allowed) {
+                    cs_saveMsg.style.color = 'red';
+                    cs_saveMsg.textContent = 'Only the site owner can save settings.';
+                    setTimeout(() => cs_saveMsg.textContent = '', 2500);
+                    return;
+                }
+                const newSettings = {
+                    allowImages: !!cs_allowImages.checked,
+                    enablePolls: !!cs_enablePolls.checked,
+                    pollAccess: cs_pollAccess.value === 'quota' ? 'quota' : 'everyone',
+                    pollFollowerQuota: Math.max(0, Number(cs_pollQuota.value || 0))
+                };
+                cs_save.disabled = true;
+                cs_save.textContent = 'Saving...';
+                try {
+                    const res = await saveCustomSettings(newSettings);
+                    cs_saveMsg.style.color = 'green';
+                    cs_saveMsg.textContent = res.savedToSite ? 'Saved site-wide' : 'Saved locally';
+                    // apply immediately
+                    await applySettingsToComposers(newSettings);
+                    setTimeout(() => closeModal(), 600);
+                } catch (e) {
+                    cs_saveMsg.style.color = 'red';
+                    cs_saveMsg.textContent = e.message || 'Save failed';
+                    console.error(e);
+                } finally {
+                    cs_save.disabled = false;
+                    cs_save.textContent = 'Save';
+                }
+            });
+        }
+
+        /* ---------- Drag & drop handling (no upload buttons) ---------- */
+        function ensurePreviewAreas() {
+            addPreviewWrapper('messageText', 'midComposerWrapper');
+            addPreviewWrapper('leftMessageText', 'leftComposeCard');
+        }
+        function addPreviewWrapper(textId, composerWrapperId) {
+            const ta = document.getElementById(textId);
+            const parent = document.getElementById(composerWrapperId) || (ta && ta.parentNode);
+            if (!ta || !parent) return;
+            if (parent.querySelector(`#${textId}AttachPreviews`)) return;
+            const wrapper = document.createElement('div');
+            wrapper.id = `${textId}AttachPreviews`;
+            Object.assign(wrapper.style, { display: 'none', marginTop: '8px', gap: '8px', flexWrap: 'wrap', display: 'flex' });
+            parent.appendChild(wrapper);
+        }
+
+        function attachDragDrop(textId) {
+            const ta = document.getElementById(textId);
+            if (!ta) return;
+
+            function highlightOn() { ta.style.outline = '2px dashed rgba(0,0,0,0.12)'; ta.style.outlineOffset = '4px'; }
+            function highlightOff() { ta.style.outline = ''; ta.style.outlineOffset = ''; }
+
+            // avoid duplicate listeners
+            if (ta._customizeDroppable) return;
+            ta._customizeDroppable = true;
+
+            ta.addEventListener('dragover', (ev) => {
+                ev.preventDefault();
+                ev.dataTransfer.dropEffect = 'copy';
+                highlightOn();
+            });
+            ta.addEventListener('dragleave', (ev) => {
+                highlightOff();
+            });
+            ta.addEventListener('drop', async (ev) => {
+                ev.preventDefault();
+                highlightOff();
+                const dt = ev.dataTransfer;
+                if (!dt || !dt.files || !dt.files.length) return;
+                const files = Array.from(dt.files).filter(f => f.type && f.type.startsWith('image/'));
+                if (!files.length) return;
+                const limited = files.slice(0, 6);
+                const readPromises = limited.map(f => new Promise((res) => {
+                    const fr = new FileReader();
+                    fr.onload = () => res({ name: f.name, type: f.type, size: f.size, dataURL: fr.result });
+                    fr.onerror = () => res(null);
+                    fr.readAsDataURL(f);
+                }));
+                const results = (await Promise.all(readPromises)).filter(Boolean);
+                attachmentsStore[textId] = (attachmentsStore[textId] || []).concat(results).slice(0, 6);
+                renderPreviews(textId);
+            });
+        }
+
+        function renderPreviews(textId) {
+            const wrapper = document.getElementById(`${textId}AttachPreviews`);
+            if (!wrapper) return;
+            const list = attachmentsStore[textId] || [];
+            wrapper.innerHTML = '';
+            if (!list.length) { wrapper.style.display = 'none'; return; }
+            wrapper.style.display = 'flex';
+            list.forEach((a, idx) => {
+                const item = document.createElement('div');
+                Object.assign(item.style, { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '120px', gap: '6px' });
+                const img = document.createElement('img');
+                img.src = a.dataURL;
+                img.alt = a.name || '';
+                Object.assign(img.style, { maxWidth: '120px', maxHeight: '90px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.06)' });
+                item.appendChild(img);
+                const info = document.createElement('div');
+                Object.assign(info.style, { fontSize: '12px', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
+                info.textContent = a.name || `image ${idx + 1}`;
+                item.appendChild(info);
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'small-btn';
+                removeBtn.textContent = 'Remove';
+                removeBtn.style.padding = '4px 6px';
+                removeBtn.style.fontSize = '12px';
+                removeBtn.addEventListener('click', () => {
+                    attachmentsStore[textId].splice(idx, 1);
+                    renderPreviews(textId);
+                });
+                item.appendChild(removeBtn);
+                wrapper.appendChild(item);
+            });
+        }
+
+        /* ---------- Poll parsing ---------- */
+        function parsePollCommand(text) {
+            if (!text) return null;
+            const trimmed = text.trim();
+            if (!trimmed.toLowerCase().startsWith('/poll')) return null;
+            const rest = trimmed.replace(/^\/poll\b\s*/i, '');
+            if (!rest) return null;
+            const parts = rest.split('|').map(p => p.trim()).filter(p => p);
+            if (parts.length < 2) return null;
+            const question = parts[0];
+            const options = parts.slice(1).slice(0, 10);
+            if (!question || options.length < 1) return null;
+            return { question, options };
+        }
+
+        /* ---------- Create message (attachments & polls) ---------- */
+        async function createEnhancedMessage({ textInputId }) {
+            const ta = document.getElementById(textInputId);
+            if (!ta) return;
+            const settings = await loadCustomSettings();
+            const text = (ta.value || '').trim();
+            const currentUser = getCurrentUser();
+            if (!currentUser) { showLoginPopup(); return; }
+
+            // Poll handling
+            let pollObj = null;
+            if (settings.enablePolls) {
+                const parsed = parsePollCommand(text);
+                if (parsed) {
+                    if (settings.pollAccess === 'quota') {
+                        const needed = Number(settings.pollFollowerQuota || 0);
+                        const userFollowers = Number(currentUser.followersCount || 0);
+                        if (userFollowers < needed) {
+                            alert(`You need at least ${needed} follower(s) to create polls. You have ${userFollowers}.`);
+                            return;
+                        }
+                    }
+                    pollObj = {
+                        question: parsed.question,
+                        options: parsed.options.map(o => ({ label: o, votes: 0 })),
+                        voters: {},
+                        createdBy: currentUser.username || '',
+                        createdByLower: (currentUser.username || '').toLowerCase(),
+                        createdAt: Date.now()
+                    };
+                }
+            }
+
+            // Attachments from attachmentsStore (if allowed)
+            let attachments = [];
+            if (settings.allowImages && attachmentsStore[textInputId] && attachmentsStore[textInputId].length) {
+                attachments = attachmentsStore[textInputId].slice();
+            }
+
+            // Build doc
+            const docData = {
+                author: currentUser.username || '',
+                authorLower: (currentUser.username || '').toLowerCase(),
+                createdAt: Date.now()
+            };
+
+            // If poll exists, don't send raw /poll text as message body.
+            if (pollObj) {
+                docData.poll = {
+                    question: pollObj.question,
+                    options: pollObj.options.map(o => ({ label: o.label, votes: 0 })),
+                    voters: {}, // usernameLower -> optionIndex
+                    createdBy: pollObj.createdBy,
+                    createdAt: pollObj.createdAt
+                };
+                // optionally include a short text field to indicate there's a poll (not the raw command)
+                docData.text = '';
+            } else {
+                docData.text = text;
+            }
+
+            // channel detection
+            try {
+                const channelLabel = document.getElementById('activeChannelLabel');
+                if (channelLabel) {
+                    const m = (channelLabel.textContent || '').match(/#([^\s]+)/);
+                    if (m) docData.channel = m[1];
+                }
+            } catch (e) { }
+
+            if (attachments && attachments.length) {
+                docData.images = attachments.map(a => ({ name: a.name, type: a.type, size: a.size, dataURL: a.dataURL }));
+            }
+
+            // write
+            try {
+                await addDoc(messagesRef, docData);
+            } catch (e) {
+                console.error('Failed to post message', e);
+                alert('Failed to post message (network or permission).');
+                return;
+            }
+
+            // clear composer and attachments
+            ta.value = '';
+            attachmentsStore[textInputId] = [];
+            renderPreviews(textInputId);
+            ta.dispatchEvent(new Event('input'));
+        }
+
+        /* ---------- Wire post buttons ---------- */
+        async function wirePostButtons() {
+            const settings = await loadCustomSettings();
+            await applySettingsToComposers(settings);
+
+            if (postBtn) {
+                postBtn.removeEventListener('click', postBtn._customizedHandler); // safe-remove
+                const handler = async (ev) => { ev.preventDefault(); await createEnhancedMessage({ textInputId: 'messageText' }); };
+                postBtn.addEventListener('click', handler);
+                postBtn._customizedHandler = handler;
+            }
+            if (leftPostBtn) {
+                leftPostBtn.removeEventListener('click', leftPostBtn._customizedHandler);
+                const handlerL = async (ev) => { ev.preventDefault(); await createEnhancedMessage({ textInputId: 'leftMessageText' }); };
+                leftPostBtn.addEventListener('click', handlerL);
+                leftPostBtn._customizedHandler = handlerL;
+            }
+        }
+
+        /* ---------- Apply settings to composers ---------- */
+        async function applySettingsToComposers(settings) {
+            ensurePreviewAreas();
+            // show/hide previews based on allowImages
+            const mainPreview = document.getElementById('messageTextAttachPreviews');
+            const leftPreview = document.getElementById('leftMessageTextAttachPreviews');
+            if (mainPreview) mainPreview.style.display = settings.allowImages && attachmentsStore.messageText.length ? 'flex' : (settings.allowImages ? 'flex' : 'none');
+            if (leftPreview) leftPreview.style.display = settings.allowImages && attachmentsStore.leftMessageText.length ? 'flex' : (settings.allowImages ? 'flex' : 'none');
+
+            // attach or remove drag/drop behavior
+            if (settings.allowImages) {
+                attachDragDrop('messageText');
+                attachDragDrop('leftMessageText');
+            } else {
+                // remove drag/drop by cloning nodes
+                ['messageText', 'leftMessageText'].forEach(id => {
+                    const ta = document.getElementById(id);
+                    if (!ta) return;
+                    const clone = ta.cloneNode(true);
+                    clone._customizeDroppable = false;
+                    ta.parentNode.replaceChild(clone, ta);
+                    // ensure we still have a reference to the new element in the global DOM for later attachments
+                });
+                attachmentsStore.messageText = [];
+                attachmentsStore.leftMessageText = [];
+                renderPreviews('messageText');
+                renderPreviews('leftMessageText');
+            }
+        }
+
+        /* ---------- Feed augmentation with retrying (to handle async main renderer) ---------- */
+        function augmentFeedRendering() {
+            if (!feedEl) return;
+            try {
+                const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(200));
+                onSnapshot(q, (snap) => {
+                    const docs = [];
+                    snap.forEach(s => {
+                        const d = s.data();
+                        if (!d) return;
+                        if ((Array.isArray(d.images) && d.images.length) || d.poll) docs.push({ id: s.id, data: d });
+                    });
+                    docs.forEach(item => retryAugment(item.id, item.data, 0));
+                }, (err) => {
+                    console.warn('augment snapshot error', err);
+                });
+            } catch (e) {
+                console.warn('augmentFeedRendering failed', e);
+            }
+        }
+
+        /* retry logic: try to find matching post and augment; if not found, retry a few times */
+        function retryAugment(docId, msg, attempt) {
+            const MAX = 6;
+            setTimeout(() => {
+                const ok = tryAugmentOnce(docId, msg);
+                if (!ok && attempt + 1 < MAX) {
+                    retryAugment(docId, msg, attempt + 1);
+                }
+            }, Math.min(900 * (attempt + 1), 3000)); // increasing delay but bounded
+        }
+
+        /* try a single augmentation pass; returns true if augmented */
+        function tryAugmentOnce(docId, msg) {
+            if (!feedEl) return false;
+            const posts = Array.from(feedEl.querySelectorAll('.post'));
+            if (!posts.length) return false;
+
+            const author = (msg.author || '').trim();
+            const createdAt = msg.createdAt ? new Date(msg.createdAt).toLocaleString() : '';
+
+            // Prefer matching by an element that contains author text AND (date or poll/question text)
+            let candidate = posts.find(p => {
+                const authorBtn = p.querySelector('.linklike');
+                const hasAuthor = authorBtn && (authorBtn.textContent || '').trim() === author;
+                if (!hasAuthor) return false;
+                // If the main renderer shows the date string somewhere, match it
+                if (createdAt && p.textContent && p.textContent.indexOf(createdAt) !== -1) return true;
+                // If poll exists, maybe the post contains the poll question text; match by question presence
+                if (msg.poll && msg.poll.question && p.textContent && p.textContent.indexOf(msg.poll.question) !== -1) return true;
+                // fallback: match by author + short text snippet (first 8 chars)
+                if (msg.text && msg.text.length) {
+                    const snippet = msg.text.substring(0, 12).trim();
+                    if (snippet && p.textContent && p.textContent.indexOf(snippet) !== -1) return true;
+                }
+                // if still no strong match, we won't augment this pass
+                return false;
+            });
+
+            // if still not found, attempt a looser match by author only and not yet augmented
+            if (!candidate) {
+                candidate = posts.find(p => {
+                    const authorBtn = p.querySelector('.linklike');
+                    const hasAuthor = authorBtn && (authorBtn.textContent || '').trim() === author;
+                    const already = p.getAttribute('data-augmented') === docId;
+                    return hasAuthor && !already;
+                });
+            }
+
+            if (!candidate) return false;
+            if (candidate.getAttribute('data-augmented') === docId) return true; // already done
+
+            // Append images
+            if (Array.isArray(msg.images) && msg.images.length) {
+                const imgsWrap = document.createElement('div');
+                Object.assign(imgsWrap.style, { display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' });
+                msg.images.forEach(im => {
+                    const img = document.createElement('img');
+                    img.src = im.dataURL || im.dataUrl || '';
+                    img.alt = im.name || '';
+                    Object.assign(img.style, { maxWidth: '220px', maxHeight: '220px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.06)' });
+                    imgsWrap.appendChild(img);
+                });
+                candidate.appendChild(imgsWrap);
+            }
+
+            // Append poll UI
+            if (msg.poll && msg.poll.question && Array.isArray(msg.poll.options)) {
+                const pollWrap = document.createElement('div');
+                Object.assign(pollWrap.style, { marginTop: '8px', padding: '8px', border: '1px solid rgba(0,0,0,0.06)', borderRadius: '8px' });
+
+                const qEl = document.createElement('div');
+                Object.assign(qEl.style, { fontWeight: '700', marginBottom: '6px' });
+                qEl.textContent = msg.poll.question;
+                pollWrap.appendChild(qEl);
+
+                // compute counts from voters
+                const voters = msg.poll.voters || {};
+                const counts = new Array(msg.poll.options.length).fill(0);
+                Object.values(voters).forEach(v => {
+                    const i = Number(v);
+                    if (!Number.isNaN(i) && i >= 0 && i < counts.length) counts[i] += 1;
+                });
+
+                msg.poll.options.forEach((opt, idx) => {
+                    const row = document.createElement('div');
+                    Object.assign(row.style, { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' });
+
+                    const left = document.createElement('div');
+                    left.textContent = opt.label || `Option ${idx + 1}`;
+                    left.style.flex = '1';
+
+                    const right = document.createElement('div');
+                    Object.assign(right.style, { display: 'flex', alignItems: 'center', gap: '8px' });
+
+                    const countBadge = document.createElement('span');
+                    countBadge.textContent = `${counts[idx] || 0}`;
+                    Object.assign(countBadge.style, { fontWeight: '700', minWidth: '26px', textAlign: 'center' });
+
+                    const voteBtn = document.createElement('button');
+                    voteBtn.className = 'small-btn';
+                    voteBtn.textContent = 'Vote';
+                    voteBtn.style.padding = '6px 8px';
+                    voteBtn.addEventListener('click', async () => {
+                        const user = getCurrentUser();
+                        if (!user) { showLoginPopup(); return; }
+                        const usernameLower = (user.username || '').toLowerCase();
+                        const pathParts = messagesRef.path.split('/'); // e.g. ['sites','<siteId>','messages'] or ['messages']
+                        const targetDocRef = doc(db, ...pathParts, docId);
+                        try {
+                            const fieldPath = `poll.voters.${usernameLower}`;
+                            await updateDoc(targetDocRef, { [fieldPath]: idx });
+                        } catch (e) {
+                            console.error('vote failed', e);
+                            alert('Could not submit vote (network/permission error).');
+                        }
+                    });
+
+                    right.appendChild(countBadge);
+                    right.appendChild(voteBtn);
+
+                    row.appendChild(left);
+                    row.appendChild(right);
+                    pollWrap.appendChild(row);
+                });
+
+                candidate.appendChild(pollWrap);
+            }
+
+            candidate.setAttribute('data-augmented', docId);
+            return true;
+        }
+
+        /* ---------- Initialization ---------- */
+        (async function initCustomize() {
+            try {
+                injectCustomizeUI();
+                ensurePreviewAreas();
+
+                // Attach drag/drop initially but visibility controlled by settings
+                attachDragDrop('messageText');
+                attachDragDrop('leftMessageText');
+
+                // initial preview render (empty)
+                renderPreviews('messageText');
+                renderPreviews('leftMessageText');
+
+                // wire post buttons
+                await wirePostButtons();
+
+                // feed augmentation
+                augmentFeedRendering();
+
+                // react to site settings changes (owner can change remotely and we'll apply)
+                if (siteDocRef) {
+                    onSnapshot(siteDocRef, async (snap) => {
+                        if (!snap.exists()) return;
+                        const data = snap.data() || {};
+                        if (data && data.customSettings) {
+                            await applySettingsToComposers(data.customSettings);
+                        }
+                    }, (err) => { /* ignore */ });
+                }
+
+                // apply existing settings once on load
+                const settings = await loadCustomSettings();
+                await applySettingsToComposers(settings);
+
+                // hide/disable Customize button if current user is not owner (visual safety)
+                const currentUser = getCurrentUser();
+                const allowed = await checkIsOwner(currentUser);
+                const customizeBtn = document.getElementById('customizeBtn');
+                if (customizeBtn && !allowed) {
+                    customizeBtn.title = 'Customize — owner only';
+                    customizeBtn.style.opacity = '0.6';
+                    // keep it present but clicking will show a polite message (handled earlier)
+                }
+            } catch (e) {
+                console.error('Customize init error', e);
             }
         })();
     </script>
